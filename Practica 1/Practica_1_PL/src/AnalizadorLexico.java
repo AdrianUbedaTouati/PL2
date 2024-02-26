@@ -8,7 +8,11 @@ public class AnalizadorLexico {
 
     private int columna;
 
+    private int filaAnteDeColumnaNueva;
+
     private boolean tokenPersonalizable;
+
+    private char CaracterActual;
 
     public AnalizadorLexico (RandomAccessFile fichero){
         this.fichero = fichero;
@@ -52,7 +56,7 @@ public class AnalizadorLexico {
         return TokenCreado;
     }
 
-    public String siguienteToken() {
+    public Token siguienteToken() {
         StringBuilder tokenActual = new StringBuilder();
         while(true) {
             try {
@@ -115,6 +119,124 @@ public class AnalizadorLexico {
         }
         return false;
     }
+
+    private char SiguienteCarater(){
+        try {
+            if(caracterActual == '\t'){
+                columna ++;
+                filaAnteDeColumnaNueva = fila;
+                fila = 1;
+            }
+            return (char) fichero.readByte();
+        } catch (IOException e){
+            e.toString();
+            System.exit(-1);
+        }
+        return 0;
+    }
+
+    private void Retroceder(){
+        try {
+            if(caracterActual == '\t'){
+                columna --;
+                fila = filaAnteDeColumnaNueva;
+            }
+            fichero.seek(fichero.getFilePointer() - 1);
+        } catch (IOException e){
+            e.toString();
+            System.exit(-1);
+        }
+    }
+
+    private Token Clasificacion(){
+        int tipoToken = -1;
+        String lexema;
+        CaracterActual = SiguienteCarater();
+        Token tokenActual = new Token();
+
+        switch (CaracterActual) {
+            case '(':
+                tipoToken = 1;
+                lexema = "(";
+            case ')':
+                tipoToken = 2;
+                lexema = ")";
+            case ',':
+                tipoToken = 3;
+                lexema = ",";
+            case ':':
+                CaracterActual = SiguienteCarater();
+                if (CaracterActual == '=') {
+                    tipoToken = 7;
+                    lexema = ":=";
+                }
+                else {
+                    Retroceder();
+                    tipoToken = 4;
+                    lexema = ":";
+                }
+            case '[':
+                tipoToken = 5;
+                lexema = "[";
+            case ']':
+                tipoToken = 6;
+                lexema = "]";
+            case ';':
+                tipoToken = 8;
+                lexema = ";";
+            case '.':
+                CaracterActual = SiguienteCarater();
+                if (CaracterActual == '.') {
+                    tipoToken = 9;
+                    lexema = "..";
+                }
+                else {
+                    Retroceder();
+                    try {
+                        throw new ErrorLexico();
+                    } catch (ErrorLexico e) {
+                        e.CaracterIncorrecto(CaracterActual);
+                    }
+                }
+            case '+':
+                tipoToken = 10;
+                lexema = "+";
+            case '-':
+                tipoToken = 10;
+                lexema = "-";
+            case '*':
+                tipoToken = 11;
+                lexema = "*";
+            case '/':
+                CaracterActual = SiguienteCarater();
+                if (CaracterActual == '/') {
+                    tipoToken = 11;
+                    lexema = "//";
+                }
+                else{
+                    Retroceder();
+                    tipoToken = 11;
+                    lexema = "/";
+                }
+            case '%':
+                tipoToken = 11;
+                lexema = "%";
+            default:
+                if(Character.isDigit(CaracterActual)){
+                    while(true){
+                        CaracterActual = SiguienteCarater();
+
+                    }
+                } else if(Character.isLetter(CaracterActual)){
+
+                } else if(CaracterActual == '\t'){
+
+                }
+            }
+        return tokenActual;
+    }
+
+    private boolean esNumero
 
     //Excepciones
     public class ErrorLexico extends Exception {
