@@ -7,9 +7,6 @@ public class AnalizadorLexico {
     private int fila;
 
     private int columna;
-
-    private boolean tokenPersonalizable;
-
     public AnalizadorLexico (RandomAccessFile fichero){
         this.fichero = fichero;
         while(true){
@@ -17,48 +14,14 @@ public class AnalizadorLexico {
         }
     }
 
-    private boolean esCaracterOmitir(int byteRead){
-        boolean omitirCaracter = false;
-
-        //Camiar fila o columna
-        if (byteRead == 9) {
-            columna++;
-            omitirCaracter = true;
-        }
-        //Salto de Linea o espacio o tabulador
-        else if(byteRead == 32 || byteRead == 10){
-            omitirCaracter = true;
-        }
-        else {
-            fila++;
-            omitirCaracter = false;
-        }
-        return omitirCaracter;
-    }
-
-    private boolean esTerminadoToken(String tokenActual, char asciiChar){
-        boolean TokenCreado = false;
-        if (esToken(tokenActual.toString())) {
-            TokenCreado = true;
-        }
-
-        if (!posibleToken(tokenActual.toString())) {
-            try {
-                throw new ErrorLexico();
-            } catch (ErrorLexico e) {
-                e.CaracterIncorrecto(asciiChar);
-            }
-        }
-        return TokenCreado;
-    }
-
     public String siguienteToken() {
+
         StringBuilder tokenActual = new StringBuilder();
+
         while(true) {
             try {
                 int byteRead = fichero.readByte();
 
-                //Fin de fichero inesperado
                 if (byteRead == -1) {
                     try {
                         throw new ErrorLexico();
@@ -67,15 +30,27 @@ public class AnalizadorLexico {
                     }
                 }
 
-                if(esCaracterOmitir(byteRead)){
+                //Camiar fila o columna
+                if (byteRead == 9) {
+                    columna++;
                     continue;
+                } else {
+                    fila++;
                 }
 
                 char asciiChar = (char) byteRead;
                 tokenActual.append(asciiChar);
 
-                if(esTerminadoToken(tokenActual.toString(),asciiChar)){
+                if (esToken(tokenActual.toString())) {
                     break;
+                }
+
+                if (!posibleToken(tokenActual.toString())) {
+                    try {
+                        throw new ErrorLexico();
+                    } catch (ErrorLexico e) {
+                        e.CaracterIncorrecto(asciiChar);
+                    }
                 }
             }catch (IOException e){
                 e.toString();
@@ -88,11 +63,6 @@ public class AnalizadorLexico {
 
     private boolean esToken(String posibleToken){
         for(String token : Token.nombreToken){
-
-            if(token.startsWith("'")){
-                posibleToken = "'" + posibleToken + "'";
-            }
-
             if (token.equals(posibleToken)){
                 return true;
             }
@@ -104,13 +74,8 @@ public class AnalizadorLexico {
         int longitudToken = posibleToken.length();
 
         for (String token : Token.nombreToken) {
-            if (token.length() >= longitudToken) {
-                if(token.startsWith("'")){
-                    posibleToken = "'" + posibleToken;
-                }
-                if(token.startsWith(posibleToken)){
-                    return true;
-                }
+            if (token.length() >= longitudToken && token.startsWith(posibleToken)) {
+                return true;
             }
         }
         return false;
