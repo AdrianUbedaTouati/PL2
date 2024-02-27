@@ -25,7 +25,7 @@ public class AnalizadorLexico {
         this.fichero = fichero;
         while(true){
             Token token = siguienteToken();
-            String frase = "Token: "+token.columna+","+token.fila+" "+token.lexema+"  -> ("+token.columna+","+token.fila+"): "+token.lexema+"  es de tipo "+token.tipo;
+            String frase = "Token: "+token.columna+","+token.fila+" "+token.lexema+"  -> ("+token.columna+","+token.fila+"): "+token.lexema+" es de tipo "+token.tipo;
             System.out.println(frase);
             System.out.println();
             //System.out.print(" "+token.tipo+" ");
@@ -288,12 +288,7 @@ public class AnalizadorLexico {
                 separadorAparecido = true;
                 auxSeparador = caracterActual;
                 caracterActual = SiguienteCaracter();
-                if(caracterActual == '.'){
-                    Retroceder();
-                    Retroceder();
-                    break;
-                }
-                else if(!Character.isDigit(caracterActual)){
+                if(!Character.isDigit(caracterActual)){
                     Retroceder();
                     Retroceder();
                     break;
