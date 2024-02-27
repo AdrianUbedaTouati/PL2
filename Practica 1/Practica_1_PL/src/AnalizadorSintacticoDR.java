@@ -2,7 +2,7 @@ import java.io.RandomAccessFile;
 
 public class AnalizadorSintacticoDR {
 
-    public AnalizadorSintacticoDR (AnalizadorLexico analizadorLexico){
+    public AnalizadorSintacticoDR (AnalizadorLexico aanalizadorLexico){
 
     }
 
