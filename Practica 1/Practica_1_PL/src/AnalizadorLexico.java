@@ -5,9 +5,9 @@ import java.io.RandomAccessFile;
 public class AnalizadorLexico {
     private final RandomAccessFile fichero;
 
-    private int fila;
+    private int fila = 0;
 
-    private int columna;
+    private int columna = 1;
 
     private int filaAnteDeColumnaNueva;
 
@@ -15,13 +15,23 @@ public class AnalizadorLexico {
 
     private boolean finalizacionDeFicheroInesperada = false;
 
+    private StringBuilder lexema;
+
+    private int tipoToken;
+
+    private boolean finDeFichero = false;
+
     public AnalizadorLexico (RandomAccessFile fichero){
         this.fichero = fichero;
         while(true){
-            System.out.println(siguienteToken());
+            Token token = siguienteToken();
+            System.out.print(token.lexema);
+            System.out.print(" "+token.tipo+" ");
+            System.out.println("("+token.columna+','+token.fila+')');
         }
     }
 
+    /*
     private boolean esCaracterOmitir(int byteRead){
         boolean omitirCaracter = false;
 
@@ -120,15 +130,19 @@ public class AnalizadorLexico {
         }
         return false;
     }
+    */
 
     private char SiguienteCaracter(){
+        char caracter = '@';
         try {
-            if(caracterActual == '\t'){
+            if(caracterActual == '\n'){
                 columna ++;
                 filaAnteDeColumnaNueva = fila;
                 fila = 1;
+            }else{
+                fila++;
             }
-            return (char) fichero.readByte();
+            caracter = (char) fichero.readByte();
         } catch (EOFException e){
             if(finalizacionDeFicheroInesperada) {
                 try {
@@ -136,19 +150,23 @@ public class AnalizadorLexico {
                 } catch (ErrorLexico error) {
                     error.FinDeFicheroInesperado();
                 }
+            } else{
+                finDeFichero = true;
             }
         } catch (IOException e){
             e.toString();
             System.exit(-1);
         }
-        return 0;
+        return caracter;
     }
 
     private void Retroceder(){
         try {
-            if(caracterActual == '\t'){
+            if(caracterActual == '\n'){
                 columna --;
                 fila = filaAnteDeColumnaNueva;
+            }else{
+                fila--;
             }
             fichero.seek(fichero.getFilePointer() - 1);
         } catch (IOException e){
@@ -157,11 +175,19 @@ public class AnalizadorLexico {
         }
     }
 
-    private Token Clasificacion(){
-        int tipoToken = -1;
-        StringBuilder lexema = new StringBuilder();
-        caracterActual = SiguienteCaracter();
+    private Token siguienteToken(){
+        boolean lexemaTipoInsertado = false;
+        tipoToken = -1;
+        lexema = new StringBuilder();
+        PasarCaracteresOmitibles();
+
+        if(finDeFichero){
+            System.exit(0);
+        }
+
         Token tokenActual = new Token();
+        tokenActual.columna = columna;
+        tokenActual.fila = fila;
 
         switch (caracterActual) {
             case '(':
@@ -199,6 +225,7 @@ public class AnalizadorLexico {
             case ';':
                 tipoToken = Token.PYC;
                 lexema.append(';');
+                break;
             case '.':
                 finalizacionDeFicheroInesperada = true;
                 caracterActual = SiguienteCaracter();
@@ -244,15 +271,38 @@ public class AnalizadorLexico {
             default:
                 if(Character.isDigit(caracterActual)){
                     lexema.append(caracterActual);
-                    return FiltracionNumero(tokenActual,lexema);
+                    tokenActual = FiltracionNumero(tokenActual,lexema);
                 } else if(Character.isLetter(caracterActual)){
                     lexema.append(caracterActual);
-                    return FiltracionLetras(tokenActual,lexema);
-                } else if(caracterActual == '\t'){
-
+                    tokenActual = FiltracionLetras(tokenActual,lexema);
                 }
+                lexemaTipoInsertado = true;
+        }
+        if(!lexemaTipoInsertado) {
+            tokenActual.lexema = lexema.toString();
+            tokenActual.tipo = tipoToken;
         }
         return tokenActual;
+    }
+
+    private void PasarCaracteresOmitibles(){
+        while(true) {
+            caracterActual = SiguienteCaracter();
+            if (!CaracterOmitible()) {
+                break;
+            }
+        }
+    }
+
+    private boolean CaracterOmitible(){
+        boolean omitible = false;
+        if(caracterActual == '@'){
+
+        }
+        if(caracterActual == ' ' || caracterActual == '\t' || caracterActual == '\n'){
+            omitible = true;
+        }
+        return omitible;
     }
 
     private void OmitirTextoComentario(){
@@ -274,41 +324,42 @@ public class AnalizadorLexico {
                 Retroceder();
                 switch (lexema.toString()) {
                     case ("funcion"):
-                        tokenActual.tipo = Token.FUNCION;
+                        tipoToken = Token.FUNCION;
                         break;
                     case ("var"):
-                        tokenActual.tipo = Token.VAR;
+                        tipoToken = Token.VAR;
                         break;
                     case ("fvar"):
-                        tokenActual.tipo = Token.FVAR;
+                        tipoToken = Token.FVAR;
                         break;
                     case ("entero"):
-                        tokenActual.tipo = Token.ENTERO;
+                        tipoToken = Token.ENTERO;
                         break;
                     case ("real"):
-                        tokenActual.tipo = Token.REAL;
+                        tipoToken = Token.REAL;
                         break;
                     case ("tabla"):
-                        tokenActual.tipo = Token.TABLA;
+                        tipoToken = Token.TABLA;
                         break;
                     case ("de"):
-                        tokenActual.tipo = Token.DE;
+                        tipoToken = Token.DE;
                         break;
                     case ("puntero"):
-                        tokenActual.tipo = Token.PUNTERO;
+                        tipoToken = Token.PUNTERO;
                         break;
                     case ("blq"):
-                        tokenActual.tipo = Token.BLQ;
+                        tipoToken = Token.BLQ;
                         break;
                     case ("fblq"):
-                        tokenActual.tipo = Token.FBLQ;
+                        tipoToken = Token.FBLQ;
                         break;
                     case ("escribe"):
-                        tokenActual.tipo = Token.ESCRIBE;
+                        tipoToken = Token.ESCRIBE;
                         break;
                     default:
-                        tokenActual.tipo = Token.ID;
+                        tipoToken = Token.ID;
                 }
+                tokenActual.tipo = tipoToken;
                 tokenActual.lexema = lexema.toString();
                 break;
             } else {
@@ -319,26 +370,34 @@ public class AnalizadorLexico {
     }
     private Token FiltracionNumero(Token tokenActual,StringBuilder lexema){
         boolean separadorAparecido = false;
-        tokenActual.tipo = Token.NUMENTERO;
+        char auxSeparador;
+        tipoToken = Token.NUMENTERO;
         while(true){
             caracterActual = SiguienteCaracter();
             if (Character.isDigit(caracterActual)) {
                 lexema.append(caracterActual);
             } else if (!separadorAparecido && (caracterActual == '.' || caracterActual == '\\')) {
                 separadorAparecido = true;
-                lexema.append(caracterActual);
+                auxSeparador = caracterActual;
                 caracterActual = SiguienteCaracter();
-                if(!Character.isDigit(caracterActual)){
+                if(caracterActual == '.'){
+                    Retroceder();
+                    Retroceder();
+                    break;
+                }
+                else if(!Character.isDigit(caracterActual)){
                     ExcepcionCaracterIncorrecto(caracterActual);
                 }else{
+                    lexema.append(auxSeparador);
                     lexema.append(caracterActual);
                 }
-                tokenActual.tipo = Token.NUMREAL;
+                tipoToken = Token.NUMREAL;
             } else {
                 Retroceder();
                 break;
             }
         }
+        tokenActual.tipo = tipoToken;
         tokenActual.lexema = lexema.toString();
         return tokenActual;
     }
@@ -364,7 +423,7 @@ public class AnalizadorLexico {
         private String FraseError;
 
         public void CaracterIncorrecto(char caracterIncorrecto){
-            FraseError = "Error lexico ("+ fila + ',' + columna + "): caracter ’" + caracterIncorrecto + "’ incorrecto";
+            FraseError = "Error lexico ("+ columna + ',' + fila + "): caracter ’" + caracterIncorrecto + "’ incorrecto";
             System.out.println(FraseError);
             System.exit(-1);
         }

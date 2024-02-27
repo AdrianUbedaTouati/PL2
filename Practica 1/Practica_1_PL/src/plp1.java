@@ -17,10 +17,6 @@ class plp1 {
             System.out.println("Error, fichero no encontrado: " + args[0]);
         }
     }
-
-
-
-
 }
 
 
