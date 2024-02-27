@@ -25,112 +25,13 @@ public class AnalizadorLexico {
         this.fichero = fichero;
         while(true){
             Token token = siguienteToken();
-            System.out.print(token.lexema);
-            System.out.print(" "+token.tipo+" ");
-            System.out.println("("+token.columna+','+token.fila+')');
+            String frase = "Token: "+token.columna+","+token.fila+" "+token.lexema+"  -> ("+token.columna+","+token.fila+"): "+token.lexema+"  es de tipo "+token.tipo;
+            System.out.println(frase);
+            System.out.println();
+            //System.out.print(" "+token.tipo+" ");
+            //System.out.println("("+token.columna+','+token.fila+')');
         }
     }
-
-    /*
-    private boolean esCaracterOmitir(int byteRead){
-        boolean omitirCaracter = false;
-
-        //Camiar fila o columna
-        if (byteRead == 9) {
-            columna++;
-            omitirCaracter = true;
-        }
-        //Salto de Linea o espacio o tabulador
-        else if(byteRead == 32 || byteRead == 10){
-            omitirCaracter = true;
-        }
-        else {
-            fila++;
-            omitirCaracter = false;
-        }
-        return omitirCaracter;
-    }
-
-    private boolean esTerminadoToken(String tokenActual, char asciiChar){
-        boolean TokenCreado = false;
-        if (esToken(tokenActual.toString())) {
-            TokenCreado = true;
-        }
-
-        if (!posibleToken(tokenActual.toString())) {
-            try {
-                throw new ErrorLexico();
-            } catch (ErrorLexico e) {
-                e.CaracterIncorrecto(asciiChar);
-            }
-        }
-        return TokenCreado;
-    }
-
-    public Token siguienteToken() {
-        StringBuilder tokenActual = new StringBuilder();
-        while(true) {
-            try {
-                int byteRead = fichero.readByte();
-
-                //Fin de fichero inesperado
-                if (byteRead == -1) {
-                    try {
-                        throw new ErrorLexico();
-                    } catch (ErrorLexico e) {
-                        e.FinDeFicheroInesperado();
-                    }
-                }
-
-                if(esCaracterOmitir(byteRead)){
-                    continue;
-                }
-
-                char asciiChar = (char) byteRead;
-                tokenActual.append(asciiChar);
-
-                if(esTerminadoToken(tokenActual.toString(),asciiChar)){
-                    break;
-                }
-            }catch (IOException e){
-                e.toString();
-                System.exit(-1);
-            }
-        }
-
-        return tokenActual.toString();
-    }
-
-    private boolean esToken(String posibleToken){
-        for(String token : Token.nombreToken){
-
-            if(token.startsWith("'")){
-                posibleToken = "'" + posibleToken + "'";
-            }
-
-            if (token.equals(posibleToken)){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean posibleToken(String posibleToken){
-        int longitudToken = posibleToken.length();
-
-        for (String token : Token.nombreToken) {
-            if (token.length() >= longitudToken) {
-                if(token.startsWith("'")){
-                    posibleToken = "'" + posibleToken;
-                }
-                if(token.startsWith(posibleToken)){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    */
 
     private char SiguienteCaracter(){
         char caracter = '@';
@@ -162,13 +63,19 @@ public class AnalizadorLexico {
 
     private void Retroceder(){
         try {
+            /*
             if(caracterActual == '\n'){
                 columna --;
                 fila = filaAnteDeColumnaNueva;
             }else{
                 fila--;
             }
+            */
+            fila--;
             fichero.seek(fichero.getFilePointer() - 1);
+            fichero.seek(fichero.getFilePointer() - 1);
+            caracterActual = (char) fichero.readByte();
+            //fichero.seek(fichero.getFilePointer() - 1);
         } catch (IOException e){
             e.toString();
             System.exit(-1);
@@ -252,14 +159,15 @@ public class AnalizadorLexico {
                 lexema.append('*');
                 break;
             case '/':
-                lexema.append('/');
                 caracterActual = SiguienteCaracter();
                 if (caracterActual == '/') {
                     tipoToken = Token.OPMUL;
                     lexema.append("//");
                 } else if (caracterActual == '*') {
                     OmitirTextoComentario();
+                    return siguienteToken();
                 } else{
+                    lexema.append('/');
                     Retroceder();
                     tipoToken = Token.OPMUL;
                 }
@@ -282,6 +190,7 @@ public class AnalizadorLexico {
             tokenActual.lexema = lexema.toString();
             tokenActual.tipo = tipoToken;
         }
+
         return tokenActual;
     }
 
@@ -386,7 +295,10 @@ public class AnalizadorLexico {
                     break;
                 }
                 else if(!Character.isDigit(caracterActual)){
-                    ExcepcionCaracterIncorrecto(caracterActual);
+                    Retroceder();
+                    Retroceder();
+                    break;
+                    //ExcepcionCaracterIncorrecto(caracterActual);
                 }else{
                     lexema.append(auxSeparador);
                     lexema.append(caracterActual);

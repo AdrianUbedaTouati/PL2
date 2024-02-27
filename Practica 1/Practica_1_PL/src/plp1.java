@@ -4,7 +4,7 @@ import java.io.IOException;
 
 class plp1 {
     public static void main(String[] args) {
-        String nombreFichero= "p01.txt";
+        String nombreFichero= "p06.txt";
         try {
             RandomAccessFile entrada = new RandomAccessFile(nombreFichero,"r");
             AnalizadorLexico al = new AnalizadorLexico(entrada);
