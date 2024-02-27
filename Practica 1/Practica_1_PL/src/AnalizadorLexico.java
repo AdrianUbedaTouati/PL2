@@ -1,8 +1,9 @@
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class AnalizadorLexico {
-    private RandomAccessFile fichero;
+    private final RandomAccessFile fichero;
 
     private int fila;
 
@@ -10,9 +11,9 @@ public class AnalizadorLexico {
 
     private int filaAnteDeColumnaNueva;
 
-    private boolean tokenPersonalizable;
+    private char caracterActual;
 
-    private char CaracterActual;
+    private boolean finalizacionDeFicheroInesperada = false;
 
     public AnalizadorLexico (RandomAccessFile fichero){
         this.fichero = fichero;
@@ -120,7 +121,7 @@ public class AnalizadorLexico {
         return false;
     }
 
-    private char SiguienteCarater(){
+    private char SiguienteCaracter(){
         try {
             if(caracterActual == '\t'){
                 columna ++;
@@ -128,6 +129,14 @@ public class AnalizadorLexico {
                 fila = 1;
             }
             return (char) fichero.readByte();
+        } catch (EOFException e){
+            if(finalizacionDeFicheroInesperada) {
+                try {
+                    throw new ErrorLexico();
+                } catch (ErrorLexico error) {
+                    error.FinDeFicheroInesperado();
+                }
+            }
         } catch (IOException e){
             e.toString();
             System.exit(-1);
@@ -150,93 +159,205 @@ public class AnalizadorLexico {
 
     private Token Clasificacion(){
         int tipoToken = -1;
-        String lexema;
-        CaracterActual = SiguienteCarater();
+        StringBuilder lexema = new StringBuilder();
+        caracterActual = SiguienteCaracter();
         Token tokenActual = new Token();
 
-        switch (CaracterActual) {
+        switch (caracterActual) {
             case '(':
-                tipoToken = 1;
-                lexema = "(";
+                tipoToken = Token.PARI;
+                lexema.append('(');
+                break;
             case ')':
-                tipoToken = 2;
-                lexema = ")";
+                tipoToken = Token.PARD;
+                lexema.append(')');
+                break;
             case ',':
-                tipoToken = 3;
-                lexema = ",";
+                tipoToken = Token.COMA;
+                lexema.append(',');
+                break;
             case ':':
-                CaracterActual = SiguienteCarater();
-                if (CaracterActual == '=') {
-                    tipoToken = 7;
-                    lexema = ":=";
+                lexema.append(':');
+                caracterActual = SiguienteCaracter();
+                if (caracterActual == '=') {
+                    tipoToken = Token.ASIG;
+                    lexema.append('=');
                 }
                 else {
                     Retroceder();
-                    tipoToken = 4;
-                    lexema = ":";
+                    tipoToken = Token.DOSP;
                 }
+                break;
             case '[':
-                tipoToken = 5;
-                lexema = "[";
+                tipoToken = Token.CORI;
+                lexema.append('[');
+                break;
             case ']':
-                tipoToken = 6;
-                lexema = "]";
+                tipoToken = Token.CORD;
+                lexema.append(']');
+                break;
             case ';':
-                tipoToken = 8;
-                lexema = ";";
+                tipoToken = Token.PYC;
+                lexema.append(';');
             case '.':
-                CaracterActual = SiguienteCarater();
-                if (CaracterActual == '.') {
-                    tipoToken = 9;
-                    lexema = "..";
+                finalizacionDeFicheroInesperada = true;
+                caracterActual = SiguienteCaracter();
+                if (caracterActual == '.') {
+                    tipoToken = Token.PTOPTO;
+                    lexema.append("..");
+                    finalizacionDeFicheroInesperada = false;
                 }
                 else {
                     Retroceder();
-                    try {
-                        throw new ErrorLexico();
-                    } catch (ErrorLexico e) {
-                        e.CaracterIncorrecto(CaracterActual);
-                    }
+                    ExcepcionCaracterIncorrecto(caracterActual);
                 }
+                break;
             case '+':
-                tipoToken = 10;
-                lexema = "+";
+                tipoToken = Token.OPAS;
+                lexema.append('+');
+                break;
             case '-':
-                tipoToken = 10;
-                lexema = "-";
+                tipoToken = Token.OPAS;
+                lexema.append('-');
+                break;
             case '*':
-                tipoToken = 11;
-                lexema = "*";
+                tipoToken = Token.OPMUL;
+                lexema.append('*');
+                break;
             case '/':
-                CaracterActual = SiguienteCarater();
-                if (CaracterActual == '/') {
-                    tipoToken = 11;
-                    lexema = "//";
-                }
-                else{
+                lexema.append('/');
+                caracterActual = SiguienteCaracter();
+                if (caracterActual == '/') {
+                    tipoToken = Token.OPMUL;
+                    lexema.append("//");
+                } else if (caracterActual == '*') {
+                    OmitirTextoComentario();
+                } else{
                     Retroceder();
-                    tipoToken = 11;
-                    lexema = "/";
+                    tipoToken = Token.OPMUL;
                 }
+                break;
             case '%':
-                tipoToken = 11;
-                lexema = "%";
+                tipoToken = Token.OPMUL;
+                lexema.append('%');
+                break;
             default:
-                if(Character.isDigit(CaracterActual)){
-                    while(true){
-                        CaracterActual = SiguienteCarater();
-
-                    }
-                } else if(Character.isLetter(CaracterActual)){
-
-                } else if(CaracterActual == '\t'){
+                if(Character.isDigit(caracterActual)){
+                    lexema.append(caracterActual);
+                    return FiltracionNumero(tokenActual,lexema);
+                } else if(Character.isLetter(caracterActual)){
+                    lexema.append(caracterActual);
+                    return FiltracionLetras(tokenActual,lexema);
+                } else if(caracterActual == '\t'){
 
                 }
-            }
+        }
         return tokenActual;
     }
 
-    private boolean esNumero
+    private void OmitirTextoComentario(){
+        while(true){
+            caracterActual = SiguienteCaracter();
+            if(caracterActual == '*'){
+                caracterActual = SiguienteCaracter();
+                if(caracterActual == '/'){
+                    break;
+                }
+            }
+        }
+    }
+
+    private Token FiltracionLetras(Token tokenActual,StringBuilder lexema) {
+        while (true) {
+            caracterActual = SiguienteCaracter();
+            if (!Character.isLetter(caracterActual) && !Character.isDigit(caracterActual)) {
+                Retroceder();
+                switch (lexema.toString()) {
+                    case ("funcion"):
+                        tokenActual.tipo = Token.FUNCION;
+                        break;
+                    case ("var"):
+                        tokenActual.tipo = Token.VAR;
+                        break;
+                    case ("fvar"):
+                        tokenActual.tipo = Token.FVAR;
+                        break;
+                    case ("entero"):
+                        tokenActual.tipo = Token.ENTERO;
+                        break;
+                    case ("real"):
+                        tokenActual.tipo = Token.REAL;
+                        break;
+                    case ("tabla"):
+                        tokenActual.tipo = Token.TABLA;
+                        break;
+                    case ("de"):
+                        tokenActual.tipo = Token.DE;
+                        break;
+                    case ("puntero"):
+                        tokenActual.tipo = Token.PUNTERO;
+                        break;
+                    case ("blq"):
+                        tokenActual.tipo = Token.BLQ;
+                        break;
+                    case ("fblq"):
+                        tokenActual.tipo = Token.FBLQ;
+                        break;
+                    case ("escribe"):
+                        tokenActual.tipo = Token.ESCRIBE;
+                        break;
+                    default:
+                        tokenActual.tipo = Token.ID;
+                }
+                tokenActual.lexema = lexema.toString();
+                break;
+            } else {
+                lexema.append(caracterActual);
+            }
+        }
+        return tokenActual;
+    }
+    private Token FiltracionNumero(Token tokenActual,StringBuilder lexema){
+        boolean separadorAparecido = false;
+        tokenActual.tipo = Token.NUMENTERO;
+        while(true){
+            caracterActual = SiguienteCaracter();
+            if (Character.isDigit(caracterActual)) {
+                lexema.append(caracterActual);
+            } else if (!separadorAparecido && (caracterActual == '.' || caracterActual == '\\')) {
+                separadorAparecido = true;
+                lexema.append(caracterActual);
+                caracterActual = SiguienteCaracter();
+                if(!Character.isDigit(caracterActual)){
+                    ExcepcionCaracterIncorrecto(caracterActual);
+                }else{
+                    lexema.append(caracterActual);
+                }
+                tokenActual.tipo = Token.NUMREAL;
+            } else {
+                Retroceder();
+                break;
+            }
+        }
+        tokenActual.lexema = lexema.toString();
+        return tokenActual;
+    }
+
+    private void ExcepcionCaracterIncorrecto(char caracterIncorrecto){
+        try {
+            throw new ErrorLexico();
+        } catch (ErrorLexico e) {
+            e.CaracterIncorrecto(caracterIncorrecto);
+        }
+    }
+
+    private void ExcepcionFinDeFicheroInesperado(){
+        try {
+            throw new ErrorLexico();
+        } catch (ErrorLexico e) {
+            e.FinDeFicheroInesperado();
+        }
+    }
 
     //Excepciones
     public class ErrorLexico extends Exception {
