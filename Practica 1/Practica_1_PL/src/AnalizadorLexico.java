@@ -4,21 +4,12 @@ import java.io.RandomAccessFile;
 
 public class AnalizadorLexico {
     private final RandomAccessFile fichero;
-
     private int fila = 0;
-
     private int columna = 1;
-
-    private int filaAnteDeColumnaNueva;
-
     private char caracterActual;
-
     private boolean finalizacionDeFicheroInesperada = false;
-
     private StringBuilder lexema;
-
     private int tipoToken;
-
     private boolean finDeFichero = false;
 
     public AnalizadorLexico (RandomAccessFile fichero){
@@ -28,8 +19,6 @@ public class AnalizadorLexico {
             String frase = "Token: "+token.columna+","+token.fila+" "+token.lexema+"  -> ("+token.columna+","+token.fila+"): "+token.lexema+" es de tipo "+token.tipo;
             System.out.println(frase);
             System.out.println();
-            //System.out.print(" "+token.tipo+" ");
-            //System.out.println("("+token.columna+','+token.fila+')');
         }
     }
 
@@ -38,7 +27,6 @@ public class AnalizadorLexico {
         try {
             if(caracterActual == '\n'){
                 columna ++;
-                filaAnteDeColumnaNueva = fila;
                 fila = 1;
             }else{
                 fila++;
@@ -63,19 +51,10 @@ public class AnalizadorLexico {
 
     private void Retroceder(){
         try {
-            /*
-            if(caracterActual == '\n'){
-                columna --;
-                fila = filaAnteDeColumnaNueva;
-            }else{
-                fila--;
-            }
-            */
             fila--;
             fichero.seek(fichero.getFilePointer() - 1);
             fichero.seek(fichero.getFilePointer() - 1);
             caracterActual = (char) fichero.readByte();
-            //fichero.seek(fichero.getFilePointer() - 1);
         } catch (IOException e){
             e.toString();
             System.exit(-1);
