@@ -183,6 +183,8 @@ public class AnalizadorLexico {
                 } else if(Character.isLetter(caracterActual)){
                     lexema.append(caracterActual);
                     tokenActual = FiltracionLetras(tokenActual,lexema);
+                }else{
+                    ExcepcionCaracterIncorrecto(caracterActual);
                 }
                 lexemaTipoInsertado = true;
         }
@@ -205,9 +207,6 @@ public class AnalizadorLexico {
 
     private boolean CaracterOmitible(){
         boolean omitible = false;
-        if(caracterActual == '@'){
-
-        }
         if(caracterActual == ' ' || caracterActual == '\t' || caracterActual == '\n'){
             omitible = true;
         }
@@ -298,7 +297,6 @@ public class AnalizadorLexico {
                     Retroceder();
                     Retroceder();
                     break;
-                    //ExcepcionCaracterIncorrecto(caracterActual);
                 }else{
                     lexema.append(auxSeparador);
                     lexema.append(caracterActual);
