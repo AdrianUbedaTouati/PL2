@@ -18,19 +18,18 @@ public class AnalizadorSintacticoDR {
         }
     }
 
-
     public AnalizadorSintacticoDR (AnalizadorLexico analizadorLexico){
         flag = true;
         lexico = analizadorLexico;
         token = lexico.siguienteToken();
-        S(); //Caracter inicial
+        //S(); //Caracter inicial
     }
 
     public final void emparejar(int tokEsperado)
     {
         if (token.tipo == tokEsperado) {
             token = lexico.siguienteToken();
-            comprobarFinFichero();
+            //comprobarFinFichero();
         }
         else errorSintaxis(tokEsperado);
     }
@@ -294,9 +293,15 @@ public class AnalizadorSintacticoDR {
         Token nombreToken = new Token();
         TreeSet<Integer> tokensEsperados = new TreeSet<>();
 
-        StringBuilder FraseError = new StringBuilder("Error sintactico (" + token.columna + ',' + token.fila + "): encontrado '" + token.lexema + "', esperaba");
+        StringBuilder FraseError;
 
-        for(int tipoDeToken : tiposDeTokens) {
+        if (token.tipo == Token.EOF) {
+            FraseError = new StringBuilder("Error sintactico: encontrado fin de fichero, esperaba");
+        } else {
+            FraseError = new StringBuilder("Error sintactico (" + token.columna + ',' + token.fila + "): encontrado '" + token.lexema + "', esperaba");
+        }
+
+        for (int tipoDeToken : tiposDeTokens) {
             tokensEsperados.add(tipoDeToken);
         }
 
@@ -304,7 +309,8 @@ public class AnalizadorSintacticoDR {
             nombreToken.tipo = elemento;
             FraseError.append(" ").append(nombreToken.toString());
         }
-        System.out.println(FraseError);
+
+        System.err.println(FraseError);
 
         System.exit(1);
     }

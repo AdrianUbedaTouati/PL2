@@ -4,14 +4,14 @@ import java.io.IOException;
 
 class plp1 {
     public static void main(String[] args) {
-        String nombreFichero= "p04.txt";
+        String nombreFichero= "p06.txt";
         try {
             RandomAccessFile entrada = new RandomAccessFile(nombreFichero,"r");
             AnalizadorLexico al = new AnalizadorLexico(entrada);
             AnalizadorSintacticoDR asdr = new AnalizadorSintacticoDR(al);
 
             asdr.S(); // simbolo inicial de la gramatica
-            //asdr.comprobarFinFichero();
+            asdr.comprobarFinFichero();
         }
         catch (FileNotFoundException e) {
             System.out.println("Error, fichero no encontrado: " + args[0]);

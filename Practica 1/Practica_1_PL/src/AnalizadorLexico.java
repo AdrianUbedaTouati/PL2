@@ -312,12 +312,12 @@ public class AnalizadorLexico {
 
         public void CaracterIncorrecto(char caracterIncorrecto){
             FraseError = "Error lexico ("+ columna + ',' + fila + "): caracter ’" + caracterIncorrecto + "’ incorrecto";
-            System.out.println(FraseError);
+            System.err.println(FraseError);
             System.exit(-1);
         }
         public void FinDeFicheroInesperado(){
             FraseError = "Error lexico: fin de fichero inesperado";
-            System.out.println(FraseError);
+            System.err.println(FraseError);
             System.exit(-1);
         }
     }
