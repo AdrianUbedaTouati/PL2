@@ -14,12 +14,14 @@ public class AnalizadorLexico {
 
     public AnalizadorLexico (RandomAccessFile fichero){
         this.fichero = fichero;
+        /*
         while(true){
             Token token = siguienteToken();
             String frase = "Token: "+token.columna+","+token.fila+" "+token.lexema+"  -> ("+token.columna+","+token.fila+"): "+token.lexema+" es de tipo "+token.tipo;
             System.out.println(frase);
             System.out.println();
         }
+        */
     }
 
     private char SiguienteCaracter(){
@@ -67,13 +69,15 @@ public class AnalizadorLexico {
         lexema = new StringBuilder();
         PasarCaracteresOmitibles();
 
-        if(finDeFichero){
-            System.exit(0);
-        }
-
         Token tokenActual = new Token();
         tokenActual.columna = columna;
         tokenActual.fila = fila;
+
+        if(finDeFichero){
+            //System.exit(0);
+            tokenActual.tipo = Token.EOF;
+            return tokenActual;
+        }
 
         switch (caracterActual) {
             case '(':
