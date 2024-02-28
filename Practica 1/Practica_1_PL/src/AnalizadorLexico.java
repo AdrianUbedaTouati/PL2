@@ -61,7 +61,7 @@ public class AnalizadorLexico {
         }
     }
 
-    private Token siguienteToken(){
+    public Token siguienteToken(){
         boolean lexemaTipoInsertado = false;
         tipoToken = -1;
         lexema = new StringBuilder();
