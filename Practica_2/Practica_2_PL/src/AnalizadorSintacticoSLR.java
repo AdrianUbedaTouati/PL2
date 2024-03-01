@@ -107,7 +107,6 @@ public class AnalizadorSintacticoSLR {
         for(int l = 0; l < 18; l++){
             if(acciones[linea][l]!=null){
                 tokens[i] = l;
-                System.out.println(tokens[i]);
                 i++;
             }
         }
@@ -151,6 +150,7 @@ public class AnalizadorSintacticoSLR {
                 System.out.print(" "+cadena.pop());
             }
         }
+
     }
 
     private void CreacionTabla(){
