@@ -12,7 +12,7 @@ public class AnalizadorSintacticoDR {
     public void comprobarFinFichero() {
         if (token.tipo == Token.EOF ) {
             if(flag) {
-                System.out.print(historialTiposTokens);
+                System.out.println(historialTiposTokens);
             }
             System.exit(0);
         }
@@ -22,7 +22,8 @@ public class AnalizadorSintacticoDR {
         flag = true;
         lexico = analizadorLexico;
         token = lexico.siguienteToken();
-        //S(); //Caracter inicial
+        S();
+        comprobarFinFichero();
     }
 
     public final void emparejar(int tokEsperado)
@@ -36,6 +37,7 @@ public class AnalizadorSintacticoDR {
 
     private void AnadirHistorialRegla(int tipoDeToken){
         historialTiposTokens.append(" "+ tipoDeToken);
+        comprobarFinFichero();
     }
 
 
@@ -139,7 +141,7 @@ public class AnalizadorSintacticoDR {
             Rp();
         }else if(token.tipo == Token.CORD){
             AnadirHistorialRegla(13);
-        } else errorSintaxis(Token.COMA,Token.CORD,Token.BLQ);
+        } else errorSintaxis(Token.COMA,Token.CORD);
     }
 
     public final void G(){
@@ -286,7 +288,7 @@ public class AnalizadorSintacticoDR {
             AnadirHistorialRegla(34);
 
             emparejar(Token.ID);
-        } else errorSintaxis(Token.OPAS,Token.PYC,Token.FBLQ,Token.PARD);
+        } else errorSintaxis(Token.NUMENTERO,Token.NUMREAL,Token.FBLQ,Token.PARD,Token.ID);
     }
 
     private void errorSintaxis(int... tiposDeTokens) {

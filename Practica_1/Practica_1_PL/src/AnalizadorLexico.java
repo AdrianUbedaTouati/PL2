@@ -12,6 +12,8 @@ public class AnalizadorLexico {
     private int tipoToken;
     private boolean finDeFichero = false;
 
+    private boolean comentario = false;
+
     public AnalizadorLexico (RandomAccessFile fichero){
         this.fichero = fichero;
         /*
@@ -33,7 +35,13 @@ public class AnalizadorLexico {
             }else{
                 fila++;
             }
-            caracter = (char) fichero.readByte();
+            int byteCaracter = fichero.readByte();
+
+            if(byteCaracter == -1){
+                finDeFichero = true;
+            }
+
+            caracter = (char) byteCaracter;
         } catch (EOFException e){
             if(finalizacionDeFicheroInesperada) {
                 try {
@@ -98,8 +106,7 @@ public class AnalizadorLexico {
                 if (caracterActual == '=') {
                     tipoToken = Token.ASIG;
                     lexema.append('=');
-                }
-                else {
+                } else {
                     Retroceder();
                     tipoToken = Token.DOSP;
                 }
@@ -123,8 +130,7 @@ public class AnalizadorLexico {
                     tipoToken = Token.PTOPTO;
                     lexema.append("..");
                     finalizacionDeFicheroInesperada = false;
-                }
-                else {
+                } else {
                     Retroceder();
                     ExcepcionCaracterIncorrecto(caracterActual);
                 }
@@ -149,7 +155,7 @@ public class AnalizadorLexico {
                 } else if (caracterActual == '*') {
                     OmitirTextoComentario();
                     return siguienteToken();
-                } else{
+                } else {
                     lexema.append('/');
                     Retroceder();
                     tipoToken = Token.OPMUL;
@@ -160,18 +166,18 @@ public class AnalizadorLexico {
                 lexema.append('%');
                 break;
             default:
-                if(Character.isDigit(caracterActual)){
+                if (Character.isDigit(caracterActual)) {
                     lexema.append(caracterActual);
-                    tokenActual = FiltracionNumero(tokenActual,lexema);
-                } else if(Character.isLetter(caracterActual)){
+                    tokenActual = FiltracionNumero(tokenActual, lexema);
+                } else if (Character.isLetter(caracterActual)) {
                     lexema.append(caracterActual);
-                    tokenActual = FiltracionLetras(tokenActual,lexema);
-                }else{
+                    tokenActual = FiltracionLetras(tokenActual, lexema);
+                } else {
                     ExcepcionCaracterIncorrecto(caracterActual);
                 }
                 lexemaTipoInsertado = true;
         }
-        if(!lexemaTipoInsertado) {
+        if (!lexemaTipoInsertado) {
             tokenActual.lexema = lexema.toString();
             tokenActual.tipo = tipoToken;
         }
@@ -199,8 +205,16 @@ public class AnalizadorLexico {
     private void OmitirTextoComentario(){
         while(true){
             caracterActual = SiguienteCaracter();
+            if(finDeFichero){
+                ExcepcionFinDeFicheroInesperado();
+            }
+
             if(caracterActual == '*'){
                 caracterActual = SiguienteCaracter();
+                if(finDeFichero){
+                    ExcepcionFinDeFicheroInesperado();
+                }
+
                 if(caracterActual == '/'){
                     break;
                 }
@@ -311,7 +325,7 @@ public class AnalizadorLexico {
         private String FraseError;
 
         public void CaracterIncorrecto(char caracterIncorrecto){
-            FraseError = "Error lexico ("+ columna + ',' + fila + "): caracter ’" + caracterIncorrecto + "’ incorrecto";
+            FraseError = "Error lexico ("+ columna + ',' + fila + "): caracter '" + caracterIncorrecto + "' incorrecto";
             System.err.println(FraseError);
             System.exit(-1);
         }
