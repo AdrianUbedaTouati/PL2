@@ -96,6 +96,10 @@ public class AnalizadorLexico {
                 tipoToken = Token.PARD;
                 lexema.append(')');
                 break;
+            case ',':
+                tipoToken = Token.COMA;
+                lexema.append(',');
+                break;
             case ':':
                 lexema.append(':');
                 caracterActual = SiguienteCaracter();
@@ -107,9 +111,29 @@ public class AnalizadorLexico {
                     tipoToken = Token.DOSP;
                 }
                 break;
+            case '[':
+                tipoToken = Token.CORI;
+                lexema.append('[');
+                break;
+            case ']':
+                tipoToken = Token.CORD;
+                lexema.append(']');
+                break;
             case ';':
                 tipoToken = Token.PYC;
                 lexema.append(';');
+                break;
+            case '.':
+                finalizacionDeFicheroInesperada = true;
+                caracterActual = SiguienteCaracter();
+                if (caracterActual == '.') {
+                    tipoToken = Token.PTOPTO;
+                    lexema.append("..");
+                    finalizacionDeFicheroInesperada = false;
+                } else {
+                    Retroceder();
+                    ExcepcionCaracterIncorrecto(caracterActual);
+                }
                 break;
             case '+':
                 tipoToken = Token.OPAS;
@@ -119,15 +143,27 @@ public class AnalizadorLexico {
                 tipoToken = Token.OPAS;
                 lexema.append('-');
                 break;
+            case '*':
+                tipoToken = Token.OPMUL;
+                lexema.append('*');
+                break;
             case '/':
                 caracterActual = SiguienteCaracter();
-               if (caracterActual == '*') {
+                if (caracterActual == '/') {
+                    tipoToken = Token.OPMUL;
+                    lexema.append("//");
+                } else if (caracterActual == '*') {
                     OmitirTextoComentario();
                     return siguienteToken();
                 } else {
-
+                    lexema.append('/');
                     Retroceder();
+                    tipoToken = Token.OPMUL;
                 }
+                break;
+            case '%':
+                tipoToken = Token.OPMUL;
+                lexema.append('%');
                 break;
             default:
                 if (Character.isDigit(caracterActual)) {
@@ -206,6 +242,15 @@ public class AnalizadorLexico {
                         break;
                     case ("real"):
                         tipoToken = Token.REAL;
+                        break;
+                    case ("tabla"):
+                        tipoToken = Token.TABLA;
+                        break;
+                    case ("de"):
+                        tipoToken = Token.DE;
+                        break;
+                    case ("puntero"):
+                        tipoToken = Token.PUNTERO;
                         break;
                     case ("blq"):
                         tipoToken = Token.BLQ;
@@ -291,5 +336,4 @@ public class AnalizadorLexico {
         }
     }
 }
-
 
