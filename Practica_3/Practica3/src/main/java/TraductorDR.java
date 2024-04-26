@@ -1,13 +1,17 @@
 
+import java.util.Stack;
 import java.util.TreeSet;
 
 public class TraductorDR {
 
-    private StringBuilder historialTiposTokens = new StringBuilder();
+    private StringBuilder historialTraducion = new StringBuilder();
     private boolean flag = false;
     private Token token;
     private AnalizadorLexico lexico;
+    private Stack<TablaSimbolos> padres = new Stack();
     private TablaSimbolos tablaSimbolos;
+
+
 
     public static final int
             NONE        = 0,
@@ -31,7 +35,7 @@ public class TraductorDR {
     public void comprobarFinFichero() {
         if (token.tipo == Token.EOF ) {
             if(flag) {
-                System.out.println(historialTiposTokens);
+                System.out.println(historialTraducion);
             }
             System.exit(0);
         }
@@ -41,6 +45,11 @@ public class TraductorDR {
         flag = true;
         lexico = al;
         tablaSimbolos = new TablaSimbolos(null);
+        padres.push(tablaSimbolos);
+
+        token = lexico.siguienteToken();
+        S();
+        comprobarFinFichero();
     }
 
 
@@ -53,335 +62,396 @@ public class TraductorDR {
         else errorSintaxis(tokEsperado);
     }
 
-    private void AnadirHistorialRegla(int tipoDeToken){
-        historialTiposTokens.append(" "+ tipoDeToken);
+    private void AnadirHistorialRegla(String tipoDeToken){
+        System.out.println("Tipo de token: "+tipoDeToken);
+        historialTraducion.append(tipoDeToken);
         comprobarFinFichero();
     }
 
 
     public final String S(){
         String traduccion = "";
+        //System.out.println("token: " + token);
         if(token.tipo == Token.FUNCION){
-            AnadirHistorialRegla(1);
-
             emparejar(Token.FUNCION);
-            emparejar(Token.ID);
+            String id = token.lexema;
+
+            TablaSimbolos tabla = padres.pop();
+            String idTrad = tabla.crearVariable(id);
+            Simbolo sim = new Simbolo(id,Token.REAL,idTrad);
+            tabla.nuevoSimbolo(sim);
+            padres.push(tabla);
+
+
+            emparejar(Token.ID); 
+
             emparejar(Token.PYC);
 
             String s = S();
             String b = B(token.lexema);
-            return s+"float "+token.lexema+"()"+"\n   "+b;
-        }else if(token.tipo == Token.EOF || token.tipo == Token.BLQ){
-            AnadirHistorialRegla(2);
-        }
+            traduccion = s+"float "+id+"()"+"\n   "+b;
+        }else if(token.tipo == Token.EOF || token.tipo == Token.BLQ){}
         else errorSintaxis(Token.FUNCION,Token.EOF,Token.BLQ);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String D(){
         String traduccion = "";
         if(token.tipo == Token.VAR){
-            AnadirHistorialRegla(3);
-            String l = L();
+
             emparejar(Token.VAR);
+            String l = L();
             emparejar(Token.FVAR);
-            return l;
+            traduccion = l;
         }else errorSintaxis(Token.VAR);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String L(){
         String traduccion = "";
         if(token.tipo == Token.ID){
-            AnadirHistorialRegla(4);
-
             String v = V();
             String lp = Lp();
-            return v + lp;
+            traduccion = v + lp;
         } else errorSintaxis(Token.ID);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String Lp(){
         String traduccion = "";
         if(token.tipo == Token.ID){
-            AnadirHistorialRegla(5);
-
             String v = V();
             String lp = Lp();
-            return v + lp;
+            traduccion = v + lp;
         }else if(token.tipo == Token.FVAR){
-            AnadirHistorialRegla(6);
+
         } else errorSintaxis(Token.ID,Token.FVAR);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String V(){
         String traduccion = "";
         if(token.tipo == Token.ID){
-            AnadirHistorialRegla(7);
+            String id = token.lexema;
 
             emparejar(Token.ID);
             emparejar(Token.DOSP);
-            String c = C(token.lexema);
+            String c = C(id);
+
+            String tipoDato = c.split(" ")[0].replace("*", "");
+            int tipo = 0;
+            if(tipoDato.equals("int")){
+                tipo = Token.ENTERO;
+            }else if(tipoDato.equals("float")){
+                tipo = Token.REAL;
+            }
+            TablaSimbolos tabla = padres.pop();
+
+            String idTrad = tabla.crearVariable(id);
+            Simbolo sim = new Simbolo(id,tipo,idTrad);
+            tabla.nuevoSimbolo(sim);
+
+            padres.push(tabla);
+
             emparejar(Token.PYC);
-            return c + ";";
+            traduccion = c + ";";
         }else errorSintaxis(Token.ID);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String C(String name){
         String traduccion = "";
         if(token.tipo == Token.TABLA){
-            AnadirHistorialRegla(8);
             String a = A();
             String c = C(name);
-            return c + a;
+            traduccion = c + a;
         }else if(token.tipo == Token.PUNTERO || token.tipo == Token.ENTERO || token.tipo == Token.REAL){
-            AnadirHistorialRegla(9);
             String p = P();
-            return p + " " + name;
+            traduccion = p + " " + name;
         }
         else errorSintaxis(Token.TABLA,Token.PUNTERO,Token.ENTERO,Token.REAL);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String A(){
         String traduccion = "";
         if(token.tipo == Token.TABLA){
-            AnadirHistorialRegla(10);
-
             emparejar(Token.TABLA);
             emparejar(Token.CORI);
             String r = R();
             emparejar(Token.CORD);
             emparejar(Token.DE);
-            return r;
+            traduccion = r;
         } else errorSintaxis(Token.TABLA);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String R(){
         String traduccion = "";
         if(token.tipo == Token.NUMENTERO){
-            AnadirHistorialRegla(11);
-
             String g = G();
             String rp = Rp();
-            return g + rp;
+            traduccion = g + rp;
         } else errorSintaxis(Token.NUMENTERO);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String Rp(){
         String traduccion = "";
         if(token.tipo == Token.COMA){
-            AnadirHistorialRegla(12);
-
             emparejar(Token.COMA);
             String g = G();
             String rp = Rp();
-            return g + rp;
+            traduccion = g + rp;
         }else if(token.tipo == Token.CORD){
-            AnadirHistorialRegla(13);
+
         } else errorSintaxis(Token.COMA,Token.CORD);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String G(){
         String traduccion = "";
         if(token.tipo == Token.NUMENTERO) {
-            AnadirHistorialRegla(14);
-
+            int num1,num2;
+            num1 = Integer.parseInt(token.lexema);
             emparejar(Token.NUMENTERO);
-            int num1 = Integer.parseInt(token.lexema);
             emparejar(Token.PTOPTO);
+            if(token.tipo == Token.NUMENTERO) {
+                num2 = Integer.parseInt(token.lexema);
+            }else num2 = 0; //Va a dar error en el emparejar
             emparejar(Token.NUMENTERO);
-            int num2 = Integer.parseInt(token.lexema);
-            return "["+(num2-num1+1)+"]";
+            traduccion = "["+(num2-num1+1)+"]";
         } else errorSintaxis(Token.NUMENTERO);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String P(){
         String traduccion = "";
         if(token.tipo == Token.PUNTERO){
-            AnadirHistorialRegla(15);
-
             emparejar(Token.PUNTERO);
             emparejar(Token.DE);
             String p = P();
-            return  p + "*";
+            traduccion =  p + "*";
         }else if(token.tipo == Token.ENTERO || token.tipo == Token.REAL){
-            AnadirHistorialRegla(16);
-
             String tipo = Tipo();
-            return tipo;
+            traduccion = tipo;
         } else errorSintaxis(Token.PUNTERO,Token.ENTERO,Token.REAL);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String Tipo(){
         String traduccion = "";
         if(token.tipo == Token.ENTERO){
-            AnadirHistorialRegla(17);
-
             emparejar(Token.ENTERO);
-            return "int";
+            traduccion = "int";
         }else if(token.tipo == Token.REAL){
-            AnadirHistorialRegla(18);
-
             emparejar(Token.REAL);
-            return "float";
+            traduccion = "float";
         } else errorSintaxis(Token.ENTERO,Token.REAL);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String B(String id){
+
         String traduccion = "";
         if(token.tipo == Token.BLQ){
-            AnadirHistorialRegla(19);
-
+            TablaSimbolos ultimoPadre = padres.pop();
+            TablaSimbolos nuevoAmbito = new TablaSimbolos(ultimoPadre);
+            padres.push(ultimoPadre);
+            padres.push(nuevoAmbito);
             emparejar(Token.BLQ);
             String d = D();
             String si = SI(id);
             emparejar(Token.FBLQ);
-            return "{" + d + si + "}";
+            padres.pop();
+            traduccion = "{" + d + si + "}";
         } else errorSintaxis(Token.BLQ);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String SI(String id){
         String traduccion = "";
         if(token.tipo == Token.ID || token.tipo == Token.ESCRIBE || token.tipo == Token.BLQ){
-            AnadirHistorialRegla(20);
-
             String i = I(id);
             String m = M();
-            return i+m;
+            traduccion = i+m;
         } else errorSintaxis(Token.ID,Token.ESCRIBE,Token.BLQ);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String M(){
         String traduccion = "";
         if(token.tipo == Token.PYC){
-            AnadirHistorialRegla(21);
-
             emparejar(Token.PYC);
             String i = I(token.lexema); //Se lo pongo para que la declaracion de I tenga sentido
             String m = M();
-            return ";"+i+m;
+            traduccion = ";"+i+m;
         }else if(token.tipo == Token.FBLQ){
-            AnadirHistorialRegla(22);
+
         } else errorSintaxis(Token.PYC,Token.FBLQ);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final String I(String id){
         String traduccion = "";
         if(token.tipo == Token.ID){
-            AnadirHistorialRegla(23);
-
+            String nombre = token.lexema;
             emparejar(Token.ID);
             emparejar(Token.ASIG);
             ParametroTipo e = E();
-            if(tablaSimbolos.buscar(id) == null){
-                errorSintaxis();
-            }else if (id == token.I) { // igual a I.funcion ni puta idea
-                return "return " + e.traduccion+";";
-            }else return token.lexema + " = " + e.traduccion; // COSAS RARAS C.id ???
-        }else if(token.tipo == Token.ESCRIBE){
-            AnadirHistorialRegla(24);
 
+            TablaSimbolos tabla = padres.pop();
+
+            if(tabla.buscar(nombre) == null){
+                errorSintaxis();
+            }else if (id == token.lexema) { // igual a I.funcion ni puta idea
+                traduccion = "return " + e.traduccion+";";
+            }else traduccion = token.lexema + " = " + e.traduccion; // COSAS RARAS C.id ???
+
+            padres.push(tabla);
+
+        }else if(token.tipo == Token.ESCRIBE){
             emparejar(Token.ESCRIBE);
             emparejar(Token.PARI);
             ParametroTipo e = E();
             emparejar(Token.PARD);
             if(e.tipo == REAL){
-                return "printf("+"%f"+")";
+                traduccion = "printf("+"\"%f\","+e.traduccion+")";
             }else{
-                return "printf("+"%d"+")";
+                traduccion = "printf("+"\"%d\","+e.traduccion+")";
             }
         } else if (token.tipo == Token.BLQ) {
-            AnadirHistorialRegla(25);
-
             String b = B(id);  //Se lo pongo para que la declaracion de I tenga sentido
-            return b;
+            traduccion = b;
         } else errorSintaxis(Token.ID,Token.ESCRIBE,Token.BLQ);
+        AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
     public final ParametroTipo E(){
         ParametroTipo param = new ParametroTipo();
         if(token.tipo == Token.NUMENTERO || token.tipo == Token.NUMREAL || token.tipo == Token.ID){
-            AnadirHistorialRegla(26);
-
             ParametroTipo t = T();
-            ParametroTipo ep = Ep(t.tipo,t.traduccion);
-            return ep;
+            param = Ep(t);
         } else errorSintaxis(Token.NUMENTERO,Token.NUMREAL,Token.ID);
+        AnadirHistorialRegla(param.traduccion);
         return param;
     }
 
-    public final ParametroTipo Ep(int tipo, String id){
-        String traduccion = "";
+    public final ParametroTipo Ep(ParametroTipo parametro){
+        ParametroTipo param = new ParametroTipo();
         if(token.tipo == Token.OPAS){
-            AnadirHistorialRegla(27);
-
+            String opas = token.lexema;
             emparejar(Token.OPAS);
-            T();
-            Ep();
+            ParametroTipo t = T();
+            param = Ep(t);
+            if(parametro.tipo == REAL && param.tipo == REAL){
+                param.traduccion = parametro.traduccion + opas + "r " + param.traduccion;
+                param.tipo  = Token.REAL;
+            } else if (parametro.tipo == REAL && param.tipo == ENTERO) {
+                param.traduccion = parametro.traduccion + opas + "r " + "itor(" +param.traduccion +")";
+                param.tipo  = Token.REAL;
+            } else if (parametro.tipo == ENTERO && param.tipo == REAL) {
+                param.traduccion = "itor(" + parametro.traduccion+ ")" + opas + "r " + param.traduccion;
+                param.tipo  = Token.REAL;
+            } else{
+                param.traduccion = parametro.traduccion + opas + "i " + param.traduccion;
+                param.tipo  = Token.ENTERO;
+            }
         }else if(token.tipo == Token.PYC || token.tipo == Token.FBLQ || token.tipo == Token.PARD){
-            AnadirHistorialRegla(28);
+            param = parametro;
         } else errorSintaxis(Token.OPAS,Token.PYC,Token.FBLQ,Token.PARD);
-        return traduccion;
+        AnadirHistorialRegla(param.traduccion);
+        return param;
     }
 
     public final ParametroTipo T(){
-        String traduccion = "";
+        ParametroTipo param = new ParametroTipo();
         if(token.tipo == Token.NUMENTERO || token.tipo == Token.NUMREAL || token.tipo == Token.ID){
-            AnadirHistorialRegla(29);
-
-            F();
-            Tp();
+            ParametroTipo f = F();
+            param = Tp(f);
         } else errorSintaxis(Token.NUMENTERO,Token.NUMREAL,Token.ID);
-        return traduccion;
+        AnadirHistorialRegla(param.traduccion);
+        return param;
     }
-
-    public final String Tp(){
-        String traduccion = "";
+    //ParametroTipo parametro
+    public final ParametroTipo Tp(ParametroTipo parametro){
+        ParametroTipo param = new ParametroTipo();
         if(token.tipo == Token.OPMUL){
-            AnadirHistorialRegla(30);
-
+            String opmul = token.lexema;
+            if(opmul.equals("//")){
+                opmul = "/";
+            }
             emparejar(Token.OPMUL);
-            F();
-            Tp();
+            ParametroTipo f = F();
+            param = Tp(f);
+            if (param.tipo == REAL && parametro.tipo == REAL) {
+                param.traduccion = parametro.traduccion + opmul + "r" + param.traduccion;
+                param.tipo  = Token.REAL;
+            }
+            else if (param.tipo == REAL && parametro.tipo == ENTERO) {
+                param.traduccion = parametro.traduccion+ opmul + "r" + "itor("+param.traduccion+")";
+                param.tipo  = Token.REAL;
+            }
+            else if (param.tipo == ENTERO && parametro.tipo == REAL) {
+                param.traduccion = "itor("+parametro.traduccion+ ")" + opmul + "r" + param.traduccion;
+                param.tipo  = Token.REAL;
+            } else{
+                param.traduccion = parametro.traduccion + opmul + "i" + param.traduccion;
+                param.tipo = Token.ENTERO;
+            }
         }else if(token.tipo == Token.OPAS || token.tipo == Token.PYC || token.tipo == Token.FBLQ || token.tipo == Token.PARD){
-            AnadirHistorialRegla(31);
-        } else errorSintaxis(Token.OPMUL,Token.OPAS,Token.PYC,Token.FBLQ,Token.PARD);
-        return traduccion;
+            param = parametro;
+        }
+        else errorSintaxis(Token.OPMUL,Token.OPAS,Token.PYC,Token.FBLQ,Token.PARD);
+        AnadirHistorialRegla(param.traduccion);
+        return param;
     }
 
     public final ParametroTipo F(){
-        String traduccion = "";
+        ParametroTipo param = new ParametroTipo();
         if(token.tipo == Token.NUMENTERO){
-            AnadirHistorialRegla(32);
-
+            String numentero = token.lexema;
             emparejar(Token.NUMENTERO);
+            param.traduccion = numentero;
+            param.tipo  = Token.ENTERO;
         }else if(token.tipo == Token.NUMREAL || token.tipo == Token.FBLQ || token.tipo == Token.PARD){
-            AnadirHistorialRegla(33);
-
+            String numentero = token.lexema;
             emparejar(Token.NUMREAL);
+            param.traduccion = numentero;
+            param.tipo  = Token.REAL;
         } else if (token.tipo == Token.ID) {
-            AnadirHistorialRegla(34);
-
+            String id = token.lexema;
             emparejar(Token.ID);
+            param.traduccion = id;
+            TablaSimbolos tabla = padres.pop();
+            param.tipo  = tabla.buscar(id).tipo;
+            padres.push(tabla);
         } else errorSintaxis(Token.NUMENTERO,Token.NUMREAL,Token.FBLQ,Token.PARD,Token.ID);
-        return traduccion;
+        AnadirHistorialRegla(param.traduccion);
+        return param;
     }
 
     private void errorSintaxis(int... tiposDeTokens) {
+        //System.out.println(historialTraducion);
+        //System.exit(1);
+
+
         Token nombreToken = new Token();
         TreeSet<Integer> tokensEsperados = new TreeSet<>();
 

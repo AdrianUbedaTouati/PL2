@@ -3,6 +3,7 @@ import java.util.ArrayList;
 
 public class TablaSimbolos {
 
+    private int nivel = 0;
     /**
      * referencia a la tabla de símbolos del ámbito anterior
      */
@@ -67,5 +68,14 @@ public class TablaSimbolos {
             return padre.buscar(nombre);
         else
             return null;
+    }
+
+    public String crearVariable(String id){
+        if(padre==null){
+            return "";
+        } else{
+            id = "_"+id;
+            return padre.crearVariable(id);
+        }
     }
 }
