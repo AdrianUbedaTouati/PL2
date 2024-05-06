@@ -88,7 +88,7 @@ public class TraductorDR {
 
             String s = S();
             String b = B(id);
-            traduccion = s+"\n"+"\n"+"float "+id+"()"+b;
+            traduccion = s+"float "+id+"()"+"\n   "+b;
         }else if(token.tipo == Token.EOF || token.tipo == Token.BLQ){}
         else errorSintaxis(Token.FUNCION,Token.EOF,Token.BLQ);
         AnadirHistorialRegla(traduccion);
@@ -159,7 +159,7 @@ public class TraductorDR {
             padres.push(tabla);
 
             emparejar(Token.PYC);
-            traduccion = c + ";"+"\n";
+            traduccion = c + ";";
         }else errorSintaxis(Token.ID);
         AnadirHistorialRegla(traduccion);
         return traduccion;
@@ -277,7 +277,7 @@ public class TraductorDR {
             String si = SI(id);
             emparejar(Token.FBLQ);
             padres.pop();
-            traduccion = "\n{\n" + d + si + "\n}";
+            traduccion = "{" + d + si + "}";
         } else errorSintaxis(Token.BLQ);
         AnadirHistorialRegla(traduccion);
         return traduccion;
@@ -322,12 +322,12 @@ public class TraductorDR {
             if(sim == null){
                 errorSintaxis();
             }else if (id.equals(nombre)) { // igual a I.funcion ni puta idea
-                traduccion = "\n  return " + e.traduccion+";";
+                traduccion = "return " + e.traduccion+";";
             }else{
                 if(sim.tipo ==  e.tipo ) {
-                    traduccion = "\n  "+nombreCambiadoNivel + " = " + e.traduccion; // COSAS RARAS C.id ???
+                    traduccion = nombreCambiadoNivel + " = " + e.traduccion; // COSAS RARAS C.id ???
                 }else if(sim.tipo ==  Token.REAL && e.tipo == Token.ENTERO){
-                    traduccion = "\n  "+nombreCambiadoNivel + " = " + "itor("+e.traduccion+")";
+                    traduccion = nombreCambiadoNivel + " = " + "itor("+e.traduccion+")";
                 } else if(sim.tipo ==  Token.ENTERO && e.tipo == Token.REAL){
                     errorSintaxis();
                 }
@@ -341,9 +341,9 @@ public class TraductorDR {
             ParametroTipo e = E();
             emparejar(Token.PARD);
             if(e.tipo == Token.REAL){
-                traduccion = "\n  "+"printf("+"\"%f\","+e.traduccion+")";
+                traduccion = "printf("+"\"%f\","+e.traduccion+")";
             }else{
-                traduccion = "\n  "+"printf("+"\"%d\","+e.traduccion+")";
+                traduccion = "printf("+"\"%d\","+e.traduccion+")";
             }
         } else if (token.tipo == Token.BLQ) {
             String b = B(id);  //Se lo pongo para que la declaracion de I tenga sentido
