@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class TablaSimbolos {
 
-    private int nivel = 0;
+    public int nivel = 0;
     /**
      * referencia a la tabla de símbolos del ámbito anterior
      */
@@ -19,6 +19,8 @@ public class TablaSimbolos {
      * @param padre referencia a la tabla de símbolos anterior, o null si es la primera
      */
     public TablaSimbolos(TablaSimbolos padre) {
+        if(padre == null) nivel = 0;
+        else nivel = padre.nivel + 1;
         this.padre = padre;
         simbolos = new ArrayList<Simbolo>();
     }
@@ -71,10 +73,12 @@ public class TablaSimbolos {
     }
 
     public String crearVariable(String id){
-        if(padre==null){
-            return "";
+        if(padre == null){
+            return id;
         } else{
-            id = "_"+id;
+            if(nivel != 1) {
+                id = "_" + id;
+            }
             return padre.crearVariable(id);
         }
     }

@@ -10,7 +10,7 @@ class plp3 {
                 AnalizadorLexico al = new AnalizadorLexico(entrada);
                 TraductorDR tdr = new TraductorDR(al);
                 String trad = tdr.S(); // simbolo inicial de la gramatica
-                tdr.comprobarFinFichero();
+                //tdr.comprobarFinFichero();
                 System.out.println(trad);
             }
             catch (FileNotFoundException e) {

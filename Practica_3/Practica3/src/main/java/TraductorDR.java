@@ -48,10 +48,10 @@ public class TraductorDR {
         padres.push(tablaSimbolos);
 
         token = lexico.siguienteToken();
-        S();
-        comprobarFinFichero();
-    }
+        //S();
+        //comprobarFinFichero();
 
+    }
 
     public final void emparejar(int tokEsperado)
     {
@@ -63,9 +63,9 @@ public class TraductorDR {
     }
 
     private void AnadirHistorialRegla(String tipoDeToken){
-        System.out.println("Tipo de token: "+tipoDeToken);
+        //System.out.println("Tipo de token: "+tipoDeToken);
         historialTraducion.append(tipoDeToken);
-        comprobarFinFichero();
+        //comprobarFinFichero();
     }
 
 
@@ -82,13 +82,12 @@ public class TraductorDR {
             tabla.nuevoSimbolo(sim);
             padres.push(tabla);
 
-
             emparejar(Token.ID); 
 
             emparejar(Token.PYC);
 
             String s = S();
-            String b = B(token.lexema);
+            String b = B(id);
             traduccion = s+"float "+id+"()"+"\n   "+b;
         }else if(token.tipo == Token.EOF || token.tipo == Token.BLQ){}
         else errorSintaxis(Token.FUNCION,Token.EOF,Token.BLQ);
@@ -140,7 +139,11 @@ public class TraductorDR {
 
             emparejar(Token.ID);
             emparejar(Token.DOSP);
-            String c = C(id);
+
+            TablaSimbolos tabla = padres.pop();
+            String idTrad = tabla.crearVariable(id);
+
+            String c = C(idTrad);
 
             String tipoDato = c.split(" ")[0].replace("*", "");
             int tipo = 0;
@@ -149,9 +152,7 @@ public class TraductorDR {
             }else if(tipoDato.equals("float")){
                 tipo = Token.REAL;
             }
-            TablaSimbolos tabla = padres.pop();
 
-            String idTrad = tabla.crearVariable(id);
             Simbolo sim = new Simbolo(id,tipo,idTrad);
             tabla.nuevoSimbolo(sim);
 
@@ -316,12 +317,20 @@ public class TraductorDR {
             ParametroTipo e = E();
 
             TablaSimbolos tabla = padres.pop();
-
-            if(tabla.buscar(nombre) == null){
+            Simbolo sim = tabla.buscar(nombre);
+            if(sim == null){
                 errorSintaxis();
-            }else if (id == token.lexema) { // igual a I.funcion ni puta idea
+            }else if (id.equals(nombre)) { // igual a I.funcion ni puta idea
                 traduccion = "return " + e.traduccion+";";
-            }else traduccion = token.lexema + " = " + e.traduccion; // COSAS RARAS C.id ???
+            }else{
+                if(sim.tipo ==  e.tipo ) {
+                    traduccion = token.lexema + " = " + e.traduccion; // COSAS RARAS C.id ???
+                }else if(sim.tipo ==  Token.REAL && e.tipo == Token.ENTERO){
+                    traduccion = token.lexema + " = " + "itor("+e.traduccion+")";
+                } else if(sim.tipo ==  Token.ENTERO && e.tipo == Token.REAL){
+                    errorSintaxis();
+                }
+            }
 
             padres.push(tabla);
 
@@ -359,20 +368,20 @@ public class TraductorDR {
             String opas = token.lexema;
             emparejar(Token.OPAS);
             ParametroTipo t = T();
-            param = Ep(t);
-            if(parametro.tipo == REAL && param.tipo == REAL){
-                param.traduccion = parametro.traduccion + opas + "r " + param.traduccion;
+            if(parametro.tipo == Token.REAL && t.tipo == Token.REAL){
+                param.traduccion = parametro.traduccion + opas + "r " + t.traduccion;
                 param.tipo  = Token.REAL;
-            } else if (parametro.tipo == REAL && param.tipo == ENTERO) {
-                param.traduccion = parametro.traduccion + opas + "r " + "itor(" +param.traduccion +")";
+            } else if (parametro.tipo == Token.REAL && t.tipo == Token.ENTERO) {
+                param.traduccion = parametro.traduccion + opas + "r " + "itor(" +t.traduccion +")";
                 param.tipo  = Token.REAL;
-            } else if (parametro.tipo == ENTERO && param.tipo == REAL) {
-                param.traduccion = "itor(" + parametro.traduccion+ ")" + opas + "r " + param.traduccion;
+            } else if (parametro.tipo == Token.ENTERO && t.tipo == Token.REAL) {
+                param.traduccion = "itor(" + parametro.traduccion+ ")" + opas + "r " + t.traduccion;
                 param.tipo  = Token.REAL;
             } else{
-                param.traduccion = parametro.traduccion + opas + "i " + param.traduccion;
+                param.traduccion = parametro.traduccion + opas + "i " + t.traduccion;
                 param.tipo  = Token.ENTERO;
             }
+            param = Ep(param);
         }else if(token.tipo == Token.PYC || token.tipo == Token.FBLQ || token.tipo == Token.PARD){
             param = parametro;
         } else errorSintaxis(Token.OPAS,Token.PYC,Token.FBLQ,Token.PARD);
@@ -389,32 +398,47 @@ public class TraductorDR {
         AnadirHistorialRegla(param.traduccion);
         return param;
     }
+
+
     //ParametroTipo parametro
     public final ParametroTipo Tp(ParametroTipo parametro){
         ParametroTipo param = new ParametroTipo();
         if(token.tipo == Token.OPMUL){
             String opmul = token.lexema;
-            if(opmul.equals("//")){
-                opmul = "/";
-            }
+
             emparejar(Token.OPMUL);
             ParametroTipo f = F();
-            param = Tp(f);
-            if (param.tipo == REAL && parametro.tipo == REAL) {
-                param.traduccion = parametro.traduccion + opmul + "r" + param.traduccion;
-                param.tipo  = Token.REAL;
+
+            if (parametro.tipo == Token.REAL && f.tipo == Token.REAL) {
+                param.traduccion = parametro.traduccion + opmul + "r" + f.traduccion;
+                param.tipo = Token.REAL;
             }
-            else if (param.tipo == REAL && parametro.tipo == ENTERO) {
-                param.traduccion = parametro.traduccion+ opmul + "r" + "itor("+param.traduccion+")";
-                param.tipo  = Token.REAL;
+            else if (parametro.tipo == Token.REAL && f.tipo == Token.ENTERO) {
+                param.traduccion = parametro.traduccion + opmul + "r" + "itor(" + f.traduccion + ")";
+                param.tipo = Token.REAL;
             }
-            else if (param.tipo == ENTERO && parametro.tipo == REAL) {
-                param.traduccion = "itor("+parametro.traduccion+ ")" + opmul + "r" + param.traduccion;
-                param.tipo  = Token.REAL;
+            else if (parametro.tipo == Token.ENTERO && f.tipo == Token.REAL) {
+                    param.traduccion = "itor(" + parametro.traduccion + ")" + opmul + "r" + f.traduccion;
+                    param.tipo = Token.REAL;
             } else{
-                param.traduccion = parametro.traduccion + opmul + "i" + param.traduccion;
-                param.tipo = Token.ENTERO;
+                if(opmul.equals("%")){
+                    param.traduccion = parametro.traduccion+ opmul + f.traduccion;
+                    param.tipo = Token.ENTERO;
+                }else if(opmul.equals("//")){
+                    param.traduccion = parametro.traduccion + "/" + f.traduccion;
+                    param.tipo = Token.ENTERO;
+                }
+                else if(opmul.equals("/"))
+                {
+                    param.traduccion = "itor("+parametro.traduccion+")" + opmul + "r" +"itor("+ f.traduccion + ")";
+                    param.tipo = Token.REAL;
+                }
+                else{
+                    param.traduccion = parametro.traduccion + opmul + "i" + param.traduccion;
+                    param.tipo = Token.ENTERO;
+                }
             }
+            param = Tp(param);
         }else if(token.tipo == Token.OPAS || token.tipo == Token.PYC || token.tipo == Token.FBLQ || token.tipo == Token.PARD){
             param = parametro;
         }
@@ -422,6 +446,8 @@ public class TraductorDR {
         AnadirHistorialRegla(param.traduccion);
         return param;
     }
+
+
 
     public final ParametroTipo F(){
         ParametroTipo param = new ParametroTipo();
@@ -431,9 +457,9 @@ public class TraductorDR {
             param.traduccion = numentero;
             param.tipo  = Token.ENTERO;
         }else if(token.tipo == Token.NUMREAL || token.tipo == Token.FBLQ || token.tipo == Token.PARD){
-            String numentero = token.lexema;
+            String numreal = token.lexema;
             emparejar(Token.NUMREAL);
-            param.traduccion = numentero;
+            param.traduccion = numreal;
             param.tipo  = Token.REAL;
         } else if (token.tipo == Token.ID) {
             String id = token.lexema;
