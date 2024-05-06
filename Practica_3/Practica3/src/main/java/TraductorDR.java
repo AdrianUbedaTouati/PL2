@@ -300,7 +300,7 @@ public class TraductorDR {
             emparejar(Token.PYC);
             String i = I(token.lexema); //Se lo pongo para que la declaracion de I tenga sentido
             String m = M();
-            traduccion = ";"+i+m;
+            traduccion = i+m;
         }else if(token.tipo == Token.FBLQ){
 
         } else errorSintaxis(Token.PYC,Token.FBLQ);
@@ -325,9 +325,9 @@ public class TraductorDR {
                 traduccion = "\n  return " + e.traduccion+";";
             }else{
                 if(sim.tipo ==  e.tipo ) {
-                    traduccion = "\n  "+nombreCambiadoNivel + " = " + e.traduccion; // COSAS RARAS C.id ???
+                    traduccion = "\n  "+nombreCambiadoNivel + " = " + e.traduccion+";"; // COSAS RARAS C.id ???
                 }else if(sim.tipo ==  Token.REAL && e.tipo == Token.ENTERO){
-                    traduccion = "\n  "+nombreCambiadoNivel + " = " + "itor("+e.traduccion+")";
+                    traduccion = "\n  "+nombreCambiadoNivel + " = " + "itor("+e.traduccion+")"+";";
                 } else if(sim.tipo ==  Token.ENTERO && e.tipo == Token.REAL){
                     errorSintaxis();
                 }
@@ -341,9 +341,9 @@ public class TraductorDR {
             ParametroTipo e = E();
             emparejar(Token.PARD);
             if(e.tipo == Token.REAL){
-                traduccion = "\n  "+"printf("+"\"%f\","+e.traduccion+")";
+                traduccion = "\n  "+"printf("+"\"%f\","+e.traduccion+")"+";";
             }else{
-                traduccion = "\n  "+"printf("+"\"%d\","+e.traduccion+")";
+                traduccion = "\n  "+"printf("+"\"%d\","+e.traduccion+")"+";";
             }
         } else if (token.tipo == Token.BLQ) {
             String b = B(id);  //Se lo pongo para que la declaracion de I tenga sentido
@@ -370,16 +370,16 @@ public class TraductorDR {
             emparejar(Token.OPAS);
             ParametroTipo t = T();
             if(parametro.tipo == Token.REAL && t.tipo == Token.REAL){
-                param.traduccion = parametro.traduccion + opas + "r " + t.traduccion;
+                param.traduccion = parametro.traduccion +" " + opas + "r " + t.traduccion;
                 param.tipo  = Token.REAL;
             } else if (parametro.tipo == Token.REAL && t.tipo == Token.ENTERO) {
-                param.traduccion = parametro.traduccion + opas + "r " + "itor(" +t.traduccion +")";
+                param.traduccion = parametro.traduccion + " " +opas + "r " + "itor(" +t.traduccion +")";
                 param.tipo  = Token.REAL;
             } else if (parametro.tipo == Token.ENTERO && t.tipo == Token.REAL) {
-                param.traduccion = "itor(" + parametro.traduccion+ ")" + opas + "r " + t.traduccion;
+                param.traduccion = "itor(" + parametro.traduccion+ ") " + opas + "r " + t.traduccion;
                 param.tipo  = Token.REAL;
             } else{
-                param.traduccion = parametro.traduccion + opas + "i " + t.traduccion;
+                param.traduccion = parametro.traduccion +" " + opas + "i " + t.traduccion;
                 param.tipo  = Token.ENTERO;
             }
             param = Ep(param);
@@ -411,31 +411,31 @@ public class TraductorDR {
             ParametroTipo f = F();
 
             if (parametro.tipo == Token.REAL && f.tipo == Token.REAL) {
-                param.traduccion = parametro.traduccion + opmul + "r" + f.traduccion;
+                param.traduccion = parametro.traduccion +" " + opmul + "r " + f.traduccion;
                 param.tipo = Token.REAL;
             }
             else if (parametro.tipo == Token.REAL && f.tipo == Token.ENTERO) {
-                param.traduccion = parametro.traduccion + opmul + "r" + "itor(" + f.traduccion + ")";
+                param.traduccion = parametro.traduccion + " " +opmul + "r " + "itor(" + f.traduccion + ")";
                 param.tipo = Token.REAL;
             }
             else if (parametro.tipo == Token.ENTERO && f.tipo == Token.REAL) {
-                    param.traduccion = "itor(" + parametro.traduccion + ")" + opmul + "r" + f.traduccion;
+                    param.traduccion = "itor(" + parametro.traduccion + ")" +" " + opmul + "r " + f.traduccion;
                     param.tipo = Token.REAL;
             } else{
                 if(opmul.equals("%")){
-                    param.traduccion = parametro.traduccion+ opmul + f.traduccion;
+                    param.traduccion = parametro.traduccion+" " + opmul +" " + f.traduccion;
                     param.tipo = Token.ENTERO;
                 }else if(opmul.equals("//")){
-                    param.traduccion = parametro.traduccion + "/i" + f.traduccion;
+                    param.traduccion = parametro.traduccion +" " + "/i " + f.traduccion;
                     param.tipo = Token.ENTERO;
                 }
                 else if(opmul.equals("/"))
                 {
-                    param.traduccion = "itor("+parametro.traduccion+")" + opmul + "r" +"itor("+ f.traduccion + ")";
+                    param.traduccion = "itor("+parametro.traduccion+")" +" " + opmul + "r " +"itor("+ f.traduccion + ")";
                     param.tipo = Token.REAL;
                 }
                 else{
-                    param.traduccion = parametro.traduccion + opmul + "i" + param.traduccion;
+                    param.traduccion = parametro.traduccion +" " + opmul + "i " + f.traduccion;
                     param.tipo = Token.ENTERO;
                 }
             }
