@@ -21,16 +21,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fc911b4f-d0e2-41de-b203-2f216e0214d3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../Practica_3/Practica3/autocorrector-plp3.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../Practica_3/Practica3/src.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TablaSimbolo.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TablaSimbolo.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Practica_1/plp1.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/../Practica_1/plp1.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Practica_2/Practica_2_PL/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/../Practica_2/Practica_2_PL/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Practica_2/Practica_2_PL/src/AnalizadorLexico.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Practica_2/Practica_2_PL/src/AnalizadorLexico.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Practica_3/Practica3/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/../Practica_3/Practica3/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Practica_3/Practica3/src/main/java/TraductorDR.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Practica_3/Practica3/src/main/java/TraductorDR.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Practica_3/Practica3/src/main/java/plp3.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Practica_3/Practica3/src/main/java/plp3.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ejemplo.y" beforeDir="false" afterPath="$PROJECT_DIR$/src/ejemplo.y" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,7 +95,7 @@
       <updated>1714905009955</updated>
       <workItem from="1714905010989" duration="23000" />
       <workItem from="1714905044213" duration="1971000" />
-      <workItem from="1714979050850" duration="2228000" />
+      <workItem from="1714979050850" duration="3001000" />
     </task>
     <servers />
   </component>

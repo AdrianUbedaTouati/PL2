@@ -16,7 +16,7 @@
 %token opas
 %token opmul
 %token numreal
-git a
+
 %{
 
 #include <string.h>
@@ -52,19 +52,19 @@ string operador, s1, s2;  // string auxiliares
 %%
 
 
-S    : SExp pyc    { /* comprobar que después del programa no hay ningún token más */
+S    : funcion id pyc S B  { /* comprobar que después del programa no hay ningún token más */
                            int tk = yylex();
                            if (tk != 0) yyerror("");
 			 }
+     | /*epsilon*/       {}
      ;
 
 
-SExp : SExp coma Exp     { cout << $3.cod << endl; }
-     | Exp               { cout << $1.cod << endl; }
+D : var L fvar     { cout << $3.cod << endl; }
      ;
 
 
-Exp : Exp opas Factor    { if (!strcmp($2.lexema,"+"))
+L : L V  { if (!strcmp($2.lexema,"+"))
                                   operador = "sum";
                            else
                                   operador = "res";
@@ -94,19 +94,60 @@ Exp : Exp opas Factor    { if (!strcmp($2.lexema,"+"))
                                  $$.cod = operador + "(" + s1 + "," + s2 + ")";
                            }
                          }
-        | Factor         /* $$ = $1 */
+        | V         /* $$ = $1 */
         ;
 
-Factor : numentero           { $$.tipo = ENTERO;
+V : id dosp C pyc           { $$.tipo = ENTERO;
                                $$.cod = $1.lexema;
                              }
-       | pari Exp pard       { $$.tipo = $2.tipo;
-                               $$.cod = $2.cod;
-                             }
-       | id                  { $$.tipo  = ENTERO; // todas las variables son enteras
-                               $$.cod = $1.lexema;
-                             }
-       ;
+     ;
+
+C : A C      { cout << $3.cod << endl; }
+     | P               { cout << $1.cod << endl; }
+     ;
+
+A : tabla cori R cord de     { cout << $3.cod << endl; }
+     ;
+
+R : R coma G     { cout << $3.cod << endl; }
+     | G               { cout << $1.cod << endl; }
+     ;
+
+G : numentero ptopto numentero     { cout << $3.cod << endl; }
+     ;
+
+P : puntero de P     { cout << $3.cod << endl; }
+     | Tipo               { cout << $1.cod << endl; }
+     ;
+
+Tipo : entero    { cout << $3.cod << endl; }
+     | real               { cout << $1.cod << endl; }
+     ;
+
+B : blq D SI fblq     { cout << $3.cod << endl; }
+     ;
+
+SI : SI pyc I     { cout << $3.cod << endl; }
+     | I               { cout << $1.cod << endl; }
+     ;
+
+I : id asig E     { cout << $3.cod << endl; }
+     | escribe pari E pard               { cout << $1.cod << endl; }
+     | B               { cout << $1.cod << endl; }
+     ;
+
+E : E opas T     { cout << $3.cod << endl; }
+     | T               { cout << $1.cod << endl; }
+     ;
+
+T : T opmul F     { cout << $3.cod << endl; }
+     | F               { cout << $1.cod << endl; }
+     ;
+
+F : numentero    { cout << $3.cod << endl; }
+     | numreal               { cout << $1.cod << endl; }
+     | id               { cout << $1.cod << endl; }
+     ;
 
 %%
 
