@@ -318,15 +318,16 @@ public class TraductorDR {
 
             TablaSimbolos tabla = padres.pop();
             Simbolo sim = tabla.buscar(nombre);
+            String nombreCambiadoNivel = tabla.crearVariable(nombre);
             if(sim == null){
                 errorSintaxis();
             }else if (id.equals(nombre)) { // igual a I.funcion ni puta idea
                 traduccion = "return " + e.traduccion+";";
             }else{
                 if(sim.tipo ==  e.tipo ) {
-                    traduccion = token.lexema + " = " + e.traduccion; // COSAS RARAS C.id ???
+                    traduccion = nombreCambiadoNivel + " = " + e.traduccion; // COSAS RARAS C.id ???
                 }else if(sim.tipo ==  Token.REAL && e.tipo == Token.ENTERO){
-                    traduccion = token.lexema + " = " + "itor("+e.traduccion+")";
+                    traduccion = nombreCambiadoNivel + " = " + "itor("+e.traduccion+")";
                 } else if(sim.tipo ==  Token.ENTERO && e.tipo == Token.REAL){
                     errorSintaxis();
                 }
@@ -464,8 +465,9 @@ public class TraductorDR {
         } else if (token.tipo == Token.ID) {
             String id = token.lexema;
             emparejar(Token.ID);
-            param.traduccion = id;
+
             TablaSimbolos tabla = padres.pop();
+            param.traduccion =  tabla.buscar(id).nomtrad;
             param.tipo  = tabla.buscar(id).tipo;
             padres.push(tabla);
         } else errorSintaxis(Token.NUMENTERO,Token.NUMREAL,Token.FBLQ,Token.PARD,Token.ID);
