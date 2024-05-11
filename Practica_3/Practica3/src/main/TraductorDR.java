@@ -9,7 +9,6 @@ public class TraductorDR {
     private Token token;
     private AnalizadorLexico lexico;
     private Stack<TablaSimbolos> padres = new Stack();
-    private TablaSimbolos tablaSimbolos;
 
     public static final int
             NONE        = 0,
@@ -41,9 +40,6 @@ public class TraductorDR {
     public TraductorDR(AnalizadorLexico al){
         flag = true;
         lexico = al;
-        tablaSimbolos = new TablaSimbolos(null);
-        padres.push(tablaSimbolos);
-
         token = lexico.siguienteToken();
         //S();
         //comprobarFinFichero();
@@ -72,7 +68,8 @@ public class TraductorDR {
             emparejar(Token.FUNCION);
             String id = token.lexema;
 
-            TablaSimbolos tabla = padres.pop();
+            TablaSimbolos tabla = new TablaSimbolos(null);
+            tabla.nombre_funcion = id;
             String idTrad = tabla.crearVariable(id);
             Simbolo sim = new Simbolo(id,Token.REAL,idTrad);
             tabla.nuevoSimbolo(sim);
@@ -274,6 +271,7 @@ public class TraductorDR {
         if(token.tipo == Token.BLQ){
             TablaSimbolos ultimoPadre = padres.pop();
             TablaSimbolos nuevoAmbito = new TablaSimbolos(ultimoPadre);
+            nuevoAmbito.nombre_funcion = id;
             padres.push(ultimoPadre);
             padres.push(nuevoAmbito);
             emparejar(Token.BLQ);
@@ -291,19 +289,19 @@ public class TraductorDR {
         String traduccion = "";
         if(token.tipo == Token.ID || token.tipo == Token.ESCRIBE || token.tipo == Token.BLQ){
             String i = I(id);
-            String m = M(id);
+            String m = M();
             traduccion = i+m;
         } else errorSintaxis(Token.ID,Token.ESCRIBE,Token.BLQ);
         AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
-    public final String M(String id){
+    public final String M(){
         String traduccion = "";
         if(token.tipo == Token.PYC){
             emparejar(Token.PYC);
-            String i = I(id); //Se lo pongo para que la declaracion de I tenga sentido
-            String m = M(id);
+            String i = I(token.lexema); //Se lo pongo para que la declaracion de I tenga sentido
+            String m = M();
             traduccion = i+m;
         }else if(token.tipo == Token.FBLQ){
 
@@ -322,18 +320,18 @@ public class TraductorDR {
 
             TablaSimbolos tabla = padres.pop();
             Simbolo sim = tabla.buscar(nombre);
-            //String nombreCambiadoNivel = tabla.crearVariable(nombre);
+            String nombreCambiadoNivel = tabla.crearVariable(nombre);
             if(sim == null){
                 errorSintaxis();
-            }else if (id.equals(nombre)) { // igual a I.funcion ni puta idea
+            }else if (id.equals(nombre) && tabla.nombre_funcion.equals(id)) { // igual a I.funcion ni puta idea
                 if(sim.tipo ==  e.tipo ) {
                     traduccion = "\n  return " + e.traduccion + ";";
                 }else traduccion = "\n  return itor(" + e.traduccion + ");";
             }else{
                 if(sim.tipo ==  e.tipo ) {
-                    traduccion = "\n  "+sim.nomtrad + " = " + e.traduccion+";"; // COSAS RARAS C.id ???
+                    traduccion = "\n  "+nombreCambiadoNivel + " = " + e.traduccion+";"; // COSAS RARAS C.id ???
                 }else if(sim.tipo ==  Token.REAL && e.tipo == Token.ENTERO){
-                    traduccion = "\n  "+sim.nomtrad + " = " + "itor("+e.traduccion+")"+";";
+                    traduccion = "\n  "+nombreCambiadoNivel + " = " + "itor("+e.traduccion+")"+";";
                 } else if(sim.tipo ==  Token.ENTERO && e.tipo == Token.REAL){
                     errorSintaxis();
                 }

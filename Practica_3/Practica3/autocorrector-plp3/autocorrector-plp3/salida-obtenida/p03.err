@@ -1,13 +1,3 @@
-Exception in thread "main" java.lang.NullPointerException: Cannot read field "nomtrad" because the return value of "TablaSimbolos.buscar(String)" is null
-	at TraductorDR.F(TraductorDR.java:468)
-	at TraductorDR.T(TraductorDR.java:396)
-	at TraductorDR.E(TraductorDR.java:359)
-	at TraductorDR.I(TraductorDR.java:317)
-	at TraductorDR.M(TraductorDR.java:301)
-	at TraductorDR.SI(TraductorDR.java:290)
-	at TraductorDR.B(TraductorDR.java:277)
-	at TraductorDR.I(TraductorDR.java:349)
-	at TraductorDR.SI(TraductorDR.java:289)
-	at TraductorDR.B(TraductorDR.java:277)
-	at TraductorDR.S(TraductorDR.java:90)
-	at plp3.main(plp3.java:12)
+Error semantico (12,25): en '+', no ha sido declarado
+
+

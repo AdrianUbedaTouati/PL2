@@ -1,1 +1,3 @@
-Error sintactico (11,1): encontrado 'fblq', esperaba 'blq' 'escribe' identificador
+Error semantico (26,6): en ']',  rango incorrecto
+
+
