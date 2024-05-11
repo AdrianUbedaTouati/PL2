@@ -1,1 +1,1 @@
-Error sintactico (14,1): encontrado 'fblq', esperaba 'blq' 'escribe' identificador
+Error semantico (13,14): en 'c',  debe ser de tipo entero o real

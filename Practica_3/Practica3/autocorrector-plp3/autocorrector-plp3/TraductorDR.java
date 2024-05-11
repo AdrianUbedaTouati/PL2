@@ -145,23 +145,15 @@ public class TraductorDR {
             }
             String idTrad = tabla.crearVariable(id);
 
-            String c = C(idTrad).traduccion;
+            ParametroTipo c = C(idTrad);
 
-            String tipoDato = c.split(" ")[0].replace("*", "");
-            int tipo = 0;
-            if(tipoDato.equals("int")){
-                tipo = Token.ENTERO;
-            }else if(tipoDato.equals("float")){
-                tipo = Token.REAL;
-            }
-
-            Simbolo sim = new Simbolo(id,tipo,idTrad);
+            Simbolo sim = new Simbolo(id,c.tipo,idTrad);
             tabla.nuevoSimbolo(sim);
 
             padres.push(tabla);
 
             emparejar(Token.PYC);
-            traduccion = c + ";"+"\n";
+            traduccion = c.traduccion + ";"+"\n";
         }else errorSintaxis(Token.ID);
         AnadirHistorialRegla(traduccion);
         return traduccion;
@@ -175,7 +167,7 @@ public class TraductorDR {
             param.tipo = Token.TABLA;
             param.traduccion = c.traduccion;
         }else if(token.tipo == Token.PUNTERO || token.tipo == Token.ENTERO || token.tipo == Token.REAL){
-            String p = P();
+
             if(token.tipo == Token.PUNTERO){
                 param.tipo = Token.PUNTERO;
             } else if(token.tipo == Token.ENTERO){
@@ -183,6 +175,7 @@ public class TraductorDR {
             } else if (token.tipo == Token.REAL) {
                 param.tipo = Token.REAL;
             }
+            String p = P();
             param.traduccion = p + " " + name;
         }
         else errorSintaxis(Token.TABLA,Token.PUNTERO,Token.ENTERO,Token.REAL);
@@ -433,12 +426,16 @@ public class TraductorDR {
             Token toke_posible_error = token;
             emparejar(Token.OPMUL);
 
-            ParametroTipo f = F();
-
             if (opmul.equals("//") || opmul.equals("%")){
                 if (parametro.tipo == Token.REAL){
                     errores_lexico(toke_posible_error,Error_num_no_entero_division_izquierda,null);
-                } else if (f.tipo == Token.REAL){
+                }
+            }
+
+            ParametroTipo f = F();
+
+            if (opmul.equals("//") || opmul.equals("%")){
+                if (f.tipo == Token.REAL){
                     errores_lexico(toke_posible_error,Error_num_no_entero_division_derecha,null);
                 }
             }
@@ -538,9 +535,9 @@ public class TraductorDR {
             FraseError.append(" ").append(nombreToken.toString());
         }
 
-        System.err.println(FraseError);
+        System.err.print(FraseError);
 
-        System.exit(1);
+        System.exit(-1);
     }
 
     private void errores_lexico(Token token, int err,TablaSimbolos tabla){
