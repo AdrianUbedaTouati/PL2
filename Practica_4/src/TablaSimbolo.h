@@ -23,7 +23,7 @@ struct Simbolo {
 class TablaSimbolos {
 
 public:
-
+    int nivel;
     TablaSimbolos *padre;
     vector<Simbolo> simbolos;
 
@@ -33,6 +33,7 @@ public:
     Simbolo *buscarAmbito(string nombre); // ver si está en el ámbito actual
     bool nuevoSimbolo(Simbolo s);
     Simbolo* buscar(string nombre);
+    string crearVariable(string id);
 };
 
 

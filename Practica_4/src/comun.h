@@ -17,14 +17,14 @@ typedef struct {
 #define ERREOF          3
 #define ERRLEXEOF       4
 
-#define ERRYADECL       1
-#define ERRNOMFUNC      2
-#define ERRNOSIMPLE     3
-#define ERRNODECL       4
-#define ERRTIPOS        5
-#define ERRNOENTEROIZQ  6
-#define ERRNOENTERODER  7
-#define ERRRANGO        8
+#define ERRYADECL       5
+#define ERRNOMFUNC      6
+#define ERRNOSIMPLE     7
+#define ERRNODECL       8
+#define ERRTIPOS        9
+#define ERRNOENTEROIZQ  10
+#define ERRNOENTERODER  11
+#define ERRRANGO        12
 
 void msgError(int nerror,int nlin,int ncol,const char *s);
 

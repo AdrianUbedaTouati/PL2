@@ -1,5 +1,5 @@
 #!/bin/bash
 
-flex ejemplo.l
-bison -d ejemplo.y
-g++ -o ejemplo ejemplo.tab.c lex.yy.c
+flex plp4.l
+bison -d plp4.y
+g++ -o plp4 plp4.tab.c lex.yy.c

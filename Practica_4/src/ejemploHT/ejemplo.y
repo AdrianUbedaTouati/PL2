@@ -1,21 +1,8 @@
-/*------------------------------ ejemplo.y -------------------------------*/
-// Tokens
-//==========================================================
-%token funcion id pyc
-%token var fvar
-%token dosp
-%token tabla cori cord de
-%token coma
-%token numentero ptopto
-%token puntero
-%token entero
-%token real
-%token blq fblq
-%token asig
-%token escribe pari pard
-%token opas
-%token opmul
-%token numreal
+/*------------------------------ plp4.y -------------------------------*/
+%token print id 
+%token opas opmd
+%token numentero numreal pari pard
+%token pyc coma
 
 %{
 
@@ -52,19 +39,19 @@ string operador, s1, s2;  // string auxiliares
 %%
 
 
-S    : funcion id pyc S B  { /* comprobar que después del programa no hay ningún token más */
+S    : print SExp pyc    { /* comprobar que después del programa no hay ningún token más */
                            int tk = yylex();
                            if (tk != 0) yyerror("");
 			 }
-     | /*epsilon*/       {}
      ;
 
 
-D : var L fvar     { cout << $3.cod << endl; }
+SExp : SExp coma Exp     { cout << $3.cod << endl; }
+     | Exp               { cout << $1.cod << endl; }
      ;
 
 
-L : L V  { if (!strcmp($2.lexema,"+"))
+Exp : Exp opas Factor    { if (!strcmp($2.lexema,"+"))
                                   operador = "sum";
                            else
                                   operador = "res";
@@ -94,60 +81,22 @@ L : L V  { if (!strcmp($2.lexema,"+"))
                                  $$.cod = operador + "(" + s1 + "," + s2 + ")";
                            }
                          }
-        | V         /* $$ = $1 */
+        | Factor         /* $$ = $1 */
         ;
 
-V : id dosp C pyc           { $$.tipo = ENTERO;
+Factor : numentero           { $$.tipo = ENTERO;
                                $$.cod = $1.lexema;
                              }
-     ;
-
-C : A C      { cout << $3.cod << endl; }
-     | P               { cout << $1.cod << endl; }
-     ;
-
-A : tabla cori R cord de     { cout << $3.cod << endl; }
-     ;
-
-R : R coma G     { cout << $3.cod << endl; }
-     | G               { cout << $1.cod << endl; }
-     ;
-
-G : numentero ptopto numentero     { cout << $3.cod << endl; }
-     ;
-
-P : puntero de P     { cout << $3.cod << endl; }
-     | Tipo               { cout << $1.cod << endl; }
-     ;
-
-Tipo : entero    { cout << $3.cod << endl; }
-     | real               { cout << $1.cod << endl; }
-     ;
-
-B : blq D SI fblq     { cout << $3.cod << endl; }
-     ;
-
-SI : SI pyc I     { cout << $3.cod << endl; }
-     | I               { cout << $1.cod << endl; }
-     ;
-
-I : id asig E     { cout << $3.cod << endl; }
-     | escribe pari E pard               { cout << $1.cod << endl; }
-     | B               { cout << $1.cod << endl; }
-     ;
-
-E : E opas T     { cout << $3.cod << endl; }
-     | T               { cout << $1.cod << endl; }
-     ;
-
-T : T opmul F     { cout << $3.cod << endl; }
-     | F               { cout << $1.cod << endl; }
-     ;
-
-F : numentero    { cout << $3.cod << endl; }
-     | numreal               { cout << $1.cod << endl; }
-     | id               { cout << $1.cod << endl; }
-     ;
+       | numreal             { $$.tipo = REAL;
+                               $$.cod = $1.lexema;
+                             }
+       | pari Exp pard       { $$.tipo = $2.tipo;
+                               $$.cod = $2.cod;
+                             }
+       | id                  { $$.tipo  = ENTERO; // todas las variables son enteras
+                               $$.cod = $1.lexema;
+                             }
+       ;
 
 %%
 
@@ -166,31 +115,6 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
         
      exit(1);
 }
-
-void errorSemantico(int nerror,char *lexema,int fila,int columna)
-{
-    fprintf(stderr,"Error semantico (%d,%d): en '%s', ",fila,columna,lexema);
-    switch (nerror) {
-      case ERRYADECL: fprintf(stderr,"ya existe en este ambito\n");
-         break;
-      case ERRNOMFUNC: fprintf(stderr,"no puede llamarse igual que la funcion");
-         break;
-      case ERRNOSIMPLE: fprintf(stderr,"debe ser de tipo entero o real\n");
-         break;
-      case ERRNODECL: fprintf(stderr,"no ha sido declarado\n");
-         break;
-      case ERRTIPOS: fprintf(stderr,"tipos incompatibles entero/real\n");
-         break;
-      case ERRNOENTEROIZQ: fprintf(stderr,"el operando izquierdo debe ser entero\n");
-         break;
-      case ERRNOENTERODER: fprintf(stderr,"el operando derecho debe ser entero\n");
-         break;
-      case ERRRANGO: fprintf(stderr,"rango incorrecto\n");
-         break;
-    }
-    exit(-1);
-}
-
 
 
 int yyerror(char *s)

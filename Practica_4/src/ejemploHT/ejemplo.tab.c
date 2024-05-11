@@ -67,7 +67,7 @@
 
 
 /* First part of user prologue.  */
-#line 20 "ejemplo.y"
+#line 7 "plp4.y"
 
 
 #include <string.h>
@@ -130,36 +130,21 @@ enum yysymbol_kind_t
   YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
   YYSYMBOL_YYerror = 1,                    /* error  */
   YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
-  YYSYMBOL_funcion = 3,                    /* funcion  */
+  YYSYMBOL_print = 3,                      /* print  */
   YYSYMBOL_id = 4,                         /* id  */
-  YYSYMBOL_pyc = 5,                        /* pyc  */
-  YYSYMBOL_var = 6,                        /* var  */
-  YYSYMBOL_fvar = 7,                       /* fvar  */
-  YYSYMBOL_dosp = 8,                       /* dosp  */
-  YYSYMBOL_tabla = 9,                      /* tabla  */
-  YYSYMBOL_cori = 10,                      /* cori  */
-  YYSYMBOL_cord = 11,                      /* cord  */
-  YYSYMBOL_de = 12,                        /* de  */
-  YYSYMBOL_coma = 13,                      /* coma  */
-  YYSYMBOL_numentero = 14,                 /* numentero  */
-  YYSYMBOL_ptopto = 15,                    /* ptopto  */
-  YYSYMBOL_puntero = 16,                   /* puntero  */
-  YYSYMBOL_entero = 17,                    /* entero  */
-  YYSYMBOL_real = 18,                      /* real  */
-  YYSYMBOL_blq = 19,                       /* blq  */
-  YYSYMBOL_fblq = 20,                      /* fblq  */
-  YYSYMBOL_asig = 21,                      /* asig  */
-  YYSYMBOL_escribe = 22,                   /* escribe  */
-  YYSYMBOL_pari = 23,                      /* pari  */
-  YYSYMBOL_pard = 24,                      /* pard  */
-  YYSYMBOL_opas = 25,                      /* opas  */
-  YYSYMBOL_opmul = 26,                     /* opmul  */
-  YYSYMBOL_numreal = 27,                   /* numreal  */
-  YYSYMBOL_YYACCEPT = 28,                  /* $accept  */
-  YYSYMBOL_S = 29,                         /* S  */
-  YYSYMBOL_SExp = 30,                      /* SExp  */
-  YYSYMBOL_Exp = 31,                       /* Exp  */
-  YYSYMBOL_Factor = 32                     /* Factor  */
+  YYSYMBOL_opas = 5,                       /* opas  */
+  YYSYMBOL_opmd = 6,                       /* opmd  */
+  YYSYMBOL_numentero = 7,                  /* numentero  */
+  YYSYMBOL_numreal = 8,                    /* numreal  */
+  YYSYMBOL_pari = 9,                       /* pari  */
+  YYSYMBOL_pard = 10,                      /* pard  */
+  YYSYMBOL_pyc = 11,                       /* pyc  */
+  YYSYMBOL_coma = 12,                      /* coma  */
+  YYSYMBOL_YYACCEPT = 13,                  /* $accept  */
+  YYSYMBOL_S = 14,                         /* S  */
+  YYSYMBOL_SExp = 15,                      /* SExp  */
+  YYSYMBOL_Exp = 16,                       /* Exp  */
+  YYSYMBOL_Factor = 17                     /* Factor  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -485,21 +470,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  9
+#define YYFINAL  10
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   19
+#define YYLAST   14
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  28
+#define YYNTOKENS  13
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  9
+#define YYNRULES  10
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  16
+#define YYNSTATES  18
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   282
+#define YYMAXUTOK   267
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -539,16 +524,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27
+       5,     6,     7,     8,     9,    10,    11,    12
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    55,    55,    62,    63,    67,    97,   100,   103,   106
+       0,    42,    42,    49,    50,    54,    84,    87,    90,    93,
+      96
 };
 #endif
 
@@ -564,10 +548,8 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end of file\"", "error", "\"invalid token\"", "funcion", "id", "pyc",
-  "var", "fvar", "dosp", "tabla", "cori", "cord", "de", "coma",
-  "numentero", "ptopto", "puntero", "entero", "real", "blq", "fblq",
-  "asig", "escribe", "pari", "pard", "opas", "opmul", "numreal", "$accept",
+  "\"end of file\"", "error", "\"invalid token\"", "print", "id", "opas",
+  "opmd", "numentero", "numreal", "pari", "pard", "pyc", "coma", "$accept",
   "S", "SExp", "Exp", "Factor", YY_NULLPTR
 };
 
@@ -578,7 +560,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-24)
+#define YYPACT_NINF (-7)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -592,8 +574,8 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -4,   -24,   -24,    -4,     5,    -2,   -19,   -24,   -23,   -24,
-     -24,    -4,    -4,   -24,   -19,   -24
+       6,    -3,     2,    -7,    -7,    -7,    -3,    -1,     7,    -7,
+      -7,    -2,    -7,    -3,    -3,    -7,     7,    -7
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -601,20 +583,20 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     9,     7,     0,     0,     0,     4,     6,     0,     1,
-       2,     0,     0,     8,     3,     5
+       0,     0,     0,    10,     7,     8,     0,     0,     4,     6,
+       1,     0,     2,     0,     0,     9,     3,     5
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -24,   -24,   -24,     1,    -5
+      -7,    -7,    -7,    -6,     0
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     4,     5,     6,     7
+       0,     2,     7,     8,     9
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -622,34 +604,36 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       1,    13,    12,    10,     8,     9,    12,    15,     0,     0,
-       2,    11,    14,     0,     0,     0,     0,     0,     0,     3
+      11,     3,    10,    14,     4,     5,     6,    16,    15,     1,
+      12,    13,    14,     0,    17
 };
 
 static const yytype_int8 yycheck[] =
 {
-       4,    24,    25,     5,     3,     0,    25,    12,    -1,    -1,
-      14,    13,    11,    -1,    -1,    -1,    -1,    -1,    -1,    23
+       6,     4,     0,     5,     7,     8,     9,    13,    10,     3,
+      11,    12,     5,    -1,    14
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     4,    14,    23,    29,    30,    31,    32,    31,     0,
-       5,    13,    25,    24,    31,    32
+       0,     3,    14,     4,     7,     8,     9,    15,    16,    17,
+       0,    16,    11,    12,     5,    10,    16,    17
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    28,    29,    30,    30,    31,    31,    32,    32,    32
+       0,    13,    14,    15,    15,    16,    16,    17,    17,    17,
+      17
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     2,     3,     1,     3,     1,     1,     3,     1
+       0,     2,     3,     3,     1,     3,     1,     1,     1,     3,
+       1
 };
 
 
@@ -1112,29 +1096,29 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 2: /* S: SExp pyc  */
-#line 55 "ejemplo.y"
-                   { /* comprobar que después del programa no hay ningún token más */
+  case 2: /* S: print SExp pyc  */
+#line 42 "plp4.y"
+                         { /* comprobar que después del programa no hay ningún token más */
                            int tk = yylex();
                            if (tk != 0) yyerror("");
 			 }
-#line 1122 "ejemplo.tab.c"
+#line 1106 "ejemplo.tab.c"
     break;
 
   case 3: /* SExp: SExp coma Exp  */
-#line 62 "ejemplo.y"
+#line 49 "plp4.y"
                          { cout << yyvsp[0].cod << endl; }
-#line 1128 "ejemplo.tab.c"
+#line 1112 "ejemplo.tab.c"
     break;
 
   case 4: /* SExp: Exp  */
-#line 63 "ejemplo.y"
+#line 50 "plp4.y"
                          { cout << yyvsp[0].cod << endl; }
-#line 1134 "ejemplo.tab.c"
+#line 1118 "ejemplo.tab.c"
     break;
 
   case 5: /* Exp: Exp opas Factor  */
-#line 67 "ejemplo.y"
+#line 54 "plp4.y"
                          { if (!strcmp(yyvsp[-1].lexema,"+"))
                                   operador = "sum";
                            else
@@ -1165,35 +1149,43 @@ yyreduce:
                                  yyval.cod = operador + "(" + s1 + "," + s2 + ")";
                            }
                          }
-#line 1169 "ejemplo.tab.c"
+#line 1153 "ejemplo.tab.c"
     break;
 
   case 7: /* Factor: numentero  */
-#line 100 "ejemplo.y"
+#line 87 "plp4.y"
                              { yyval.tipo = ENTERO;
                                yyval.cod = yyvsp[0].lexema;
+                             }
+#line 1161 "ejemplo.tab.c"
+    break;
+
+  case 8: /* Factor: numreal  */
+#line 90 "plp4.y"
+                             { yyval.tipo = REAL;
+                               yyval.cod = yyvsp[0].lexema;
+                             }
+#line 1169 "ejemplo.tab.c"
+    break;
+
+  case 9: /* Factor: pari Exp pard  */
+#line 93 "plp4.y"
+                             { yyval.tipo = yyvsp[-1].tipo;
+                               yyval.cod = yyvsp[-1].cod;
                              }
 #line 1177 "ejemplo.tab.c"
     break;
 
-  case 8: /* Factor: pari Exp pard  */
-#line 103 "ejemplo.y"
-                             { yyval.tipo = yyvsp[-1].tipo;
-                               yyval.cod = yyvsp[-1].cod;
+  case 10: /* Factor: id  */
+#line 96 "plp4.y"
+                             { yyval.tipo  = ENTERO; // todas las variables son enteras
+                               yyval.cod = yyvsp[0].lexema;
                              }
 #line 1185 "ejemplo.tab.c"
     break;
 
-  case 9: /* Factor: id  */
-#line 106 "ejemplo.y"
-                             { yyval.tipo  = ENTERO; // todas las variables son enteras
-                               yyval.cod = yyvsp[0].lexema;
-                             }
-#line 1193 "ejemplo.tab.c"
-    break;
 
-
-#line 1197 "ejemplo.tab.c"
+#line 1189 "ejemplo.tab.c"
 
       default: break;
     }
@@ -1386,7 +1378,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 111 "ejemplo.y"
+#line 101 "plp4.y"
 
 
 void msgError(int nerror,int nlin,int ncol,const char *s)
@@ -1404,31 +1396,6 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
         
      exit(1);
 }
-
-void errorSemantico(int nerror,char *lexema,int fila,int columna)
-{
-    fprintf(stderr,"Error semantico (%d,%d): en '%s', ",fila,columna,lexema);
-    switch (nerror) {
-      case ERRYADECL: fprintf(stderr,"ya existe en este ambito\n");
-         break;
-      case ERRNOMFUNC: fprintf(stderr,"no puede llamarse igual que la funcion");
-         break;
-      case ERRNOSIMPLE: fprintf(stderr,"debe ser de tipo entero o real\n");
-         break;
-      case ERRNODECL: fprintf(stderr,"no ha sido declarado\n");
-         break;
-      case ERRTIPOS: fprintf(stderr,"tipos incompatibles entero/real\n");
-         break;
-      case ERRNOENTEROIZQ: fprintf(stderr,"el operando izquierdo debe ser entero\n");
-         break;
-      case ERRNOENTERODER: fprintf(stderr,"el operando derecho debe ser entero\n");
-         break;
-      case ERRRANGO: fprintf(stderr,"rango incorrecto\n");
-         break;
-    }
-    exit(-1);
-}
-
 
 
 int yyerror(char *s)

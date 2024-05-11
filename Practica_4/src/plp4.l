@@ -16,7 +16,7 @@ OPMUL   "*"|"/"|"//"|"%"
 using namespace std;
 
 #include "comun.h"
-#include "ejemplo.tab.h"
+#include "plp4.tab.h"
 
 int ncol = 1,
     nlin = 1;
@@ -44,7 +44,6 @@ void errorSemantico(int nerror,char *lexema,int fila,int columna);
 " "                {ncol++;}
 [\t]               {ncol++;}
 [\n]               {nlin++;ncol=1;}
-"//"(.)*           {; /* comentarios de una linea, no hacer nada */} 
 "/*"                    {ncol += strlen(yytext);BEGIN(COMENTARIO);}
 <COMENTARIO>[^/*\n]+    {ncol += strlen(yytext);}
 <COMENTARIO>\n          {nlin++;ncol=1;}

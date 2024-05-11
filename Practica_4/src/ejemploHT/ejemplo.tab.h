@@ -54,31 +54,16 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    funcion = 258,                 /* funcion  */
+    print = 258,                   /* print  */
     id = 259,                      /* id  */
-    pyc = 260,                     /* pyc  */
-    var = 261,                     /* var  */
-    fvar = 262,                    /* fvar  */
-    dosp = 263,                    /* dosp  */
-    tabla = 264,                   /* tabla  */
-    cori = 265,                    /* cori  */
-    cord = 266,                    /* cord  */
-    de = 267,                      /* de  */
-    coma = 268,                    /* coma  */
-    numentero = 269,               /* numentero  */
-    ptopto = 270,                  /* ptopto  */
-    puntero = 271,                 /* puntero  */
-    entero = 272,                  /* entero  */
-    real = 273,                    /* real  */
-    blq = 274,                     /* blq  */
-    fblq = 275,                    /* fblq  */
-    asig = 276,                    /* asig  */
-    escribe = 277,                 /* escribe  */
-    pari = 278,                    /* pari  */
-    pard = 279,                    /* pard  */
-    opas = 280,                    /* opas  */
-    opmul = 281,                   /* opmul  */
-    numreal = 282                  /* numreal  */
+    opas = 260,                    /* opas  */
+    opmd = 261,                    /* opmd  */
+    numentero = 262,               /* numentero  */
+    numreal = 263,                 /* numreal  */
+    pari = 264,                    /* pari  */
+    pard = 265,                    /* pard  */
+    pyc = 266,                     /* pyc  */
+    coma = 267                     /* coma  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
