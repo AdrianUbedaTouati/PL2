@@ -12,17 +12,19 @@ public class TraductorDR {
     private TablaSimbolos tablaSimbolos;
 
     public static final int
-            NONE        = 0,
-            ENTERO      = 1,
-            REAL        = 2,
-            FUNCION     = 3,
-            BOOLEANO    = 4;
+            Error_nombre_igual_funcion = 1,
+            Error_sim_ya_existe = 2,
+            Error_sim_no_declarado = 3,
+            Error_num_entero = 4,
+            Error_num_entero_o_real = 5,
+            Error_num_no_entero_division = 6,
+            Error_tabla_rango = 7;
 
     private class ParametroTipo {
 
         private ParametroTipo() {
             traduccion = "";
-            tipo = NONE;
+            tipo = 0;
         }
         private int tipo;
 
@@ -91,12 +93,12 @@ public class TraductorDR {
         return traduccion;
     }
 
-    public final String D(){
+    public final String D(String id){
         String traduccion = "";
         if(token.tipo == Token.VAR){
 
             emparejar(Token.VAR);
-            String l = L();
+            String l = L(id);
             emparejar(Token.FVAR);
             traduccion = l;
         }else errorSintaxis(Token.VAR);
@@ -104,22 +106,22 @@ public class TraductorDR {
         return traduccion;
     }
 
-    public final String L(){
+    public final String L(String id){
         String traduccion = "";
         if(token.tipo == Token.ID){
-            String v = V();
-            String lp = Lp();
+            String v = V(id);
+            String lp = Lp(id);
             traduccion = v + lp;
         } else errorSintaxis(Token.ID);
         AnadirHistorialRegla(traduccion);
         return traduccion;
     }
 
-    public final String Lp(){
+    public final String Lp(String id){
         String traduccion = "";
         if(token.tipo == Token.ID){
-            String v = V();
-            String lp = Lp();
+            String v = V(id);
+            String lp = Lp(id);
             traduccion = v + lp;
         }else if(token.tipo == Token.FVAR){
 
@@ -128,15 +130,24 @@ public class TraductorDR {
         return traduccion;
     }
 
-    public final String V(){
+
+
+    public final String V(String nameFuncion){
         String traduccion = "";
         if(token.tipo == Token.ID){
+            Token token_posible_error = token;
             String id = token.lexema;
 
             emparejar(Token.ID);
             emparejar(Token.DOSP);
 
             TablaSimbolos tabla = padres.pop();
+            if (id.equals(nameFuncion)){
+                errores_lexico(token_posible_error,Error_nombre_igual_funcion,null);
+            }
+            if (tabla.buscarAmbito(id) != null){
+                errores_lexico(token_posible_error,Error_sim_ya_existe,null);
+            }
             String idTrad = tabla.crearVariable(id);
 
             String c = C(idTrad).traduccion;
@@ -233,6 +244,9 @@ public class TraductorDR {
             if(token.tipo == Token.NUMENTERO) {
                 num2 = Integer.parseInt(token.lexema);
             }else num2 = 0; //Va a dar error en el emparejar
+            if(num2 < num1){
+                errores_lexico(token,Error_tabla_rango,null);
+            }
             emparejar(Token.NUMENTERO);
             traduccion = "["+(num2-num1+1)+"]";
         } else errorSintaxis(Token.NUMENTERO);
@@ -277,7 +291,7 @@ public class TraductorDR {
             padres.push(ultimoPadre);
             padres.push(nuevoAmbito);
             emparejar(Token.BLQ);
-            String d = D();
+            String d = D(id);
             String si = SI(id);
             emparejar(Token.FBLQ);
             padres.pop();
@@ -315,6 +329,7 @@ public class TraductorDR {
     public final String I(String id){
         String traduccion = "";
         if(token.tipo == Token.ID){
+            Token pasarFuncionError = token;
             String nombre = token.lexema;
             emparejar(Token.ID);
             emparejar(Token.ASIG);
@@ -322,9 +337,8 @@ public class TraductorDR {
 
             TablaSimbolos tabla = padres.pop();
             Simbolo sim = tabla.buscar(nombre);
-            //String nombreCambiadoNivel = tabla.crearVariable(nombre);
             if(sim == null){
-                errorSintaxis();
+                errores_lexico(pasarFuncionError,Error_sim_no_declarado,null);
             }else if (id.equals(nombre)) { // igual a I.funcion ni puta idea
                 if(sim.tipo ==  e.tipo ) {
                     traduccion = "\n  return " + e.traduccion + ";";
@@ -468,9 +482,13 @@ public class TraductorDR {
             param.tipo  = Token.REAL;
         } else if (token.tipo == Token.ID) {
             String id = token.lexema;
+            TablaSimbolos tabla = padres.pop();
+            if (tabla.buscar(id) == null){
+                errores_lexico(token,Error_sim_no_declarado,null);
+            }
+
             emparejar(Token.ID);
 
-            TablaSimbolos tabla = padres.pop();
             param.traduccion =  tabla.buscar(id).nomtrad;
             param.tipo  = tabla.buscar(id).tipo;
             padres.push(tabla);
@@ -506,6 +524,32 @@ public class TraductorDR {
         System.err.println(FraseError);
 
         System.exit(1);
+    }
+
+    private void errores_lexico(Token token, int err,TablaSimbolos tabla){
+
+        if(err==Error_nombre_igual_funcion){
+            System.err.println("Error semantico (" + token.columna +","+ token.fila +"): en '"+ token.lexema + "', no puede llmarse igual que la funcion");
+        }
+        else if(err==Error_sim_ya_existe){
+            System.err.println("Error semantico (" + token.columna +","+ token.fila +"): en '"+ token.lexema + "', ya existe en este ambito");
+        }
+        else if(err==Error_sim_no_declarado){
+            System.err.println("Error semantico (" + token.columna +","+ token.fila +"): en '"+ token.lexema + "', no ha sido declarado" );
+        }
+        else if(err==Error_num_entero){
+            System.err.println("Error semantico (" + token.columna +","+ token.fila +"): en '"+ token.lexema + "', tipos incompatibles entero/real" );
+        }
+        else if(err==Error_num_entero_o_real){
+            System.err.println("Error semantico (" + token.columna +","+ token.fila +"): en '"+ token.lexema + "',  debe ser de tipo entero o real"+ tabla.buscar(token.lexema).tipo);
+        }
+        else if(err==Error_num_no_entero_division){
+            System.err.println("Error semantico (" + token.columna +","+ token.fila +"): en '"+ token.lexema + "', el operando izquierdo debe ser entero");
+        }
+        else if(err==Error_tabla_rango){
+            System.err.println("Error semantico (" + token.columna +","+ token.fila +"): en '"+ token.lexema + "',  rango incorrecto");
+        }
+        System.exit(-1);
     }
 }
 
