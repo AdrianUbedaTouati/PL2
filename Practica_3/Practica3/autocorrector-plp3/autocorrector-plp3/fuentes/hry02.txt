@@ -1,0 +1,9 @@
+funcion prueba;
+blq
+var 
+   c : real; 
+   b : tabla [ 1..7, 0..2 ] de real;
+fvar
+c := 256.2 // 2
+prueba := 7.555
+fblq

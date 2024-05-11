@@ -1,0 +1,9 @@
+
+
+float hija()
+{
+float b[7][3];
+
+  b = 2.5;
+  return 7.555;
+}

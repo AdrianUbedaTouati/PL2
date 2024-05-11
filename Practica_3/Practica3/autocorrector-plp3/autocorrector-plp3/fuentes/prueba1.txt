@@ -1,0 +1,5 @@
+funcion hija;
+   blq
+       var c : real; fvar
+       hija := 7.555
+   fblq

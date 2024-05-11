@@ -1,0 +1,10 @@
+funcion prueba;
+blq
+var 
+   c : real; 
+   b : tabla [ 1..7, 0..2 ] de tomate;
+fvar
+c := b // 2
+prueba := 7.555
+fblq
+

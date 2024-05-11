@@ -1,0 +1,12 @@
+funcion prueba;
+
+blq
+ var a : entero;
+     c : puntero de real;
+     d : tabla [ 3..5 ] de entero;
+     f : tabla [ 3..4, 3..4 ] de real;
+ fvar
+
+    escribe(d)
+
+fblq

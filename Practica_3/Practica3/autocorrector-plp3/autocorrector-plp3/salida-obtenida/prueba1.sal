@@ -1,0 +1,8 @@
+
+
+float hija()
+{
+float c;
+
+  return 7.555;
+}

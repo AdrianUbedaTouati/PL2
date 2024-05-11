@@ -1,1 +1,1 @@
-Error sintactico (19,3): encontrado 'fblq', esperaba
+Error semantico (18,9): en ':=', tipos incompatibles entero/real

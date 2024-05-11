@@ -1,0 +1,8 @@
+funcion prueba;
+
+blq
+ var a : real;
+ fvar
+
+    a := 3.5 // 4;
+fblq

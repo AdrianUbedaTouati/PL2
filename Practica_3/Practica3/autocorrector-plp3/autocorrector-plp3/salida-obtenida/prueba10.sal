@@ -1,0 +1,11 @@
+
+
+float prueba()
+{
+int a;
+float* c;
+int d[3];
+float f[2][2];
+
+  printf("%d",d);
+}

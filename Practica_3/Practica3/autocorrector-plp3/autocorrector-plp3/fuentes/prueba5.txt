@@ -1,0 +1,14 @@
+funcion prueba;
+
+blq
+ var a : entero;
+     b : real;
+     c : puntero de real;
+     d : tabla [ 3..5 ] de entero;
+     f : tabla [ 3..4, 3..4 ] de real;
+ fvar
+
+    a := 3 + 1 + 4 + 2.5;
+    b := 7 // 3;
+    d := 2 * c;
+fblq

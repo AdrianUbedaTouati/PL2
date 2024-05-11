@@ -1,0 +1,6 @@
+funcion hija;
+   blq
+       var b : tabla [ 1..7, 0..2 ] de real; fvar
+       b := 2.5;
+       hija := 7.555
+   fblq
