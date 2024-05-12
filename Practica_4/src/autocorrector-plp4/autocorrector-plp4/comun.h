@@ -28,4 +28,4 @@ typedef struct {
 
 void msgError(int nerror,int nlin,int ncol,const char *s);
 
-void errorSemantico(int nerror,int fila,int columna, char *lexema);
+void errorSemantico(int nerror,char *lexema,int fila,int columna);

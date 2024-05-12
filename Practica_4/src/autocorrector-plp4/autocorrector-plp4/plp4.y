@@ -43,6 +43,7 @@ int yyerror(char *s);
 //varibles
 TablaSimbolos *tablaSimbolos = new TablaSimbolos(nullptr);
 
+
 //funciones
 unsigned int nuevaVar(char *lexema, int nlin, int ncol);
 
@@ -56,12 +57,12 @@ X    : S  {/* comprobar que después del programa no hay ningún token más */
                 int tk = yylex();
                 if (tk != 0) yyerror("");
                 else{
-                    cout << $1.cod ;
+                    cout << $1.cod.c_str() ;
                 }
           }
 
 S    : funcion id pyc S {$$.cod = $2.lexema;} B  {
-                                                    $$.cod = $4.cod + "float " + $2.lexema + "()" + $6.cod;
+                                                    $$.cod = $4.cod + "\n\nfloat " + $2.lexema + "()" + $6.cod;
                                                 }
      | /*epsilon*/       {$$.cod = "";}
      ;
@@ -76,17 +77,18 @@ L       : L { $$.cod = $0.cod;} V     { $$.cod = $1.cod + $3.cod;}
         ;
 
 
-V : id dosp {
-        if (strcmp($1.lexema, $0.cod.c_str()) == 0){
-            errorSemantico(ERRNOMFUNC,$1.lexema,$1.nlin,$1.ncol);
-        }
-        if (tablaSimbolos->buscarAmbito($1.lexema) != nullptr){
-            errorSemantico(ERRYADECL,$1.lexema,$1.nlin,$1.ncol);
-        }
+V : id {
+                if (strcmp($1.lexema, $0.cod.c_str()) == 0){
+                    errorSemantico(ERRNOMFUNC,$1.lexema,$1.nlin,$1.ncol);
+                }
+                if (tablaSimbolos->buscarAmbito($1.lexema) != nullptr){
+                    errorSemantico(ERRYADECL,$1.lexema,$1.nlin,$1.ncol);
+                }
+      } dosp  {
         $$.cod = $1.lexema;
-        } C pyc
+      } C pyc
               {
-                  string idTrad = tablaSimbolos->crearVariable($1.lexema);
+                  string idTrad = tablaSimbolos->crearVariable($1.lexema,false);
 
                   Simbolo *simbolo = new Simbolo();
                   simbolo->nombre = $1.lexema;
@@ -113,7 +115,7 @@ C : A {$$.cod = $0.cod + $1.cod;} C
             }else if($$.tipo == REAL){
                 $$.tipo = REAL;
             }
-            string idTrad = tablaSimbolos->crearVariable($0.cod);
+            string idTrad = tablaSimbolos->crearVariable($0.cod,false);
             $$.cod = $1.cod + " " + idTrad;
          }
      ;
@@ -167,7 +169,7 @@ B :     {
         $$.cod = $0.cod;
         } SI fblq {
             tablaSimbolos->getAmbitoAnterior();
-            $$.cod =  "\n{\n" + $4.cod + $6.cod + "}\n}";
+            $$.cod =  "\n{\n" + $4.cod + $6.cod + "\n}";
         }
      ;
 
@@ -185,7 +187,7 @@ SI : SI pyc {
 
 I : id asig {
                  Simbolo *simbolo = tablaSimbolos->buscar($1.lexema);
-                 if(!(strcmp($1.cod.c_str(), $0.cod.c_str()) == 0))
+                 if(!(strcmp($1.lexema, $0.cod.c_str()) == 0))
                  {
                     if(simbolo == nullptr)
                     {
@@ -197,7 +199,7 @@ I : id asig {
                   }
               } E {
 
-                if(strcmp($1.cod.c_str(), $0.cod.c_str()) == 0)
+                if(strcmp($1.lexema, $0.cod.c_str()) == 0)
                 {
                     if(REAL == $4.tipo)
                     {

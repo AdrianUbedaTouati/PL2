@@ -1,0 +1,22 @@
+
+
+float p06()
+{
+int a;
+
+  a = 2;
+  a = a +i 2;
+{
+int b;
+
+{
+float c;
+
+  b = a +i 3;
+  a = b;
+  c = itor(a);
+  c = itor(a) /r itor(b);
+}
+  return itor(b *i a);
+}
+}

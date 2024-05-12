@@ -5,8 +5,8 @@ using namespace std;
 
 TablaSimbolos::TablaSimbolos(TablaSimbolos *padre)
 {
-      if(padre == null) nivel = 0;
-      else nivel = padre.nivel + 1;
+      if(padre == nullptr) nivel = 0;
+      else nivel = padre->nivel + 1;
       this->padre = padre;
 }
 
@@ -37,14 +37,21 @@ Simbolo* TablaSimbolos::buscar(string nombre)
        return NULL;
 }
 
-string TablaSimbolos::crearVariable(string id)
+string TablaSimbolos::crearVariable(string id, bool ambito)
 {
     if (padre == NULL) {
         return id;
     } else {
-        if (nivel != 1) {
-            id = "_" + id;
+        if (!ambito) {
+            if (buscarAmbito(id) != nullptr) {
+                ambito = true;
+            }
         }
-        return padre.crearVariable(id);
+        if (ambito) {
+            if (nivel != 1) {
+                id = "_" + id;
+            }
+        }
+        return padre->crearVariable(id,ambito);
     }
 }
