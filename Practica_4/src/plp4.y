@@ -59,53 +59,53 @@ X    : S  {/* comprobar que después del programa no hay ningún token más */
                 int tk = yylex();
                 if (tk != 0) yyerror("");
                 else{
-                    cout << $1 ;
+                    cout << $1.cod ;
                 }
           }
 
 S    : funcion id pyc S {$$.cod = $2.lexema} B  { /* comprobar que después del programa no hay ningún token más */
-                           	                       $$.cod = $4.cod + "float" + $2.lexema + "()" + $6.cod;
+                           	                       $$.cod = $4.cod + "float " + $2.lexema + "()" + $6.cod;
                                                 }
      | /*epsilon*/       {$$.cod = "";}
      ;
 
 
-D : var L fvar     { $$.cod = $2.cod; }
+D : var { $$.cod = $0.cod;} L fvar { $$.cod = $3.cod; }
      ;
 
 
-L       : L V        { $$.cod = $1.cod + $2.cod;}
-        | V         /* $$ = $1 */
+L       : L { $$.cod = $0.cod;} V     { $$.cod = $1.cod + $3.cod;}
+        | { $$.cod = $0.cod;} V       { $$.cod = $2.cod; }
         ;
 
-L       : V        { $$.cod = $1.cod }
-        ;
 
-V : id dosp {$$.cod = $1.lexema} C pyc
-                            {
-                                if (strcmp(cadena1, cadena2) == 0){
-                                    errorSemantico(ERRYADECL,$1.lexema,$1.nlin,$1.ncol);
-                                }
-                                if (tablaSimbolos->buscarAmbito($1.lexema) != nullptr){
-                                    errorSemantico(ERRNOMFUNC,$1.lexema,$1.nlin,$1.ncol);
-                                }
-                                string idTrad = tablaSimbolos->crearVariable($1.lexema);
+V : id dosp {
+        if (strcmp(cadena1, cadena2) == 0){
+            errorSemantico(ERRNOMFUNC,$1.lexema,$1.nlin,$1.ncol);
+        }
+        if (tablaSimbolos->buscarAmbito($1.lexema) != nullptr){
+            errorSemantico(ERRYADECL,$1.lexema,$1.nlin,$1.ncol);
+        }
+        $$.cod = $1.lexema;
+        } C pyc
+              {
+                  string idTrad = tablaSimbolos->crearVariable($1.lexema);
 
-                                Simbolo *simbolo = new Simbolo();
-                                simbolo->nombre = $4.lexema;
-                                simbolo->tipo = $4.tipo;
-                                simbolo->nombretrad = idTrad;
+                  Simbolo *simbolo = new Simbolo();
+                  simbolo->nombre = $1.lexema;
+                  simbolo->tipo = $5.tipo;
+                  simbolo->nombretrad = idTrad;
 
-                                tablaSimbolos->nuevoSimbolo(*simbolo);
+                  tablaSimbolos->nuevoSimbolo(*simbolo);
 
-                                $$.cod = $4.cod + ";" + "\n";
-                             }
+                  $$.cod = $5.cod + ";" + "\n";
+              }
      ;
 
-C : A {$$.cod = $0.lexema + $1.lexema} C
+C : A {$$.cod = $0.cod + $1.cod} C
                             {
                                 $$.tipo = TABLA;
-                                $$.cod = $2.cod;
+                                $$.cod = $3.cod;
                             }
      | P
          {
@@ -116,7 +116,8 @@ C : A {$$.cod = $0.lexema + $1.lexema} C
             }else if($$.tipo == REAL){
                 $$.tipo = REAL;
             }
-            $$.cod = p + " " + $0.cod;
+            string idTrad = tablaSimbolos->crearVariable($0.cod);
+            $$.cod = $1.cod + " " + idTrad;
          }
      ;
 
@@ -130,114 +131,190 @@ R : R coma G     { $$.cod = $1.cod + $3.cod; }
 G : numentero ptopto numentero     {
                                         int num1,num2;
                                         num1 = atoi($1.lexema);
-
-                                        if($$.tipo == NUMENTERO){
-                                            num2 = atoi($3.lexema);
-                                        }else num2 = 0 //no se si esta bien
+                                        num2 = atoi($3.lexema);
 
                                         if(num2<num1){
                                             errorSemantico(ERRRANGO,$3.lexema,$3.nlin,$3.ncol);
                                         }
 
-                                        $$.cod = "["+(num2-num1+1)+"]";
+                                        $$.cod = "["+to_string((num2-num1+1))+"]";
                                     }
      ;
 
-P : puntero de P     { $$.cod = $3.cod + "*"; }
-     | Tipo               { $$.cod = $1.cod; }
+P : puntero de P     {
+                        $$.tipo = PUNTERO;
+                        $$.cod = $3.cod + "*";
+                     }
+     | Tipo          {
+                        $$.tipo = $1.tipo;
+                        $$.cod = $1.cod;
+                     }
      ;
 
-Tipo : entero    { $$.cod = $1.lexema; }
-     | real               { $$.cod = $1.lexema; }
+Tipo : entero    {
+                    $$.cod = "int";
+                    $$.tipo = ENTERO;
+                  }
+     | real       {
+                    $$.tipo = REAL;
+                    $$.cod = "float";
+                   }
      ;
 
-B : blq {$$.cod = $0.cod } D {$$.cod = $0.cod } SI fblq     {
-                                                                tablaSimbolos = new TablaSimbolos(tablaSimbolos);
-                                                                $$.cod =  "\n{\n" + $3.cod + $5.cod + "\n}";
-                                                            }
+B :     {
+            tablaSimbolos = new TablaSimbolos(tablaSimbolos);
+        }
+        blq {
+            $$.cod = $0.cod;
+        } D {
+        $$.cod = $0.cod;
+        } SI fblq {
+            tablaSimbolos->getAmbitoAnterior();
+            $$.cod =  "\n{\n" + $4.cod + $6.cod + "}\n}";
+        }
      ;
 
-SI : {$$.cod = $0.cod } SI pyc {$$.cod = $0.cod }  I     { $$.cod = $2.cod + $5.cod}
-     | {$$.cod = $0.cod } I               { $$.cod = $2.cod; }
+SI : SI pyc {
+                $$.cod = $0.cod;
+             } I {
+                    $$.cod = $1.cod + $4.cod;
+                 }
+     | {
+            $$.cod = $0.cod;
+        } I {
+            $$.cod = $2.cod;
+        }
      ;
 
-I : id asig E                {
-                                Simbolo *simbolo = tablaSimbolos->buscar($1.lexema);
-                                if(!(strcmp($1.cod, $0.cod) == 0)){
-                                    if(simbolo == nullptr){
-                                        errorSemantico(ERRNODECL,$1.lexema,$1.nlin,$1.ncol);
-                                    } else if(simbolo.tipo != ENTERO && simbolo.tipo != REAL){
-                                        errorSemantico(ERRNOSIMPLE,$1.lexema,$1.nlin,$1.ncol);
-                                    }
-                                }
+I : id asig {
+                 Simbolo *simbolo = tablaSimbolos->buscar($1.lexema);
+                 if(!(strcmp($1.cod, $0.cod) == 0))
+                 {
+                    if(simbolo == nullptr)
+                    {
+                        errorSemantico(ERRNODECL,$1.lexema,$1.nlin,$1.ncol);
+                    } else if(simbolo.tipo != ENTERO && simbolo.tipo != REAL)
+                    {
+                     errorSemantico(ERRNOSIMPLE,$1.lexema,$1.nlin,$1.ncol);
+                    }
+                  }
+              } E {
 
-                                if(strcmp($1.cod, $0.cod) == 0)
+                if(strcmp($1.cod, $0.cod) == 0)
+                {
+                    if(REAL == $4.tipo)
+                    {
+                        $$.cod = "\n  return " + $4.cod + ";";
+                    } else
+                    {
+                        $$.cod = "\n  return itor(" + $4.cod + ");"
+                    }
+                } else
+                {
+                    Simbolo *simbolo = tablaSimbolos->buscar($1.lexema);
+                    if(simbolo->tipo == $4.tipo)
+                    {
+                        $$.cod = "\n  "+simbolo->nomtrad + " = " + $4.cod+";";
+                    } if(simbolo->tipo == REAL && $4->tipo == ENTERO)
+                    {
+                        $$.cod = "\n  "+simbolo->nomtrad + " = " + "itor("+$4.cod+")"+";";
+                    } else if (simbolo->tipo == ENTERO && $4->tipo == REAL)
+                    {
+                       errorSemantico(ERRTIPOS,$2.lexema,$2.nlin,$2.ncol);
+                    }
+                }
+           }
+     | escribe pari E pard  {
+                                if(REAL == $3.tipo)
                                 {
-                                    if(REAL == $3.tipo)
-                                    {
-                                        $$.cod = "\n  return " + $3.cod + ";";
-                                     } else
-                                     {
-                                        $$.cod = "\n  return itor(" + $3.cod + ");"
-                                     }
+                                    $$.cod = "\n  "+"printf("+"\"%f\","+ $3.cod +")"+";";
                                 } else
                                 {
-                                    if(simbolo.tipo == $3.tipo)
-                                    {
-                                        $$.cod = "\n  "+simbolo.nomtrad + " = " + $3.cod+";";
-                                    } if(simbolo.tipo == REAL && $3.tipo == ENTERO)
-                                    {
-                                        $$.cod = "\n  "+simbolo.nomtrad + " = " + "itor("+$3.cod+")"+";";
-                                    } else if (simbolo.tipo == ENTERO && $3.tipo == REAL)
-                                    {
-                                        errorSemantico(ERRTIPOS,$1.lexema,$1.nlin,$1.ncol);
-                                    }
+                                   $$.cod = "\n  "+"printf("+"\"%d\","+ $3.cod +")"+";";
                                 }
-
-
                              }
-     | escribe pari E pard               {
-                                            if(REAL == $3.tipo)
-                                            {
-                                                $$.cod = "\n  "+"printf("+"\"%f\","+ $3.cod +")"+";";
-                                            } else
-                                            {
-                                                $$.cod = "\n  "+"printf("+"\"%d\","+ $3.cod +")"+";";
-                                            }
-                                         }
-     | {$$.cod = $0.lexema} B             {
-                                                $$.cod = $2.cod;
-                                          }
+     | {$$.cod = $0.cod} B {
+                              $$.cod = $2.cod;
+                           }
      ;
 
-E : E opas T     { $$.cod = $3.cod; }  //estara mal seguramnte
-     | T               {
-                            $$.cod = $1.cod;
-                            $$.tipo = $1.tipo;
-                        }
+E : E opas T   {
+                    if($1.tipo == REAL && $3.tipo == REAL)
+                    {
+                        $$.cod = $1.cod +" " + opas + "r " + $3.cod;
+                        $$.tipo  = REAL;
+                    } else if ($1.tipo == REAL && $3.tipo == ENTERO)
+                    {
+                       $$.cod = $1.cod + " " +opas + "r " + "itor(" + $3.cod +")";
+                       $$.tipo  = REAL;
+                    } else if ($1.tipo == ENTERO && $3.tipo == REAL)
+                    {
+                       $$.cod = "itor(" + $1.cod + ") " + opas + "r " + $3.cod;
+                       $$.tipo  = REAL;
+                    } else{
+                       $$.cod = $1.cod +" " + opas + "i " + $3.cod;
+                       $$.tipo  = ENTERO;
+                    }
+               }
+     | T  {
+             $$.cod = $1.cod;
+             $$.tipo = $1.tipo;
+          }
      ;
 
-T : T opmul F     {
-                        if(strcmp($2.cod, "//") == 0 || strcmp($2.cod, "%") == 0){
-                            if ($0.tipo == REAL){
-                                errorSemantico(ERRNOENTEROIZQ,$2.lexema,$2.nlin,$2.ncol);
-                            }
+T : T opmul
+            {
+                if(strcmp(s1, "//") == 0 || strcmp(s1, "%") == 0)
+                {
+                    if($1.tipo == REAL){
+                        errorSemantico(ERRNOENTEROIZQ, $2.nlin, $2.ncol, $2.lexema);
+                    }
+                }
+             } F {
+                    if(strcmp(s1, "//") == 0 || strcmp(s1, "%") == 0)
+                    {
+                        if($4.tipo == REAL)
+                        {
+                           errorSemantico(ERRNOENTERODER, $2.nlin, $2.ncol, $2.lexema);
+                         }
+                    }
 
-                            if ($3.tipo == REAL){
-                                errorSemantico(ERRNOENTERODER,$2.lexema,$2.nlin,$2.ncol);
-                             }
+                    if($1.tipo == REAL && $4.tipo == REAL){
+                        $$.tipo = REAL;
+                        $$.cod =  $1.cod + " " + $2.lexema + "r " + $4.cod;
+                    } else if($1.tipo == REAL && $4.tipo == ENTERO)
+                    {
+                        p$$.cod = $1.cod + " " +$2.lexema + "r " + "itor(" + $4.cod + ")";
+                        $$.tipo = REAL;
+                    }else if ($1.tipo == ENTERO && f.tipo == REAL) {
+                        $$.cod = "itor(" + $1.cod + ")" +" " + $2.lexema + "r " + $4.cod;
+                        $$.tipo = REAL;
+                     } else{
+                        if(strcmp("%", $2.lexema) == 0)
+                        {
+                             $$.cod = $1.cod+" " + $2.lexema +" " + $4.cod;
+                             $$.tipo = ENTERO;
+                        }else if(strcmp("//", $2.lexema) == 0)
+                        {
+                             $$.cod = $1.cod +" " + "/i " + $4.cod;
+                             $$.tipo = ENTERO;
                         }
-
-                        if ($0.TIPO
-
-
-
-
-                   }
-     | F               {
-                           $$.cod = $1.cod;
-                           $$.tipo = $1.tipo;
-                        }
+                        else if(strcmp("/", $2.lexema) == 0)
+                        {
+                             $$.cod = "itor("+$1.cod+")" +" " + $2.lexema + "r " +"itor("+ $4.cod + ")";
+                             $$.tipo = REAL;
+                         }
+                         else{
+                             $$.cod = $1.cod +" " + $2.lexema + "i " + $4.cod;
+                             $$.tipo = ENTERO;
+                         }
+                      }
+                }
+     | F
+     {
+           $$.cod = $1.cod;
+           $$.tipo = $1.tipo;
+     }
      ;
 
 F : numentero    { $$.tipo = ENTERO;
@@ -246,8 +323,17 @@ F : numentero    { $$.tipo = ENTERO;
      | numreal    { $$.tipo = REAL;
                     $$.cod = $1.lexema;
                   }
-     | id         { $$.tipo = tablaSimbolos->buscar($1.lexema).tipo;
-                    $$.cod = tablaSimbolos->buscar($1.lexema).trad;
+     | id         {
+                    Simbolo *simbolo = tablaSimbolos->buscar($1.lexema);
+
+                    if (simbolo == nullptr){
+                       errorSemantico(ERRNODECL, $1.nlin, $1.ncol, $1.lexema);
+                    }else if(simbolo.tipo !=  Token.ENTERO && simbolo.tipo != Token.REAL) {
+                       errorSemantico(ERRNOSIMPLE, $1.nlin, $1.ncol, $1.lexema);
+                    }
+
+                    $$.cod = simbolo.trad;
+                    $$.tipo = simbolo.tipo;
                    }
      ;
 
