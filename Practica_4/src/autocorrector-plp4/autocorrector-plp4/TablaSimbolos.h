@@ -4,6 +4,8 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <ostream>
 
 using namespace std;
 
@@ -33,7 +35,7 @@ public:
     Simbolo *buscarAmbito(string nombre); // ver si está en el ámbito actual
     bool nuevoSimbolo(Simbolo s);
     Simbolo* buscar(string nombre);
-    string crearVariable(string id, bool ambito);
+    string crearVariable(string id);
 };
 
 

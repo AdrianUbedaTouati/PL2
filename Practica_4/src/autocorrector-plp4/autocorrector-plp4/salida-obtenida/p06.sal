@@ -7,16 +7,16 @@ int a;
   a = 2;
   a = a +i 2;
 {
-int b;
+int _b;
 
 {
-float c;
+float __c;
 
-  b = a +i 3;
-  a = b;
-  c = itor(a);
-  c = itor(a) /r itor(b);
+  _b = a +i 3;
+  a = _b;
+  __c = itor(a);
+  __c = itor(a) /r itor(_b);
 }
-  return itor(b *i a);
+  return itor(_b *i a);
 }
 }

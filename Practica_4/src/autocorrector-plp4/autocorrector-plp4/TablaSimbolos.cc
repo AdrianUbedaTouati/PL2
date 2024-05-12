@@ -37,21 +37,14 @@ Simbolo* TablaSimbolos::buscar(string nombre)
        return NULL;
 }
 
-string TablaSimbolos::crearVariable(string id, bool ambito)
+string TablaSimbolos::crearVariable(string id)
 {
     if (padre == NULL) {
         return id;
     } else {
-        if (!ambito) {
-            if (buscarAmbito(id) != nullptr) {
-                ambito = true;
-            }
+        if (nivel != 1) {
+            id = "_" + id;
         }
-        if (ambito) {
-            if (nivel != 1) {
-                id = "_" + id;
-            }
-        }
-        return padre->crearVariable(id,ambito);
+        return padre->crearVariable(id);
     }
 }

@@ -85,10 +85,10 @@ V : id {
                     errorSemantico(ERRYADECL,$1.lexema,$1.nlin,$1.ncol);
                 }
       } dosp  {
-        $$.cod = $1.lexema;
+        $$.cod = tablaSimbolos->crearVariable($1.lexema);
       } C pyc
               {
-                  string idTrad = tablaSimbolos->crearVariable($1.lexema,false);
+                  string idTrad = tablaSimbolos->crearVariable($1.lexema);
 
                   Simbolo *simbolo = new Simbolo();
                   simbolo->nombre = $1.lexema;
@@ -115,8 +115,8 @@ C : A {$$.cod = $0.cod + $1.cod;} C
             }else if($$.tipo == REAL){
                 $$.tipo = REAL;
             }
-            string idTrad = tablaSimbolos->crearVariable($0.cod,false);
-            $$.cod = $1.cod + " " + idTrad;
+
+            $$.cod = $1.cod + " " + $0.cod;
          }
      ;
 
@@ -168,7 +168,7 @@ B :     {
         } D {
         $$.cod = $0.cod;
         } SI fblq {
-            tablaSimbolos->getAmbitoAnterior();
+            tablaSimbolos = tablaSimbolos->getAmbitoAnterior();
             $$.cod =  "\n{\n" + $4.cod + $6.cod + "\n}";
         }
      ;

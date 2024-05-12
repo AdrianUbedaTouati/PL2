@@ -23,13 +23,13 @@ float _c;
   _c = itor(256 % 2);
 }
 {
-int cc;
+int _cc;
 
 {
-int _d;
-float _b;
+int __d;
+float __b;
 
-  _b = itor(cc);
+  __b = itor(_cc);
   printf("%d",6);
   return itor(7 +i 5 *i 4);
 }
