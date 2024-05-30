@@ -56,8 +56,8 @@ unsigned int numetq = 0;       // contador de etiquetas
 
 
 //funciones
-unsigned int nuevaTemp(int nlin, int ncol);
-unsigned int nuevaVar(char *lexema, int nlin, int ncol);
+unsigned int nVar(char *lexema, int nlin, int ncol);
+unsigned int nTemp(int nlin, int ncol);
 unsigned int nuevaEtiqueta(void);
 bool esArray(int tipo);
 
@@ -77,20 +77,20 @@ S    : FVM  {/* comprobar que después del programa no hay ningún token más */
       ;
 
 FVM   : DVar FVM  {
-                    $$.cod = $4.cod + "\n\nfloat " + $2.lexema + "()" + $6.cod;
+                    $$.cod = $1.cod + $2.cod;
                  }
-     | tint tmain pari pard Bloque/*epsilon*/       {$$.cod = "";}
+     | tint tmain pari pard Bloque  {$$.cod = "";}
      ;
 
-Tipo   : int   {$$.cod = "";}
-       | float {$$.cod = "";}
+Tipo   : tint   {$$.cod = $1.lexema;}
+       | tfloat {$$.cod = $1.lexema;}
        ;
 
 Bloque : llavei BDecl SeqInstr llaved   {$$.cod = "";}
        ;
 
 BDecl  : BDecl DVar {$$.cod = "";}
-       |  {$$.cod = "";}
+       | /* epsilon */   {$$.cod = "";}
        ;
 
 DVar  : Tipo LIdent pyc {$$.cod = "";}
@@ -112,7 +112,7 @@ V :  {$$.cod = "";}
 
 
 SeqInstr : SeqInstr Instr {$$.cod = "";}
-         |  {$$.cod = "";}
+         | /* epsilon */   {$$.cod = "";}
          ;
 
 Instr : pyc {$$.cod = "";}
@@ -120,10 +120,10 @@ Instr : pyc {$$.cod = "";}
          | Ref asig Expr pyc {$$.cod = "";}
          | printf pari formato coma Expr pard pyc {$$.cod = "";}
          | scanf pari formato coma referencia Ref pard pyc {$$.cod = "";}
-         | if pari Expr pard Instr {$$.cod = "";}
-         | if pari Expr pard Instr else Instr {$$.cod = "";}
+         | tif pari Expr pard Instr {$$.cod = "";}
+         | tif pari Expr pard Instr else Instr {$$.cod = "";}
          | while pari Expr pard Instr {$$.cod = "";}
-         | for pari id asig Esimple pyc Expr pyc id incrdecr pard Instr {$$.cod = "";}
+         | tfor pari id asig Esimple pyc Expr pyc id incrdecr pard Instr {$$.cod = "";}
          ;
 
 
@@ -173,25 +173,27 @@ void errorSemantico(int nerror,char *lexema,int fila,int columna)
 {
     fprintf(stderr,"Error semantico (%d,%d): en '%s', ",fila,columna,lexema);
     switch (nerror) {
-      case ERRYADECL: fprintf(stderr,"ya existe en este ambito\n");
-         break;
-      case ERRNOMFUNC: fprintf(stderr,"no puede llamarse igual que la funcion");
-         break;
-      case ERRNOSIMPLE: fprintf(stderr,"debe ser de tipo entero o real\n");
-         break;
-      case ERRNODECL: fprintf(stderr,"no ha sido declarado\n");
-         break;
-      case ERRTIPOS: fprintf(stderr,"tipos incompatibles entero/real\n");
-         break;
-      case ERRNOENTEROIZQ: fprintf(stderr,"el operando izquierdo debe ser entero\n");
-         break;
-      case ERRNOENTERODER: fprintf(stderr,"el operando derecho debe ser entero\n");
-         break;
-      case ERRRANGO: fprintf(stderr,"rango incorrecto\n");
-         break;
+             case ERRYADECL: fprintf(stderr,"simbolo ya declarado\n");
+               break;
+             case ERRNODECL: fprintf(stderr,"identificador no declarado\n");
+               break;
+             case ERRDIM: fprintf(stderr,"la dimension debe ser mayor que cero\n");
+               break;
+             case ERRFALTAN: fprintf(stderr,"faltan indices\n");
+               break;
+             case ERRSOBRAN: fprintf(stderr,"sobran indices\n");
+               break;
+             case ERR_NOENTERO: fprintf(stderr,"debe ser de tipo entero\n");
+               break;
+
+             case ERR_NOCABE:fprintf(stderr,"la variable ya no cabe en memoria\n");
+               break;
+             case ERR_MAXTMP:fprintf(stderr,"no hay espacio para variables temporales\n");
+               break;
     }
     exit(-1);
 }
+
 
 int yyerror(char *s)
 {
@@ -204,6 +206,36 @@ int yyerror(char *s)
        msgError(ERRSINT,nlin,ncol-strlen(yytext),yytext);
     }
 }
+
+unsigned int nTemp(int nlin, int ncol) {
+   if (ctemp == MAX_DIR_TEMP) {
+      errorSemantico(ERR_MAXTMP, nlin, ncol, "");
+   }
+   ++ctemp
+   return ctemp;
+}
+
+unsigned int nVar(char *lexema, int nlin, int ncol) {
+   if (cvar == MAX_DIR_VAR) {
+      errorSemantico(ERR_NOCABE, nlin, ncol, lexema);
+   }
+   ++cvar
+   return cvar;
+}
+
+unsigned int nEtiqueta(void) {
+   ++cetiq
+   return cetiq;
+}
+
+bool esArray(int tipo) {
+   if(ARRAY == (ttipos->tipos)[tipo].clase){
+     return true;
+   }else{
+     return false;
+   }
+}
+
 
 int main(int argc,char *argv[])
 {
