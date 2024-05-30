@@ -67,7 +67,7 @@ string operador, s1, s2;  // string auxiliares
 
 %%
 
-X    : S  {/* comprobar que después del programa no hay ningún token más */
+S    : FVM  {/* comprobar que después del programa no hay ningún token más */
                 int tk = yylex();
                 if (tk != 0) yyerror("");
                 else{
@@ -94,7 +94,6 @@ BDecl  : BDecl DVar {$$.cod = "";}
        ;
 
 DVar  : Tipo LIdent pyc {$$.cod = "";}
-      |  {$$.cod = "";}
       ;
 
 LIdent : LIdent coma Variable {$$.cod = "";}
@@ -151,10 +150,6 @@ Factor : Ref {$$.cod = "";}
 Ref : id {$$.cod = "";}
      | Ref cori Esimple cord {$$.cod = "";}
      ;
-
-
-
-
 
 %%
 
