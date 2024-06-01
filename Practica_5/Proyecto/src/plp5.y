@@ -44,22 +44,28 @@ extern FILE *yyin;
 int yyerror(char *s);
 
 //Direciones
-int LIM_DIR_VAR = 15999;   // ultima dirección posible para variables
-int LIM_DIR_TEMP = 16383;  // ultima dirección posible para temporales
+int LIM_DIR_TEMP = 16383;
+int LIM_DIR_VAR = 15999;
 
-//varibles
+
+//varibles objeto
+TablaTipos *tablaTipos = new TablaTipos();
 TablaSimbolos *tablaSimbolos = new TablaSimbolos(nullptr);
-TablaTipos *ttipos = new TablaTipos();
-unsigned int numvar = 0;        // contador de direcciones de variables
-unsigned int numtemp = 16000;   // contador de direcciones temporales
-unsigned int numetq = 0;       // contador de etiquetas
+
+
+//variables
+unsigned int numtemp = 16000;
+unsigned int numetq = 0;
+unsigned int numvar = 0;
+
 
 
 //funciones
 unsigned int nVar(char *lexema, int nlin, int ncol);
 unsigned int nTemp(int nlin, int ncol);
 unsigned int nuevaEtiqueta(void);
-bool esArray(int tipo);
+
+bool isArray(int tipo);
 
 string operador, s1, s2;  // string auxiliares
 
@@ -141,14 +147,108 @@ Term : Term opmd Factor {$$.cod = "";}
      | Factor {$$.cod = "";}
      ;
 
-Factor : Ref {$$.cod = "";}
-     | nentero {$$.cod = "";}
-     | nreal {$$.cod = "";}
-     | pari Expr pard {$$.cod = "";}
+Factor : Ref {
+                 if ((tablaTipos->tipos)[$1.tipo].clase != ARRAY) {
+                      $$.cod = $1.cod;
+                      $$.dir = nTemp($1.nlin, $1.ncol);
+                      $$.tipo = $1.tipo;
+
+                      String dir1 = to_string($1.dir);
+                      String sdbase = to_string($1.dbase);
+                      String stemp = to_string(numtemp);
+
+                      $$.cod += "mov " + dir1 + " A\n";
+                      $$.cod += "addi #" + sdbase + "\n";
+                      $$.cod += "mov @A " + stemp + "\n";
+
+                 } else {
+                    errorSemantico(ERR_FALTAN, $1.nlin, $1.ncol, $1.lexema);
+                 }
+             }
+     | nentero {
+                     numTemp = nTemp($1.nlin, $1.ncol);
+                     $$.dir = numTemp;
+
+                     String stemp = " " + to_string(numTemp);
+                     $$.cod = "mov #" + $1.lexema + stemp + "\n";
+
+                     $$.tipo = ENTERO;
+               }
+     | nreal {
+                     numTemp = nTemp($1.nlin, $1.ncol);
+                     $$.dir = numTemp;
+
+                     String stemp = " " + to_string(numTemp);
+                     $$.cod = "mov $" + $1.lexema + stemp + "\n";
+
+                     $$.tipo = REAL
+             }
+     | pari Expr pard {
+                          $$.dir = $2.dir;
+                          $$.tipo = $2.tipo;
+                          $$.cod = $2.cod;
+                      }
      ;
 
-Ref : id {$$.cod = "";}
-     | Ref cori Esimple cord {$$.cod = "";}
+Ref : id {
+            Simbolo *simb = tablaActual->searchSymb($1.lexema);
+            if (simb != nullptr) {
+              numtemp = nTemp($1.nlin, $1.ncol);
+
+              String stemp = to_string(temp);
+
+              $$.cod = "mov #0 " + stemp + "\n";
+              $$.tipo = simb->tipo;
+
+              $$.dir = numtemp;
+              $$.dbase = simb->dir;
+
+              $$.nlin = $1.nlin;
+              $$.ncol = $1.ncol;
+              $$.lexema = $1.lexema;
+
+             } else {
+                errorSemantico(ERR_NODECL, $1.nlin, $1.ncol, $1.lexema);
+             }
+         }
+     | Ref cori {
+                    if (!isArray($1.tipo)) {
+                        if($1.lexema != "]") {
+                           errorSemantico(ERR_SOBRAN, $1.nlin, $1.ncol, $1.lexema);
+                        } else {
+                           errorSemantico(ERR_SOBRAN, $2.nlin, $2.ncol, $2.lexema);
+                        }
+                     }
+                }
+     Esimple cord {
+                     if ($4.tipo == ENTERO) {
+                         $$.tipo = (tablaTipos->tipos)[$1.tipo].tipoBase;
+                         $$.dbase = $1.dbase;
+
+                         numtemp = nTemp($2.nlin, $2.ncol);
+
+                         $$.dir = numtemp;
+
+                         $$.cod = $1.cod + $4.cod;
+
+                         String dir1 = to_string($1.dir);
+                         String tam1 = to_string((tablaTipos->tipos)[$1.tipo].tamanyo);
+                         String dir4 = to_string($4.dir);
+                         String stemp = to_string(numtemp);
+
+                         $$.cod += "mov " + dir1 + " A" + "\n";
+                         $$.cod += "muli #" + tam1 + "\n";
+                         $$.cod += "addi " + dir4 + "\n";
+                         $$.cod += "mov A " +stemp + "\n";
+
+                         $$.nlin = $5.nlin;
+                         $$.ncol = $5.ncol;
+                         $$.lexema = $5.lexema;
+
+                     } else {
+                        errorSemantico(ERR_INDICE_ENTERO, $4.nlin, $4.ncol, $4.lexema);
+                     }
+                  }
      ;
 
 %%
@@ -208,7 +308,7 @@ int yyerror(char *s)
 }
 
 unsigned int nTemp(int nlin, int ncol) {
-   if (ctemp == MAX_DIR_TEMP) {
+   if (ctemp == LIM_DIR_TEMP) {
       errorSemantico(ERR_MAXTMP, nlin, ncol, "");
    }
    ++ctemp
@@ -216,7 +316,7 @@ unsigned int nTemp(int nlin, int ncol) {
 }
 
 unsigned int nVar(char *lexema, int nlin, int ncol) {
-   if (cvar == MAX_DIR_VAR) {
+   if (cvar == LIM_DIR_VAR) {
       errorSemantico(ERR_NOCABE, nlin, ncol, lexema);
    }
    ++cvar
@@ -228,8 +328,8 @@ unsigned int nEtiqueta(void) {
    return cetiq;
 }
 
-bool esArray(int tipo) {
-   if(ARRAY == (ttipos->tipos)[tipo].clase){
+bool isArray(int tipo) {
+   if(ARRAY == (tablaTipos->tipos)[tipo].clase){
      return true;
    }else{
      return false;
