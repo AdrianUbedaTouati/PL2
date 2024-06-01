@@ -132,9 +132,6 @@ Instr : pyc {$$.cod = "";}
          | tfor pari id asig Esimple pyc Expr pyc id incrdecr pard Instr {$$.cod = "";}
          ;
 
-
-
-
 Expr : Expr oprel Esimple {$$.cod = "";}
      | Esimple {$$.cod = "";}
      ;
@@ -143,8 +140,82 @@ Esimple : Esimple opas Term {$$.cod = "";}
      | Term {$$.cod = "";}
      ;
 
-Term : Term opmd Factor {$$.cod = "";}
-     | Factor {$$.cod = "";}
+Term : Term opmd Factor {
+                             if($3.tipo != REAL && $3.tipo != ENTERO){
+                                  errorSemantico(ERR_EXIZQ_RE, $2.nlin, $2.ncol, $2.lexema);
+                             } else if($1.tipo != REAL && $1.tipo != ENTERO){
+                                  errorSemantico(ERR_EXDER_RE, $2.nlin, $2.ncol, $2.lexema);
+                             } else {
+                                 $$.dir = nTemp($3.nlin, $3.ncol);
+                                 $$.cod = $1.cod + $3.cod;
+
+                                 if ($1.tipo == ENTERO && $3.tipo == ENTERO){
+                                    $$.tipo = ENTERO;
+                                 } else {
+                                    $$.tipo = REAL;
+                                 }
+
+                                 if ("*" == $2.lexema){
+                                    string op = "mul";
+                                 } else {
+                                    string op = "div";
+                                 }
+
+                                 if ($1.tipo == $3.tipo && $1.tipo == ENTERO) {  // ENTERO && ENTERO, REAL && REAL
+                                    string tip =  "i";
+
+                                    string dir1 = to_string($1.dir);
+                                    string dir3 = to_string($3.dir);
+
+                                    $$.cod += "mov " + dir1 + " A" + "\n";
+                                    $$.cod += op + tip + dir3 + "\n";
+                                 } else if ($1.tipo == $3.tipo && $1.tipo == REAL) {  // ENTERO && ENTERO, REAL && REAL
+                                       string ri =  "r";
+
+                                       string dir1 = to_string($1.dir);
+                                       string dir3 = to_string($3.dir);
+
+                                       $$.cod += "mov " + dir1 + " A" + "\n";
+                                       $$.cod += op + tip + dir3 + "\n";
+                                  }else if ($1.tipo == REAL && $3.tipo == ENTERO) {
+                                    string dir3 = to_string($3.dir);
+                                    $$.cod += "mov " + dir3 + " A" + "\n";
+
+                                    $$.cod += "itor\n";
+
+                                    string stemp = to_string(numtemp);
+
+                                    $$.cod += "mov A " + stemp + "\n";
+
+                                    string dir1 = to_string($1.dir);
+
+                                    $$.cod += "mov " + dir1 + " A" + "\n";
+
+                                    string stemp = to_string(numtemp);
+
+                                    $$.cod += op + "r " + stemp + "\n";
+
+                                 } else if ($1.tipo == ENTERO && $3.tipo == REAL) {
+                                    string dir1 = to_string($1.dir);
+
+                                    $$.cod += "mov " + dir1 + " A" + "\n";
+
+                                    $$.cod += "itor\n";
+
+                                    string dir3 = to_string($3.dir);
+
+                                    $$.cod += op + "r " + dir3 + "\n";
+                                 }
+                                 string stemp = to_string(numtemp)
+
+                                 $$.cod += "mov A " + stemp + "\n";
+                             }
+                        }
+     | Factor {
+                $$.dir = $1.dir;
+                $$.tipo = $1.tipo;
+                $$.cod = $1.cod;
+              }
      ;
 
 Factor : Ref {
