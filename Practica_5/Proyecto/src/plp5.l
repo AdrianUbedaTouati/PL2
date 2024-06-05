@@ -86,10 +86,10 @@ void errorSemantico(int nerror,char *lexema,int fila,int columna);
 "]"                {return ret(cord);}
 "{"                {return ret(llavei);}
 "}"                {return ret(llaved);}
-""\"%d\"""                {return ret(formato);}
-""\"%g\"""                {return ret(formato);}
-"++"                {return ret(incrdecr);}
-"--"                {return ret(incrdecr);}
+"\"%d\""           {return ret(formato);}
+"\"%g\""           {return ret(formato);}
+"++"               {return ret(incrdecr);}
+"--"               {return ret(incrdecr);}
 
 .                  {msgError(ERRLEXICO,nlin,ncol,yytext);}
 

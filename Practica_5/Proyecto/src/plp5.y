@@ -151,7 +151,7 @@ Instr :   pyc {$$.cod = "";}
          | Ref asig Expr pyc {
                                  if ((tablatipos->tipos)[$1.tipo].clase == ARRAY) {
                                     errorSemantico(ERR_FALTAN, $1.nlin, $1.ncol, $1.lexema);
-                                 }else if ($1.tipo == ENTERO && ($3.tipo == LOGICO || $3.tipo == REAL)) {
+                                 }else if ($1.tipo == ENTERO && $3.tipo == REAL) {
                                     errorSemantico(ERR_EXDER_ENT, $2.nlin, $2.ncol, $2.lexema);
                                  }else if ($1.tipo == REAL && $3.tipo == LOGICO) {
                                     errorSemantico(ERR_EXDER_RE, $2.nlin, $2.ncol, $2.lexema);
@@ -161,7 +161,6 @@ Instr :   pyc {$$.cod = "";}
                                     $$.cod = $1.cod + $3.cod;
                                  }
 
-
                                  if ($3.tipo == ENTERO && $1.tipo == REAL) {
                                     string dir3 = to_string($3.dir);
                                     $$.cod += "mov " + dir3 + " A" + "\n" + "itor\n";
@@ -170,188 +169,130 @@ Instr :   pyc {$$.cod = "";}
                                     $$.cod += "mov A " + dir3_2 + "\n";
                                  }
 
-                                 string dir1 = to_string($1.dir);
-                                 $$.cod += "mov " + dir1 + " A" + "\n";
+                                     string dir1 = to_string($1.dir);
+                                     $$.cod += "mov " + dir1 + " A" + "\n";
 
-                                 string 1dbase =  to_string($1.dbase);
-                                 $$.cod += "addi #" + 1dbase + "\n";
+                                     string 1dbase =  to_string($1.dbase);
+                                     $$.cod += "addi #" + 1dbase + "\n";
 
-                                 string dir3_3
-                                 $$.cod += "mov " + dir3_3 + " @A" + "\n";
+                                     string dir3_3
+                                     $$.cod += "mov " + dir3_3 + " @A" + "\n";
                                 }
-         | printf pari formato coma Expr pard pyc {
-
-                                                if ($2.tipo != LOGICO) {
-                                                   $$.cod = $2.cod;
-
-                                                   string stipo;
-                                                   if ($2.tipo != REAL) {
-                                                       stipo = "i";
-                                                   } else {
-                                                       stipo = "r";
-                                                   }
-                                                   string dir2 = to_string($2.dir);
-                                                   $$.cod += "wr" + stipo + " " + dir2 + "\n" + "wrl" + "\n";
-                                                }else {
-                                                   $$.cod = $2.cod;
-                                                   string dir2 = to_string($2.dir);
-                                                   $$.cod += "mov " + dir2 + " A" + "\n";
-
-                                                   int etiqueta_1 = nEtiqueta();
-                                                   string setiqueta_1 = to_string(etiqueta_1);
-
-                                                   $$.cod += "jz L" + setiqueta_1 + "\n";
-
-                                                   string castc = to_string(static_cast<int>('c'));
-                                                   $$.cod += "wrc #" + castc + "\n";
-
-                                                   int etiqueta_2 = nEtiqueta();
-                                                   string setiqueta_2 = to_string(setiqueta_2);
-
-                                                   $$.cod += "jmp L" + setiqueta_2 + "\n";
-
-                                                   $$.cod += "L" + setiqueta_1;
-
-                                                   string castf = to_string(static_cast<int>('f'));
-                                                   $$.cod += " wrc #" + castf + "\n";
-
-                                                   $$.cod += "L" + setiqueta_2 + " ";
-                                                   $$.cod += "wrl\n";
-                                                }
-
-                                          }
-         | scanf pari formato coma referencia Ref pard pyc {
-
-                                                             if ((tablatipos->tipos)[$2.tipo].clase == ARRAY) {
-                                                                errorSemantico(ERR_FALTAN, $2.nlin, $2.ncol, $2.lexema);
-                                                             } else {
-                                                                 if ($2.tipo != LOGICO) {
-                                                                    $$.cod = $2.cod;
-                                                                    string dir2 = to_string($2.dir);
-                                                                    $$.cod += "mov " + dir2 + " A" + "\n";
-                                                                    string dbase2 = to_string($2.dbase);
-                                                                    $$.cod += "addi #" + dbase2 + "\n";
-
-                                                                    string stipo;
-                                                                    if ($2.tipo != REAL) {
-                                                                        stipo = "i";
-                                                                    } else {
-                                                                        stipo = "r";
-                                                                    }
-                                                                    $$.cod += "rd" + stipo + " @A" + "\n";
-                                                                 } else {
-                                                                    $$.cod = $2.cod;
-                                                                    $$.cod += "rdc A" + "\n";
-
-                                                                    string castc = to_string(static_cast<int>('c'));
-                                                                    $$.cod += "eqli #" + string + "\n";
-
-
-                                                                    int nTemp = nuevaTemp($1.nlin, $1.ncol);
-                                                                    string temp = to_string(nTemp);
-                                                                    $$.cod += "mov A " + temp + "\n";
-
-                                                                    string dir2 = to_string($2.dir);
-                                                                    $$.cod += "mov " + dir2 + " A" + "\n";
-
-                                                                    string dbase2 = to_string($2.dbase);
-                                                                    $$.cod += "addi #" + dbase2 + "\n";
-
-                                                                    string snumtemp = to_string(numtemp);
-                                                                    $$.cod += "mov " + snumtemp + " @A" + "\n";
-                                                                }
+         | tprintf pari formato coma Expr pard pyc {
+                                                        $$.cod = $5.cod;
+                                                        if($3.lexema == "\"%d\""){
+                                                            if($5.tipo != ENTERO){
+                                                                string dir5 = to_string($5.dir);
+                                                                $$.cod += "mov " + dir5 + " A" + "\n";
+                                                                $$.cod += "rtoi\n";
+                                                                $$.cod += "wri A\n"
+                                                            } else {
+                                                                string dir5 = to_string($5.dir);
+                                                                $$.cod += "mov " + dir5 + " A" + "\n";
+                                                                $$.cod += "wri A\n"
                                                             }
+                                                        } else {
+                                                            if($5.tipo == ENTERO){
+                                                                string dir5 = to_string($5.dir);
+                                                                $$.cod += "mov " + dir5 + " A" + "\n";
+                                                                $$.cod += "itor\n";
+                                                                $$.cod += "wrr A\n"
+                                                            } else {
+                                                                string dir5 = to_string($5.dir);
+                                                                $$.cod += "mov " + dir5 + " A" + "\n";
+                                                                $$.cod += "wrr A\n"
+                                                            }
+                                                        }
+                                                        $$.cod += "wrl \n"
+                                                  }
+
+         | tscanf pari formato coma referencia Ref pard pyc {
+                                                             if ((tablatipos->tipos)[$6.tipo].clase == ARRAY) {
+                                                                errorSemantico(ERRFALTAN, $6.nlin, $6.ncol, $6.lexema);
+                                                             } else {
+                                                                $$.cod = $6.cod;
+
+                                                                if($6.tipo ==  ENTERO) {
+                                                                    $$.cod += "rdi " + "A\n";
+                                                                    if($3.lexema == "\"%g\""){
+                                                                        $$.cod += "itor\n";
+                                                                    }
+                                                                }else {
+                                                                    $$.cod += "rdr " + "A\n";
+                                                                    if($3.lexema == "\"%d\""){
+                                                                        $$.cod += "rtoi\n";
+                                                                    }
+                                                                }
+                                                                string stemp = to_string(nTemp($6.nlin,$6.ncol));
+                                                                $$.cod = "mov A" + stemp + "\n";
+                                                                string dir6 = to_string($6.dir);
+
+                                                                $$.cod = "mov " + dir6 + " A" + "\n";
+                                                                string dbase = to_string($6.dbase);
+                                                                $$.cod = "addi #" + dbase +"\n";
+                                                                $$.cod = "mov " + stemp +" @A\n";
+                                                             }
+                                                           }
          | tif pari Expr pard Instr {
-                                        if ($2.tipo != LOGICO) {
-                                            errorSemantico(ERR_EXP_LOG, $1.nlin, $1.ncol, $1.lexema);
-                                         } else {
+                                         $$.cod = $3.cod;
 
-                                             $$.cod = $3.cod;
+                                         string dir3 = to_string($3.dir);
+                                         $$.cod += "mov " + dir3 + " A" + "\n";
 
-                                             string dir3 = to_string($3.dir);
-                                             $$.cod += "mov " + dir3 + " A" + "\n";
+                                         int etiqueta = nEtiqueta();
+                                         string setiqueta = to_string(etiqueta);
 
-                                             int etiqueta = nEtiqueta();
-                                             string setiqueta = to_string(etiqueta);
+                                         $$.cod += "jz L" + setiqueta +"\n";
 
-                                             $$.cod += "jz L" + setiqueta +"\n";
+                                         $$.cod += $5.cod;
 
-                                             $$.cod += $5.cod;
-
-                                             $$.cod += "L" + setiqueta + " ";
-                                         }
+                                         $$.cod += "L" + setiqueta + " ";
                                     }
          | tif pari Expr pard Instr else Instr {
-                                                 if ($2.tipo != LOGICO) {
-                                                    errorSemantico(ERR_EXP_LOG, $1.nlin, $1.ncol, $1.lexema);
-                                                 }else {
-                                                     $$.cod = $2.cod;
 
-                                                     string dir2 = to_string($2.dir);
-                                                     $$.cod += "mov " + dir2 + " A\n";
+                                                 $$.cod = $3.cod;
 
-                                                     int etiqueta_1 = nEtiqueta();
-                                                     string setiqueta_1 = to_string(etiqueta_1);
+                                                 string dir2 = to_string($3.dir);
+                                                 $$.cod += "mov " + dir2 + " A\n";
 
-                                                     $$.cod += "jz L" + setiqueta_1 + "\n";
+                                                 int etiqueta_1 = nEtiqueta();
+                                                 string setiqueta_1 = to_string(etiqueta_1);
 
-                                                     $$.cod += $4.cod;
+                                                 $$.cod += "jz L" + setiqueta_1 + "\n";
 
-                                                     int etiqueta_2 = nEtiqueta();
-                                                     string setiqueta_2 = to_string(etiqueta_2);
+                                                 $$.cod += $5.cod;
 
-                                                     $$.cod += "jmp L" + setiqueta_2 + "\n";
+                                                 int etiqueta_2 = nEtiqueta();
+                                                 string setiqueta_2 = to_string(etiqueta_2);
 
-                                                     // L1 Instr2.cod
-                                                     $$.cod += "L" + setiqueta_1 + " " + $7.cod;
+                                                 $$.cod += "jmp L" + setiqueta_2 + "\n";
 
-                                                     // L2 (siguiente instr)
-                                                     $$.cod += "L" + setiqueta_2 + " ";
-                                                }
+                                                 $$.cod += "L" + setiqueta_1 + " " + $7.cod;
+                                                 $$.cod += "L" + setiqueta_2 + " ";
                                               }
          | while pari Expr pard Instr {
-                                          if ($2.tipo != LOGICO) {
-                                              errorSemantico(ERR_EXP_LOG, $1.nlin, $1.ncol, $1.lexema);
-                                           }else {
+                                           int etiqueta_1 = nEtiqueta();
+                                           string setiqueta_1 = to_string(etiqueta_1);
 
-                                               int etiqueta_1 = nEtiqueta();
-                                               string setiqueta_1 = to_string(etiqueta_1);
+                                           $$.cod = "L" + setiqueta_1 + " " + $3.cod;
 
-                                               $$.cod = "L" + setiqueta_1 + " " + $3.cod;
+                                           string dir2 = to_string($2.dir);
+                                           $$.cod += "mov " + dir2 + " A" +"\n";
 
-                                               string dir2 = to_string($2.dir);
-                                               $$.cod += "mov " + dir2 + " A" +"\n";
+                                           int etiqueta_2 = nEtiqueta();
+                                           string setiqueta_2 = to_string(etiqueta_2);
+                                           $$.cod += "jz L" + setiqueta_2 + "\n";
 
-                                               int etiqueta_2 = nEtiqueta();
-                                               string setiqueta_2 = to_string(etiqueta_2);
-                                               $$.cod += "jz L" + setiqueta_2 + "\n";
+                                           $$.cod += $5.cod;
 
-                                               $$.cod += $5.cod;
+                                           $$.cod += "jmp L" + setiqueta_1 + "\n";
 
-                                               $$.cod += "jmp L" + setiqueta_1 + "\n";
-
-                                               $$.cod += "L" + setiqueta_2 + " ";
-                                            }
+                                           $$.cod += "L" + setiqueta_2 + " ";
                                       }
          | tfor pari id asig Esimple pyc Expr pyc id incrdecr pard Instr
                                        {
-                                         if ($4.tipo != LOGICO) {
-                                              errorSemantico(ERR_EXP_LOG, $3.nlin, $3.ncol, $3.lexema);
-                                         } else {
 
-                                             int etiqueta_1 = nEtiqueta();
-                                             string setiqueta_1 = to_string(etiqueta_1);
-
-                                             $$.cod = "L" + setiqueta_1 + " " + $12.cod;
-
-                                             $$.cod += $7.cod;
-
-                                             string dir7 = to_string($7.dir);
-                                             $$.cod += "mov " + dir7 + " A" + "\n";
-
-                                             $$.cod += "jz L" + setiqueta_1 + "\n";
                                         }
-                                      }
          ;
 
 Expr : Expr oprel Esimple {
@@ -362,7 +303,7 @@ Expr : Expr oprel Esimple {
                                 } else {
                                     $$.dir = nTemp($3.nlin, $3.ncol);
                                     $$.cod = $1.cod + $3.cod;
-                                    $$.tipo = LOGICO;
+                                    $$.tipo = ENTERO;
 
                                      string op = "";
                                      if ($2.lexema ==  ">") {
@@ -388,7 +329,7 @@ Expr : Expr oprel Esimple {
                                        $$.cod += "mov " + dir1 + " A" + "\n";
                                        $$.cod += op + tip + dir3 + "\n";
                                     } else if ($1.tipo == $3.tipo && $1.tipo == REAL) {  // ENTERO && ENTERO, REAL && REAL
-                                          string ri =  "r";
+                                          string tip =  "r";
 
                                           string dir1 = to_string($1.dir);
                                           string dir3 = to_string($3.dir);
