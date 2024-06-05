@@ -76,25 +76,25 @@ S    : FVM  {/* comprobar que después del programa no hay ningún token más */
                 int tk = yylex();
                 if (tk != 0) yyerror("");
                 else{
-                    cout << $1.cod.c_str() ;
+                    cout << $1.cod.c_str() << "halt\n";
                 }
-          }
-      ;
+             }
+     ;
 
 FVM   : DVar FVM  {
                     $$.cod = $1.cod + $2.cod;
-                 }
+                  }
      | tint tmain pari pard Bloque  {$$.cod = $5.cod;}
      ;
 
-Tipo   : tint   {$$.cod = $1.tipo;}
-       | tfloat {$$.cod = $1.tipo;}
+Tipo   : tint   {$$.cod = ENTERO;}
+       | tfloat {$$.cod = REAL;}
        ;
 
 Bloque : llavei { tablaSimbolos = new TablaSimbolos(tablaSimbolos); }
          BDecl SeqInstr { tablaSimbolos = tablaSimbolos->getAmbitoAnterior(); } llaved
          {
-            $$.cod = $2.cod + $3.cod;
+            $$.cod = $3.cod + $4.cod;
          }
        ;
 
@@ -142,7 +142,9 @@ V :  {$$.tipo = $0.tipo; $$.tam = $0.tam;}
   }
   ;
 
-SeqInstr : SeqInstr Instr {$$.cod = $1.cod + $2.cod;}
+
+SeqInstr : SeqInstr {$$.nlin = numtemp;} Instr {$$.cod = $1.cod + $3.cod;
+                                                numtemp = $2.nlin;}
          | /* epsilon */   {$$.cod = "";}
          ;
 
@@ -164,6 +166,15 @@ Instr :   pyc {$$.cod = "";}
                                     $$.cod += "mov A " + dir3_2 + "\n";
                                  }
 
+                                 if ($3.tipo == REAL && $1.tipo == ENTERO) {
+                                     string dir3 = to_string($3.dir);
+                                     $$.cod += "mov " + dir3 + " A" + "\n";
+                                     $$.cod += "rtoi\n";
+
+                                     string dir3_2 = to_string($3.dir);
+                                     $$.cod += "mov A " + dir3_2 + "\n";
+                                 }
+
                                      string dir1 = to_string($1.dir);
                                      $$.cod += "mov " + dir1 + " A" + "\n";
 
@@ -175,7 +186,7 @@ Instr :   pyc {$$.cod = "";}
                                 }
          | tprintf pari formato coma Expr pard pyc {
                                                         $$.cod = $5.cod;
-                                                        if($3.lexema == "\"%d\""){
+                                                        if(strcmp($3.lexema, "\"%d\"") == 0){
                                                             if($5.tipo != ENTERO){
                                                                 string dir5 = to_string($5.dir);
                                                                 $$.cod += "mov " + dir5 + " A" + "\n";
@@ -209,23 +220,23 @@ Instr :   pyc {$$.cod = "";}
 
                                                                 if($6.tipo ==  ENTERO) {
                                                                     $$.cod += "rdi A\n";
-                                                                    if($3.lexema == "\"%g\""){
+                                                                    if(strcmp($3.lexema, "\"%g\"") == 0){
                                                                         $$.cod += "itor\n";
                                                                     }
                                                                 }else {
                                                                     $$.cod += "rdr A\n";
-                                                                    if($3.lexema == "\"%d\""){
+                                                                    if(strcmp($3.lexema,"\"%d\"") == 0){
                                                                         $$.cod += "rtoi\n";
                                                                     }
                                                                 }
                                                                 string stemp = to_string(nTemp($6.nlin,$6.ncol));
-                                                                $$.cod = "mov A" + stemp + "\n";
+                                                                $$.cod += "mov A" + stemp + "\n";
                                                                 string dir6 = to_string($6.dir);
 
-                                                                $$.cod = "mov " + dir6 + " A" + "\n";
+                                                                $$.cod += "mov " + dir6 + " A" + "\n";
                                                                 string dbase = to_string($6.dbase);
-                                                                $$.cod = "addi #" + dbase +"\n";
-                                                                $$.cod = "mov " + stemp +" @A\n";
+                                                                $$.cod += "addi #" + dbase +"\n";
+                                                                $$.cod += "mov " + stemp +" @A\n";
                                                              }
                                                            }
          | tif pari Expr pard Instr {
@@ -296,21 +307,21 @@ Expr : Expr oprel Esimple {
                                     $$.tipo = ENTERO;
 
                                      string op = "";
-                                     if ($2.lexema ==  ">") {
+                                     if (strcmp($2.lexema,">") == 0) {
                                         op = "gtr";
-                                     } else if ($2.lexema == "<") {
+                                     } else if (strcmp($2.lexema,"<") == 0) {
                                         op = "lss";
-                                     } else if ($2.lexema ==  "<>") {
+                                     } else if (strcmp($2.lexema,"<>") == 0) {
                                         op = "neq";
-                                     } else if ($2.lexema ==  "=") {
+                                     } else if (strcmp($2.lexema,"=") == 0) {
                                         op = "eql";
-                                     } else if ($2.lexema ==  "<=") {
+                                     } else if (strcmp($2.lexema,"<=") == 0) {
                                         op = "leq";
                                      } else {
                                         op = "geq";
                                      }
 
-                                    if ($1.tipo == $3.tipo && $1.tipo == ENTERO) {  // ENTERO && ENTERO, REAL && REAL
+                                    if ($1.tipo == $3.tipo && $1.tipo == ENTERO) {
                                        string tip =  "i";
 
                                        string dir1 = to_string($1.dir);
@@ -318,7 +329,7 @@ Expr : Expr oprel Esimple {
 
                                        $$.cod += "mov " + dir1 + " A" + "\n";
                                        $$.cod += op + tip + dir3 + "\n";
-                                    } else if ($1.tipo == $3.tipo && $1.tipo == REAL) {  // ENTERO && ENTERO, REAL && REAL
+                                    } else if ($1.tipo == $3.tipo && $1.tipo == REAL) {
                                           string tip =  "r";
 
                                           string dir1 = to_string($1.dir);
@@ -326,11 +337,12 @@ Expr : Expr oprel Esimple {
 
                                           $$.cod += "mov " + dir1 + " A" + "\n";
                                           $$.cod += op + tip + dir3 + "\n";
-                                     }else if ($1.tipo == REAL && $3.tipo == ENTERO) {
+                                    }else if ($1.tipo == REAL && $3.tipo == ENTERO) {
                                        string dir3 = to_string($3.dir);
                                        $$.cod += "mov " + dir3 + " A" + "\n";
 
                                        $$.cod += "itor\n";
+
 
                                        string stemp = to_string(numtemp);
 
@@ -375,7 +387,7 @@ Esimple : Esimple opas Term {
                                 $$.tipo = REAL;
                              }
                                 string op;
-                             if ("+" == $2.lexema){
+                             if (strcmp("+", $2.lexema) == 0) {
                                 op = "add";
                              } else {
                                 op = "sub";
@@ -394,7 +406,7 @@ Esimple : Esimple opas Term {
 
                                    $$.cod += "mov " + dir1 + " A" + "\n";
                                    $$.cod += op + "r" + dir3 + "\n";
-                              }else if ($1.tipo == REAL && $3.tipo == ENTERO) {
+                             }else if ($1.tipo == REAL && $3.tipo == ENTERO) {
                                 string dir3 = to_string($3.dir);
                                 $$.cod += "mov " + dir3 + " A" + "\n";
 
@@ -443,7 +455,7 @@ Term : Term opmd Factor {
                                     $$.tipo = REAL;
                                  }
                                     string op;
-                                 if ("*" == $2.lexema){
+                                 if (strcmp("*", $2.lexema) == 0){
                                      op = "mul";
                                  } else {
                                      op = "div";
@@ -564,12 +576,12 @@ Ref : id {
          }
      | Ref cori {
                     if (!isArray($1.tipo)) {
-                        if($1.lexema != "]") {
+                        if(strcmp($1.lexema, "]") == 0) {
                            errorSemantico(ERRSOBRAN,$2.lexema, $2.nlin, $2.ncol);
                         } else {
                            errorSemantico(ERRSOBRAN,$1.lexema, $1.nlin, $1.ncol);
                         }
-                     }
+                    }
                 }
      Esimple cord {
                      if ($4.tipo == ENTERO) {
@@ -594,6 +606,8 @@ Ref : id {
                          $$.nlin = $5.nlin;
                          $$.ncol = $5.ncol;
                          $$.lexema = $5.lexema;
+                    }else {
+                         errorSemantico(ERR_NOENTERO,$5.lexema, $5.nlin, $5.ncol);
                     }
                  }
      ;
@@ -651,6 +665,7 @@ int yyerror(char *s)
     {  
        msgError(ERRSINT,nlin,ncol-strlen(yytext),yytext);
     }
+    return -1;
 }
 
 unsigned int nTemp(int nlin, int ncol) {

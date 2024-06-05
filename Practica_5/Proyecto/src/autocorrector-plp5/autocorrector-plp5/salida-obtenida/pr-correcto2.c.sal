@@ -1,0 +1,5 @@
+
+ERROR(m2r) al leer un valor de la posicion de memoria 0 sin haberlo
+inicializado, en la instrucción 22
+Línea 22: mov 0 A
+

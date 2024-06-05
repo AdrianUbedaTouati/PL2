@@ -8,6 +8,8 @@ NUMREAL     {D}+(\.){D}+
 OPAS    "-"|"+"
 OPMD    "/"|"*"
 OPREL   "<"|">"|"=="|"!="|">="|"<="
+FORMATO  "\"%d\""|"\"%g\""
+INCRDECR "++"|"--"
 
 
 %{
@@ -51,15 +53,15 @@ void errorSemantico(int nerror,char *lexema,int fila,int columna);
 <COMENTARIO>"*/"        {ncol+=strlen(yytext); BEGIN(INITIAL);}
 <COMENTARIO>[*/]        {ncol += strlen(yytext);}
 
-"main"            {return ret(tmain);}
-"int"             {return ret(tint);}
-"float"                {return ret(tfloat);}
-"printf"                {return ret(tprintf);}
-"scanf"                {return ret(tscanf);}
-"if"                {return ret(tif);}
-"else"                {return ret(telse);}
-"while"                {return ret(twhile);}
-"for"                {return ret(tfor);}
+"main"             {return ret(tmain);}
+"int"              {return ret(tint);}
+"float"            {return ret(tfloat);}
+"printf"           {return ret(tprintf);}
+"scanf"            {return ret(tscanf);}
+"if"               {return ret(tif);}
+"else"             {return ret(telse);}
+"while"            {return ret(twhile);}
+"for"              {return ret(tfor);}
 
 {ID}               {return ret(id);}
 {NUMENTERO}        {return ret(nentero);}
@@ -78,8 +80,8 @@ void errorSemantico(int nerror,char *lexema,int fila,int columna);
 "]"                {return ret(cord);}
 "{"                {return ret(llavei);}
 "}"                {return ret(llaved);}
-"\"%d\"" | "\"%g\""      {return ret(formato);}
-"++" | "--"              {return ret(incrdecr);}
+{FORMATO}          {return ret(formato);}
+{INCRDECR}         {return ret(incrdecr);}
 .                  {msgError(ERRLEXICO,nlin,ncol,yytext);}
 
 %%
