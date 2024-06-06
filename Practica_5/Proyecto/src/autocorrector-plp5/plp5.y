@@ -1,29 +1,17 @@
-/*########################################################*/
-/*                                                        */
-/*   Autor: Natallia Tsuranava                            */
-/*   PL 2022/23                                           */
-/*   Modificacion: plp4.y (ejemploHT)                  */
-/*                                                        */
-/*########################################################*/
-
-//==========================================================
-// COMPONENTES LEXICOS
-//==========================================================
-%token algoritmo falgoritmo
-%token var fvar
-%token entero real logico
-%token tabla de
-%token escribe lee
-%token si entonces sino
-%token mientras hacer repetir hasta
-%token blq fblq
-%token cierto falso
-%token id nentero nreal
-%token coma pyc dospto
+/*------------------------------ plp4.y -------------------------------*/
+%token cuerpo
 %token pari pard
-%token oprel opas opmd opasig 
+%token ent real
+%token llavei llaved
+%token pyc coma
+%token id nentero nreal
 %token cori cord
-%token ybool obool nobool
+%token asig
+%token imprimir leer formato referencia
+%token si sino
+%token mientras para incrdecr
+%token oprel opas opmd
+
 
 %{
 
@@ -40,850 +28,624 @@ using namespace std;
 #include "TablaSimbolos.h"
 #include "TablaTipos.h"
 
-//==========================================================
+
+// ####################################
 // variables y funciones del A. Léxico
-//==========================================================
+// ####################################
 extern int ncol,nlin,findefichero;
+
 
 extern int yylex();
 extern char *yytext;
 extern FILE *yyin;
 
+
 int yyerror(char *s);
 
-//==========================================================
-// CONSTANTES
-//==========================================================
-int MAX_DIR_VAR = 15999;   // ultima dirección posible para variables 
-int MAX_DIR_TEMP = 16383;  // ultima dirección posible para temporales
+// #############################
+//     constantes
+// #############################
+int FIN_DIR_VAR = 15999;   // dirección final de variables 
+int FIN_DIR_TMP = 16383;  // dirección final de temporales
 
-//==========================================================
-// VARIABLES
-//==========================================================
-TablaSimbolos *tsActual = new TablaSimbolos(nullptr);
+// #############################
+//     variables
+// #############################
+TablaSimbolos *tsimbs = new TablaSimbolos(nullptr);
 TablaTipos *ttipos = new TablaTipos();
-unsigned int cvar = 0;        // contador de direcciones de variables
-unsigned int ctemp = 16000;   // contador de direcciones temporales
-unsigned int cetiq = 0;       // contador de etiquetas
 
-//==========================================================
-// FUNCIONES
-//==========================================================
-unsigned int nuevaTemp(int nlin, int ncol);
-unsigned int nuevaVar(char *lexema, int nlin, int ncol);
-unsigned int nuevaEtiqueta(void);
+int cont_pos_vars =-1;
+int cont_pos_temps = 16000;
+int cont_etiqueta = 0;
+
+string operador, s1, s2;  // string auxiliares
+
+// #############################
+//     funciones
+// #############################
+int nuevaTemporal(char *lexema, int linea, int columna);
+int nuevaVariable(char *lexema, int linea, int columna);
+int incrementarEtiqueta();
 bool esArray(int tipo);
-
 
 %}
 
 %%
 
-
-S        : algoritmo dospto id SDec SInstr falgoritmo
-                              {  /* comprobar que después del programa no hay ningún token más */
-                                 int tk = yylex();
-                                 if (tk == 0) {
-                                    // SDec.cod | SInstr.cod | halt (detener el programa) 
-                                    cout << $4.cod << $5.cod << "halt\n";
-                                 } else {
+S           : FVM       {
+                              int tk = yylex();
+                              if(tk == 0){
+                                    cout << $1.cod << "halt\n";
+                              } 
+                              else{
                                     yyerror("");
-                                 }
                               }
-         ;
+                        }
+            ;
 
-SDec     : Dec                {  $$.cod = $1.cod;  }
-         | /* epsilon */      {  $$.cod = "";   }
-         ;
 
-Dec      : var DVar MDVar fvar
-                              {  $$.cod = $2.cod + $3.cod;  }
-         ;
-
-DVar     : Tipo dospto id     {  // Para crear nuevo simbolo necesitamos:
-                                 // nombre = id, tipo, dir, tam
-                                 Simbolo *simbolo = new Simbolo();
-                                 simbolo->nombre = $3.lexema;
-                                 simbolo->dir = nuevaVar($3.lexema, $3.nlin, $3.ncol);
-
-                                 // Bucle para obtener el tamanyo
-                                 $$.tipo = $1.tipo;
-                                 simbolo->tam = (ttipos->tipos)[$1.tipo].tamanyo;
-                                 while ((ttipos->tipos)[$$.tipo].clase != TIPOBASICO) {
-                                    // quitar la dimension
-                                    $$.tipo = (ttipos->tipos)[$$.tipo].tipoBase;
-
-                                    simbolo->tam *= (ttipos->tipos)[$$.tipo].tamanyo;
-                                 }
-                                 simbolo->tipo = $1.tipo;
-
-                                 // Comprobar el espacio para todo el array
-                                 if (cvar + simbolo->tam >= MAX_DIR_VAR) {
-                                    errorSemantico(ERR_NOCABE, 0, 0, $3.lexema);
-                                 }
-                                 cvar += simbolo->tam;      // actualizar contador
-                                 
-                                 // comprueba si el simbolo se repite en el ambito
-                                 // si no se repite, se anade a tsActual
-                                 if (!tsActual->newSymb(*simbolo)) {
-                                    errorSemantico(ERR_YADECL, $3.nlin, $3.ncol, $3.lexema);
-                                 }
-
+FVM         : DVar FVM        {
+                                    $$.cod = $1.cod + $2.cod;
                               }
-           LId pyc
-         ;
 
-MDVar    : DVar MDVar         {  $$.cod = $1.cod + $2.cod;  }
-         | /* epsilon */      {  $$.cod = "";   }
-         ;
+            | ent cuerpo pari pard Bloque   {
+                                                $$.cod = $5.cod;
+                                          }
+            ;
 
-LId      : coma id            {  // Para crear nuevo simbolo necesitamos:
-                                 // nombre = id, tipo, dir, tam
-                                 Simbolo *simbolo = new Simbolo();
-                                 simbolo->nombre = $2.lexema;
-                                 simbolo->dir = nuevaVar($2.lexema, $2.nlin, $2.ncol);
+Tipo        : ent       {
+                              $$.tipo = ENTERO;
+                        }
+            | real     {
+                              $$.tipo = REAL;
+                        }
+            ;
 
-                                 // Bucle para obtener el tamanyo
-                                 $$.tipo = $0.tipo;
-                                 simbolo->tam = (ttipos->tipos)[$0.tipo].tamanyo;
-                                 while ((ttipos->tipos)[$$.tipo].clase != TIPOBASICO) {
-                                    // quitar la dimension
-                                    $$.tipo = (ttipos->tipos)[$$.tipo].tipoBase;
+Bloque      : llavei {  tsimbs = new TablaSimbolos(tsimbs);} 
+              BDecl SeqInstr llaved      {
+                                                $$.cod = $3.cod + $4.cod;
+                                                tsimbs = tsimbs->getAmbitoAnterior();
+                                          }
+            ;
 
-                                    simbolo->tam *= (ttipos->tipos)[$$.tipo].tamanyo;
-                                 }
-                                 simbolo->tipo = $0.tipo;
-
-                                 // Comprobar el espacio para todo el array
-                                 if (cvar + simbolo->tam >= MAX_DIR_VAR) {
-                                    errorSemantico(ERR_NOCABE, 0, 0, $2.lexema);
-                                 }
-                                 cvar += simbolo->tam;      // actualizar contador
-
-                                 // comprueba si el simbolo se repite en el ambito
-                                 // si no se repite, se anade a tsActual
-                                 if (!tsActual->newSymb(*simbolo)) {
-                                    errorSemantico(ERR_YADECL, $2.nlin, $2.ncol, $2.lexema);
-                                 }
+BDecl       : BDecl DVar      {
+                                    $$.cod = $1.cod + $2.cod;
                               }
-           LId
-         | /* epsilon */      {  $$.cod = "";   }
-         ;
+            | /* epsilon */   {     $$.cod = ""; }
+            ;
 
-Tipo     : entero             {  $$.tipo = ENTERO; }
-         | real               {  $$.tipo = REAL;   }
-         | logico             {  $$.tipo = LOGICO; }
-         | tabla nentero de Tipo
-                              {  if (stoi($2.lexema) <= 0) {
-                                    errorSemantico(ERR_DIM, $2.nlin, $2.ncol, $2.lexema); 
-                                 }
-                                 $$.tipo = ttipos->nuevoTipoArray(stoi($2.lexema), $4.tipo);
+DVar        : Tipo      {
+                              $$.tipo = $1.tipo;
+                        } 
+            LIdent pyc  {$$.cod = "";}   
+            ;
+
+LIdent      :  LIdent coma {$$.tipo = $0.tipo;} Variable   {$$.cod = ""; }
+            |  {$$.tipo = $0.tipo;} Variable   {$$.cod = ""; }
+            ;
+
+Variable    : id  {     
+                        if (tsimbs->buscarAmbito($1.lexema) != nullptr) {
+                              errorSemantico(ERRYADECL, $1.lexema, $1.nlin, $1.ncol);
+                        }
+                        $$.tipo = $0.tipo;
+                  }  
+                  V     {
+                              Simbolo *simb = new Simbolo();
+                              simb->nombre = $1.lexema;
+                              simb->dir = nuevaVariable($1.lexema, $1.nlin, $1.ncol);
+                              simb->tam = $3.tamanyo;
+                              simb->tipo = $3.tipo;
+
+                              if(cont_pos_vars + simb->tam >= FIN_DIR_VAR) {
+                                    errorSemantico(ERR_NOCABE, $1.lexema, $1.nlin, $1.ncol);
                               }
-         ;
-
-SInstr   : SInstr pyc         {  $$.nlin = ctemp;  } 
-           Instr              {  $$.cod = $1.cod + $4.cod;  
-                                 ctemp = $1.nlin;
-                              }
-         |                    {  $$.nlin = ctemp;  }
-           Instr              {  $$.cod = $2.cod;
-                                 ctemp = $1.nlin;
-                              }
-         ;
-
-Instr    : escribe Expr       {  $$.cod = $2.cod;
-
-                                 if ($2.tipo == LOGICO) {
-                                    int etq1 = nuevaEtiqueta();   // etiqueta si la expr es falsa
-                                    int etq2 = nuevaEtiqueta();   // etiqueta de salida
-                                    
-                                    // El valor de A debe ser entero
-                                    // mov Expr.dir A
-                                    $$.cod += "mov " + to_string($2.dir) + " A\n";
-
-                                    // Salta a la posicion de programa indicada por 
-                                    // el valor L1 si en A hay un cero (falso)
-                                    // jz L1 
-                                    $$.cod += "jz L" + to_string(etq1) + "\n";
-
-                                    // se escribira una ‘c’ minuscula si el valor es cierto
-                                    $$.cod += "wrc #" + to_string(static_cast<int>('c')) + "\n";
-                                    
-                                    // saltar a la etiqueta de salida
-                                    $$.cod += "jmp L" + to_string(etq2) + "\n";
-
-                                    // la etiqueta de falso
-                                    $$.cod += "L" + to_string(etq1);
-
-                                    // se escribira una ‘f’ minuscula si el valor es falso
-                                    $$.cod += " wrc #" + to_string(static_cast<int>('f')) + "\n";
-
-                                    // la etiqueta de salida
-                                    $$.cod += "L" + to_string(etq2) + " ";
-                                 } else {
-                                    // si el tipo es real tenemos wrr, sino wri
-                                    string ri = ($2.tipo == REAL) ? "r" : "i";
-                                    
-                                    $$.cod += "wr" + ri + " " + to_string($2.dir) + "\n";
-                                 }
-
-                                 $$.cod += "wrl\n";
-                              }
-         | lee Ref            {  // si el tipo de Ref que nos llega es array, es decir no es un tipo basico,
-                                 // entonces se necesitan corchetes
-                                 if ((ttipos->tipos)[$2.tipo].clase == ARRAY) {
-                                    errorSemantico(ERR_FALTAN, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-                                 
-                                 $$.cod = $2.cod;
-
-                                 if ($2.tipo == LOGICO) {
-                                    //  Al leer del teclado una variable logica, 
-                                    // si se lee el caracter ‘c’ se entendera que el valor es cierto, 
-                                    // y si se lee cualquier otro caracter se entendera que es falso
-                                    
-                                    // Lee un caracter de la consola y carga su codigo ASCII en destino
-                                    $$.cod += "rdc A\n";
-
-                                    // si en A esta 'c', A se carga con 1
-                                    $$.cod += "eqli #" + to_string(static_cast<int>('c')) + "\n";
-
-                                    // movemos 1 o 0 a la temporal
-                                    $$.cod += "mov A " + to_string(nuevaTemp($1.nlin, $1.ncol)) + "\n";
-                                    
-                                    // calcular la direccion
-                                    $$.cod += "mov " + to_string($2.dir) + " A\n";
-                                    $$.cod += "addi #" + to_string($2.dbase) + "\n";
-
-                                    // guardar ctemp en la direccion calculada en A
-                                    $$.cod += "mov " + to_string(ctemp) + " @A\n";
-                                 } else {
-                                    // calcular la direccion
-                                    $$.cod += "mov " + to_string($2.dir) + " A\n";
-                                    $$.cod += "addi #" + to_string($2.dbase) + "\n";
-
-                                    // si el tipo es real tenemos rdr, sino rdi
-                                    string ri = ($2.tipo == REAL) ? "r" : "i";
-
-                                    // Lee un numero de la consola en la direccion calculada en A
-                                    $$.cod += "rd" + ri + " @A\n";
-                                 }
-                              }
-         | si Expr entonces Instr
-                              {  if ($2.tipo != LOGICO) {
-                                    errorSemantico(ERR_EXP_LOG, $1.nlin, $1.ncol, $1.lexema);
-                                 }
-                                 
-                                 // Expr.cod
-                                 $$.cod = $2.cod;
-
-                                 int etq = nuevaEtiqueta();    // etiqueta si expr es falsa
-
-                                 // mov Expr.dir A (debe ser un valor entero)
-                                 $$.cod += "mov " + to_string($2.dir) + " A\n";
-
-                                 // jz L1 (saltar si vale 0)
-                                 $$.cod += "jz L" + to_string(etq) +"\n";
-
-                                 // Instr1.cod
-                                 $$.cod += $4.cod;
-
-                                 // Etq a la siguiente instruccion
-                                 $$.cod += "L" + to_string(etq) + " ";
-                              }         
-         | si Expr entonces Instr sino Instr
-                              {  if ($2.tipo != LOGICO) {
-                                    errorSemantico(ERR_EXP_LOG, $1.nlin, $1.ncol, $1.lexema);
-                                 }
-
-                                 // Expr.cod
-                                 $$.cod = $2.cod;
-
-                                 int etq1 = nuevaEtiqueta();   // etiqueta si la expr es falsa
-                                 int etq2 = nuevaEtiqueta();   // etiqueta de salida
-
-                                 // mov Expr.dir A
-                                 $$.cod += "mov " + to_string($2.dir) + " A\n";
-
-                                 // jz L1
-                                 $$.cod += "jz L" + to_string(etq1) + "\n";
-
-                                 // Instr1.cod
-                                 $$.cod += $4.cod;
-
-                                 // jmp L2
-                                 $$.cod += "jmp L" + to_string(etq2) + "\n";
-
-                                 // L1 Instr2.cod
-                                 $$.cod += "L" + to_string(etq1) + " " + $6.cod;
-
-                                 // L2 (siguiente instr)
-                                 $$.cod += "L" + to_string(etq2) + " ";
-                              }
-         | mientras Expr hacer Instr
-                              {  if ($2.tipo != LOGICO) {
-                                    errorSemantico(ERR_EXP_LOG, $1.nlin, $1.ncol, $1.lexema);
-                                 }
-
-                                 int etq1 = nuevaEtiqueta();
-                                 int etq2 = nuevaEtiqueta();
-
-                                 // L1 Expr.cod
-                                 $$.cod = "L" + to_string(etq1) + " " + $2.cod;
-
-                                 // mov Expr.dir A
-                                 $$.cod += "mov " + to_string($2.dir) + " A\n";
-
-                                 // jz L2
-                                 $$.cod += "jz L" + to_string(etq2) + "\n";
-
-                                 // Instr1.cod
-                                 $$.cod += $4.cod;
-
-                                 // jmp L1
-                                 $$.cod += "jmp L" + to_string(etq1) + "\n";
-
-                                 // L2 (siguiente inst)
-                                 $$.cod += "L" + to_string(etq2) + " ";
-                              }   
-         | repetir Instr hasta Expr
-                              {  if ($4.tipo != LOGICO) {
-                                    errorSemantico(ERR_EXP_LOG, $3.nlin, $3.ncol, $3.lexema);
-                                 }
-
-                                 int etq = nuevaEtiqueta();    // etiqueta de bucle
-
-                                 // L1 Instr1.cod
-                                 $$.cod = "L" + to_string(etq) + " " + $2.cod;
-
-                                 // Expr.cod
-                                 $$.cod += $4.cod;
-
-                                 // mov Expr.dir A
-                                 $$.cod += "mov " + to_string($4.dir) + " A\n";
-
-                                 // jz L1
-                                 $$.cod += "jz L" + to_string(etq) + "\n";                                 
-                              }   
-         | Ref opasig Expr    {  // si el tipo de Ref que nos llega es array, es decir no es un tipo basico,
-                                 // entonces se necesitan corchetes
-                                 if ((ttipos->tipos)[$1.tipo].clase == ARRAY) {
-                                    errorSemantico(ERR_FALTAN, $1.nlin, $1.ncol, $1.lexema);
-                                 }
-
-                                 // no esta permitido asignar un valor real a una variable entera
-                                 // no se permite asignar valores logicos a variables enteras
-                                 if ($1.tipo == ENTERO && ($3.tipo == REAL || $3.tipo == LOGICO)) {
-                                    errorSemantico(ERR_EXDER_ENT, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-                                 
-                                 // no se permite asignar valores logicos a variables reales
-                                 if ($1.tipo == REAL && $3.tipo == LOGICO) {
-                                    errorSemantico(ERR_EXDER_RE, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-
-                                 // no se permite asignar valores reales o enteros a variables logicas
-                                 if ($1.tipo == LOGICO && ($3.tipo == ENTERO || $3.tipo == REAL)) {
-                                    errorSemantico(ERR_EXDER_LOG, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-                                 
-                                 // Ref.cod + Expr.cod
-                                 $$.cod = $1.cod + $3.cod;
-
-                                 // si es REAL := ENTERO, hay que convertir
-                                 if ($1.tipo == REAL && $3.tipo == ENTERO) {
-                                    // mov Expr.dir A
-                                    $$.cod += "mov " + to_string($3.dir) + " A\n";
-
-                                    // itor
-                                    $$.cod += "itor\n";
-
-                                    // mov A Expr.dir
-                                    $$.cod += "mov A " + to_string($3.dir) + "\n";
-                                 }
-
-                                 // calcular la direccion
-                                 // mov Ref.dir A
-                                 $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                 // addi #Ref.dbase
-                                 $$.cod += "addi #" + to_string($1.dbase) + "\n";
-
-                                 // guardar el valor de Expr en la direccion calculada en A
-                                 // mov Expr.dir @A
-                                 $$.cod += "mov " + to_string($3.dir) + " @A\n";
-                              }
-         | blq                {  tsActual = new TablaSimbolos(tsActual);   }
-           SDec SInstr fblq   {  $$.cod = $3.cod + $4.cod; 
-                                 tsActual = tsActual->getAmbitoAnterior();
-                              }
-         ;
-
-Expr     : Expr obool Econj   {  // los operadores logicos solamente pueden utilizarse con valores logicos,
-                                 // nunca con valores reales o enteros
-                                 if ($1.tipo != LOGICO) {
-                                    errorSemantico(ERR_EXIZQ_LOG, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-                                 if ($3.tipo != LOGICO) {
-                                    errorSemantico(ERR_EXDER_LOG, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-
-                                 $$.cod = $1.cod + $3.cod;
-                                 $$.dir = nuevaTemp($3.nlin, $3.ncol);
-                                 $$.tipo = LOGICO;
-
-                                 // mov Expr1.dir A
-                                 $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                 // las expresiones logicas son 0 o 1
-                                 // ori Econj.dir
-                                 $$.cod += "ori " + to_string($3.dir) + "\n";
-
-                                 // mov A ctemp
-                                 $$.cod += "mov A " + to_string(ctemp) + "\n";
-                              }
-         | Econj              {  $$.cod = $1.cod;
-                                 $$.dir = $1.dir;
-                                 $$.tipo = $1.tipo;
-                              }
-         ;
-
-Econj    : Econj ybool Ecomp  {  // los operadores logicos solamente pueden utilizarse con valores logicos,
-                                 // nunca con valores reales o enteros
-                                 if ($1.tipo != LOGICO) {
-                                    errorSemantico(ERR_EXIZQ_LOG, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-                                 if ($3.tipo != LOGICO) {
-                                    errorSemantico(ERR_EXDER_LOG, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-
-                                 $$.cod = $1.cod + $3.cod;
-                                 $$.dir = nuevaTemp($3.nlin, $3.ncol);
-                                 $$.tipo = LOGICO;
-
-                                 // mov Expr1.dir A
-                                 $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                 // las expresiones logicas son 0 o 1
-                                 // andi Econj.dir
-                                 $$.cod += "andi " + to_string($3.dir) + "\n";
-
-                                 // mov A ctemp
-                                 $$.cod += "mov A " + to_string(ctemp) + "\n";
-                              }
-         | Ecomp              {  $$.cod = $1.cod;
-                                 $$.dir = $1.dir;
-                                 $$.tipo = $1.tipo;
-                              }
-         ;
-
-Ecomp    : Esimple oprel Esimple
-                              {  // los operadores relacionales admiten expresiones reales o enteras
-                                 if ($1.tipo != REAL && $1.tipo != ENTERO) {
-                                    errorSemantico(ERR_EXIZQ_RE, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-                                 if ($3.tipo != REAL && $3.tipo != ENTERO) {
-                                    errorSemantico(ERR_EXDER_RE, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-
-                                 $$.cod = $1.cod + $3.cod;
-                                 $$.dir = nuevaTemp($3.nlin, $3.ncol);
-                                 $$.tipo = LOGICO;
-                                 
-                                 // operacion
-                                 string op = "";
-                                 if (strcmp($2.lexema, "=") == 0) {
-                                    op = "eql";
-                                 } else if (strcmp($2.lexema, "<>") == 0) {
-                                    op = "neq";
-                                 } else if (strcmp($2.lexema, "<") == 0) {
-                                    op = "lss";
-                                 } else if (strcmp($2.lexema, "<=") == 0) {
-                                    op = "leq";
-                                 } else if (strcmp($2.lexema, ">") == 0) {
-                                    op = "gtr";
-                                 } else {    // >=
-                                    op = "geq";
-                                 }
-
-                                 if ($1.tipo == $3.tipo) {  // ENTERO && ENTERO, REAL && REAL
-                                    string ri = $1.tipo == ENTERO ? "i" : "r";
-                                    
-                                    // mov Esimple1.dir A
-                                    $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                    // opri Esimple2.dir
-                                    $$.cod += op + ri + to_string($3.dir) + "\n";
-
-                                 } else if ($1.tipo == REAL && $3.tipo == ENTERO) {
-                                    // mov Esimple2.dir A
-                                    $$.cod += "mov " + to_string($3.dir) + " A\n";
-
-                                    // itor
-                                    $$.cod += "itor\n";
-
-                                    // mov A ctemp
-                                    $$.cod += "mov A " + to_string(ctemp) + "\n";
-
-                                    // mov Esimple1.dir A
-                                    $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                    // opr ctemp
-                                    $$.cod += op + "r " + to_string(ctemp) + "\n";
-
-                                 } else {    // ENTERO && REAL
-                                    // mov Esimple1.dir A
-                                    $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                    // itor
-                                    $$.cod += "itor\n";
-
-                                    // opr Esimple2.dir
-                                    $$.cod += op + "r " + to_string($3.dir) + "\n";
-                                 }
-
-                                 // mov A ctemp
-                                 $$.cod += "mov A " + to_string(ctemp) + "\n";
-                              }
-         | Esimple            {  $$.cod = $1.cod;
-                                 $$.dir = $1.dir;
-                                 $$.tipo = $1.tipo;
-                              }
-         ;
-
-Esimple  : Esimple opas Term  {  // los operadores aritmeticos solamente pueden utilizarse con valores reales o enteros, 
-                                 // nunca con valores logicos
-                                 if ($1.tipo != REAL && $1.tipo != ENTERO) {
-                                    errorSemantico(ERR_EXIZQ_RE, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-                                 if ($3.tipo != REAL && $3.tipo != ENTERO) {
-                                    errorSemantico(ERR_EXDER_RE, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-                                 
-                                 $$.cod = $1.cod + $3.cod;
-                                 $$.dir = nuevaTemp($3.nlin, $3.ncol);
-                                 $$.tipo = ($1.tipo == ENTERO && $3.tipo == ENTERO) ? ENTERO : REAL;
-                                 
-                                 // operacion
-                                 string op = (strcmp($2.lexema, "+") == 0) ? "add" : "sub";
-                                 
-                                 if ($1.tipo == $3.tipo) {  // ENTERO && ENTERO, REAL && REAL
-                                    string ri = $1.tipo == ENTERO ? "i" : "r";
-                                    
-                                    // mov Esimple1.dir A
-                                    $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                    // opri Term.dir
-                                    $$.cod += op + ri + to_string($3.dir) + "\n";
-
-                                 } else if ($1.tipo == REAL && $3.tipo == ENTERO) {
-                                    // mov Term.dir A
-                                    $$.cod += "mov " + to_string($3.dir) + " A\n";
-
-                                    // itor
-                                    $$.cod += "itor\n";
-
-                                    // mov A ctemp
-                                    $$.cod += "mov A " + to_string(ctemp) + "\n";
-
-                                    // mov Esimple1.dir A
-                                    $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                    // opr ctemp
-                                    $$.cod += op + "r " + to_string(ctemp) + "\n";
-
-                                 } else {    // ENTERO && REAL
-                                    // mov Esimple1.dir A
-                                    $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                    // itor
-                                    $$.cod += "itor\n";
-
-                                    // opr Term.dir
-                                    $$.cod += op + "r " + to_string($3.dir) + "\n";
-                                 }
-
-                                 // mov A ctemp
-                                 $$.cod += "mov A " + to_string(ctemp) + "\n";
-                              }
-         | Term               {  $$.cod = $1.cod;
-                                 $$.dir = $1.dir;
-                                 $$.tipo = $1.tipo;
-                              }
-         | opas Term          {  // los operadores aritmeticos solamente pueden utilizarse con valores reales o enteros, 
-                                 // nunca con valores logicos
-                                 if ($2.tipo != REAL && $2.tipo != ENTERO) {
-                                    errorSemantico(ERR_EXDER_RE, $1.nlin, $1.ncol, $1.lexema);
-                                 }
-
-                                 $$.cod = $2.cod;
-                                 $$.dir = nuevaTemp($2.nlin, $2.ncol);
-                                 $$.tipo = $2.tipo;
-
-                                 // si operacion es '-', hay que cambiar el signo
-                                 if(strcmp($1.lexema, "+") == 0) {
-                                    // mov Term.dir ctemp
-                                    $$.cod += "mov " + to_string($2.dir) + " " + to_string(ctemp) + "\n";
-
-                                 } else {
-                                    // mov Term.dir A
-                                    $$.cod += "mov " + to_string($2.dir) +" A\n";
-                                          
-                                    // muli #-1
-                                    $$.cod += "muli #-1\n";
-                                    
-                                    // mov A ctemp
-                                    $$.cod += "mov A " + to_string(ctemp) + "\n";
-                                 }
-                              }
-         ;
-
-Term     : Term opmd Factor   {  // los operadores aritmeticos solamente pueden utilizarse con valores reales o enteros, 
-                                 // nunca con valores logicos
-                                 if ($1.tipo != REAL && $1.tipo != ENTERO) {
-                                    errorSemantico(ERR_EXIZQ_RE, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-                                 if ($3.tipo != REAL && $3.tipo != ENTERO) {
-                                    errorSemantico(ERR_EXDER_RE, $2.nlin, $2.ncol, $2.lexema);
-                                 }
-
-                                 $$.cod = $1.cod + $3.cod;
-                                 $$.dir = nuevaTemp($3.nlin, $3.ncol);
-                                 $$.tipo = ($1.tipo == ENTERO && $3.tipo == ENTERO) ? ENTERO : REAL;
-                                 
-                                 // operacion
-                                 string op = (strcmp($2.lexema, "*") == 0) ? "mul" : "div";
-                                 
-                                 if ($1.tipo == $3.tipo) {  // ENTERO && ENTERO, REAL && REAL
-                                    string ri = $1.tipo == ENTERO ? "i" : "r";
-                                    
-                                    // mov Term1.dir A
-                                    $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                    // opri Factor.dir
-                                    $$.cod += op + ri + to_string($3.dir) + "\n";
-
-                                 } else if ($1.tipo == REAL && $3.tipo == ENTERO) {
-                                    // mov Factor.dir A
-                                    $$.cod += "mov " + to_string($3.dir) + " A\n";
-
-                                    // itor
-                                    $$.cod += "itor\n";
-
-                                    // mov A ctemp
-                                    $$.cod += "mov A " + to_string(ctemp) + "\n";
-
-                                    // mov Term1.dir A
-                                    $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                    // opr ctemp
-                                    $$.cod += op + "r " + to_string(ctemp) + "\n";
-
-                                 } else {    // ENTERO && REAL
-                                    // mov Term1.dir A
-                                    $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                    // itor
-                                    $$.cod += "itor\n";
-
-                                    // opr Factor.dir
-                                    $$.cod += op + "r " + to_string($3.dir) + "\n";
-                                 }
-
-                                 // mov A ctemp
-                                 $$.cod += "mov A " + to_string(ctemp) + "\n";
-                              }
-         | Factor             {  $$.cod = $1.cod;
-                                 $$.dir = $1.dir;
-                                 $$.tipo = $1.tipo;
-                              }
-         ;
-
-Factor   : Ref                {  // si el tipo de Ref que nos llega es array, es decir no es un tipo basico,
-                                 // entonces se necesitan corchetes
-                                 if ((ttipos->tipos)[$1.tipo].clase == ARRAY) {
-                                    errorSemantico(ERR_FALTAN, $1.nlin, $1.ncol, $1.lexema);
-                                 }
-
-                                 $$.cod = $1.cod;
-                                 $$.dir = nuevaTemp($1.nlin, $1.ncol);
-                                 $$.tipo = $1.tipo;
-
-                                 // mov Ref.dir A
-                                 $$.cod += "mov " + to_string($1.dir) + " A\n";
-
-                                 // addi #Ref.dbase
-                                 $$.cod += "addi #" + to_string($1.dbase) + "\n";
-
-                                 // mov @A ctemp
-                                 $$.cod += "mov @A " + to_string(ctemp) + "\n";
-                              }
-         | nentero            {  $$.tipo = ENTERO; 
-
-                                 // si no hay espacio para la variable, salta el error 
-                                 // (lexema se necesita para el mensaje de error) 
-                                 ctemp = nuevaTemp($1.nlin, $1.ncol); 
-                                 
-                                 $$.dir = ctemp;
-                                 $$.cod = "mov #" + string($1.lexema) + " " + to_string(ctemp) + "\n";
-                              }
-         | nreal              {  $$.tipo = REAL; 
-
-                                 // si no hay espacio para la variable, salta el error 
-                                 // (lexema se necesita para el mensaje de error) 
-                                 ctemp = nuevaTemp($1.nlin, $1.ncol); 
-                                 
-                                 $$.dir = ctemp;
-                                 $$.cod = "mov $" + string($1.lexema) + " " + to_string(ctemp) + "\n";
-                              }
-         | pari Expr pard     {  $$.cod = $2.cod;
-                                 $$.dir = $2.dir;
-                                 $$.tipo = $2.tipo;
-                              }
-         | nobool Factor      {  if ($2.tipo != LOGICO) {
-                                    errorSemantico(ERR_EXDER_LOG, $1.nlin, $1.ncol, $1.lexema);
-                                 }
-
-                                 $$.cod = $2.cod;
-                                 $$.dir = nuevaTemp($2.nlin, $2.ncol);
-                                 $$.tipo = LOGICO;
-
-                                 // mov Factor1.dir A
-                                 $$.cod += "mov " + to_string($2.dir) + " A\n";
-                                 
-                                 // Factor va a ser 1 o 0
-                                 // noti
-                                 $$.cod += "noti\n";
-
-                                 // mov A ctemp
-                                 $$.cod += "mov A " + to_string(ctemp) + "\n";
-                              }
-         | cierto             {  $$.tipo = LOGICO;
-                                 $$.dir = nuevaTemp($1.nlin, $1.ncol);
-
-                                 // true es 1
-                                 $$.cod = "mov #1 " + to_string(ctemp) + "\n";
-                              }
-         | falso              {  $$.tipo = LOGICO;
-                                 $$.dir = nuevaTemp($1.nlin, $1.ncol);
-
-                                 // false es 0
-                                 $$.cod = "mov #0 " + to_string(ctemp) + "\n"; 
-                              }
-         ;
-
-Ref      : id                 {  Simbolo *simbolo = tsActual->searchSymb($1.lexema);
-                                 if (simbolo == nullptr) {
-                                    errorSemantico(ERR_NODECL, $1.nlin, $1.ncol, $1.lexema);
-                                 }
-
-                                 // si no hay espacio para la variable, salta el error 
-                                 // (lexema se necesita para el mensaje de error) 
-                                 ctemp = nuevaTemp($1.nlin, $1.ncol);    
-
-                                 $$.dir = ctemp;
-                                 $$.cod = "mov #0 " + to_string(ctemp) + "\n";
-                                 $$.tipo = simbolo->tipo;
-
-                                 // si id no es de tipo array, simbolo->dir es 0
-                                 $$.dbase = simbolo->dir;
-                              
-                                 $$.lexema = $1.lexema;
-                                 $$.nlin = $1.nlin;
-                                 $$.ncol = $1.ncol;
-                              }
-         | Ref cori           {  if (!esArray($1.tipo)) {
-                                    if(strcmp($1.lexema, "]") == 0) {
-                                       errorSemantico(ERR_SOBRAN, $2.nlin, $2.ncol, $2.lexema); 
-                                    } else {
-                                       errorSemantico(ERR_SOBRAN, $1.nlin, $1.ncol, $1.lexema);
+                              cont_pos_vars += simb->tam;  
+                              tsimbs->nuevoSimbolo(*simb);
+                        }
+            ;
+
+V           : cori nentero cord {$$.tipo = $0.tipo; $$.tamanyo = 1;}
+                                    V   {      
+                                          if (stoi($2.lexema) <= 0) {
+                                                errorSemantico(ERRDIM, $2.lexema, $2.nlin, $2.ncol); 
+                                          }
+                                          $$.tipo = ttipos->nuevoTipoArray(stoi($2.lexema), $5.tipo);
+                                          $$.tamanyo = $5.tamanyo * stoi($2.lexema);
                                     }
-                                 }
+            | /* epsilon */   { $$.tipo = $0.tipo; $$.tamanyo = $0.tamanyo;}
+            ;
+
+SeqInstr    : SeqInstr {  $$.nlin = cont_pos_temps;  } 
+                  Instr       {
+                                    $$.cod = $1.cod + $3.cod;
+                                    cont_pos_temps = $2.nlin;
                               }
-           Esimple cord       {  // Indice solo puede ser un numero entero
-                                 if ($4.tipo != ENTERO) {
-                                    errorSemantico(ERR_INDICE_ENTERO, $4.nlin, $4.ncol, $4.lexema);
-                                 }
+            | /* epsilon */   { $$.cod = "";}
+            ;
 
-                                 // desreferenciar
-                                 $$.tipo = (ttipos->tipos)[$1.tipo].tipoBase;
-                                 $$.dbase = $1.dbase;
+Instr       : pyc       {
+                              $$.cod = "";
+                        }
+            | Bloque    {
+                              $$.cod = $1.cod;
+                        }
+            | Ref asig Expr pyc     {
+                                          if((ttipos->tipos)[$1.tipo].clase == ARRAY){
+                                                errorSemantico(ERRFALTAN, $1.lexema, $1.nlin, $1.ncol);
+                                          }
+                                          
+                                          s1 = $1.cod + $3.cod;
 
-                                 // si no hay espacio para la variable, salta el error 
-                                 // (lexema se necesita para el mensaje de error) 
-                                 ctemp = nuevaTemp($2.nlin, $2.ncol);    
+                                          if ($1.tipo == REAL && $3.tipo == ENTERO) {
+                                                s1 += "mov " + to_string($3.dir) + " A\n";
+                                                s1 += "itor\n";
+                                                s1 += "mov A " + to_string($3.dir) + "\n";
+                                          }
+                                          if ($1.tipo == ENTERO && $3.tipo == REAL) {
+                                                s1 += "mov " + to_string($3.dir) + " A\n";
+                                                s1 += "rtoi\n";
+                                                s1 += "mov A " + to_string($3.dir) + "\n";
+                                          }
 
-                                 $$.dir = ctemp;
+                                          s1 += "mov " + to_string($1.dir) + " A\n";
+                                          s1 += "addi #" + to_string($1.dbase) + "\n";
 
-                                 // Ref1.cod + Esimple.cod
-                                 $$.cod = $1.cod + $4.cod;
+                                          s1 += "mov " + to_string($3.dir) + " @A\n";
+                                          $$.cod = s1;
+                                    }
+            | imprimir pari formato coma Expr pard pyc        {
+                                                                  s1 = $5.cod;
+                                                                  if(strcmp($3.lexema, "\"%d\"") ==0){
+                                                                        if($5.tipo == REAL){
+                                                                              s1 += "mov " + to_string($5.dir) + " A\n";
+                                                                              s1 += "rtoi\n";
+                                                                              s1 += "wri A\n";    
+                                                                        }
+                                                                        else{
+                                                                              s1 += "wri " + to_string($5.dir) + "\n";
+                                                                        }
+                                                                  }
+                                                                  else{
+                                                                        if($5.tipo == ENTERO){
+                                                                              s1 += "mov " + to_string($5.dir) + " A\n";
+                                                                              s1 += "itor\n";
+                                                                              s1 += "wrr A\n";    
+                                                                        }
+                                                                        else{
+                                                                              s1 += "wrr " + to_string($5.dir) + "\n";
+                                                                        }
+                                                                  }
+                                                                  s1 += "wrl\n";
+                                                                  $$.cod = s1;
+                                                            }
+            | leer pari formato coma referencia Ref pard pyc     {
+                                                                        if ((ttipos->tipos)[$6.tipo].clase == ARRAY) {
+                                                                              errorSemantico(ERRFALTAN, $6.lexema, $6.nlin, $6.ncol);
+                                                                        }
+                                                                              
+                                                                        s1 = $6.cod;
 
-                                 // A = Ref1.dir * Ref1.tam + Esimple.dir
-                                 // mov Ref1.dir A
-                                 $$.cod += "mov " + to_string($1.dir) + " A\n";
-                                 // muli #Ref1.tam
-                                 $$.cod += "muli #" + to_string((ttipos->tipos)[$1.tipo].tamanyo) + "\n";
-                                 // addi Esimple.dir
-                                 $$.cod += "addi " + to_string($4.dir) + "\n";
-                                 // mov A ctemp
-                                 $$.cod += "mov A " + to_string(ctemp) + "\n";
+                                                                        if($6.tipo == ENTERO){
+                                                                              s1 += "rdi A\n";
+                                                                              if(strcmp($3.lexema, "\"%g\"") ==0){
+                                                                                    s1 += "itor\n";
+                                                                              }
+                                                                              
+                                                                              cont_pos_temps = nuevaTemporal($6.lexema, $6.nlin, $6.ncol);
+                                                                              s1 += "mov A " + to_string(cont_pos_temps) + "\n";
 
-                                 $$.lexema = $5.lexema;
-                                 $$.nlin = $5.nlin;
-                                 $$.ncol = $5.ncol;
+                                                                              s1 += "mov " + to_string($6.dir) + " A\n";
+                                                                              s1 += "addi #" + to_string($6.dbase) + "\n";
+
+                                                                              s1 += "mov " + to_string(cont_pos_temps) + " @A\n";
+                                                                        }
+                                                                        else{
+                                                                              s1 += "rdr A\n";
+                                                                              if(strcmp($3.lexema, "\"%d\"") ==0){
+                                                                                    s1 += "rtoi\n";
+                                                                              }
+                                                                              
+                                                                              cont_pos_temps = nuevaTemporal($6.lexema, $6.nlin, $6.ncol);
+                                                                              s1 += "mov A " + to_string(cont_pos_temps) + "\n";
+
+                                                                              s1 += "mov " + to_string($6.dir) + " A\n";
+                                                                              s1 += "addi #" + to_string($6.dbase) + "\n";
+
+                                                                              s1 += "mov " + to_string(cont_pos_temps) + " @A\n";
+                                                                        }
+                                                                        $$.cod = s1;
+                                                                  }
+            | si pari Expr pard Instr     {
+                                                s1 = $3.cod;
+                                                int label = incrementarEtiqueta();
+
+                                                s1 += "mov " + to_string($3.dir) + " A\n";
+                                                s1 += "jz L" + to_string(label) +"\n";
+                                                s1 += $5.cod;
+                                                s1 += "L" + to_string(label) + " ";
+                                                $$.cod = s1;
+                                          }
+            | si pari Expr pard Instr sino Instr      {
+                                                            s1 = $3.cod;
+                                                            int label1 = incrementarEtiqueta();
+                                                            int label2 = incrementarEtiqueta();
+
+                                                            s1 += "mov " + to_string($3.dir) + " A\n";
+                                                            s1 += "jz L" + to_string(label1) +"\n";
+                                                            s1 += $5.cod;
+                                                            s1 += "jmp L" + to_string(label2) + "\n";
+                                                            s1 += "L" + to_string(label1) + " " + $7.cod;
+                                                            s1 += "L" + to_string(label2) + " ";
+                                                            $$.cod = s1;
+
+                                                      }
+            | mientras pari Expr pard Instr        {
+                                                      int label1 = incrementarEtiqueta();
+                                                      int label2 = incrementarEtiqueta();
+                                                
+                                                      s1 = "L" + to_string(label1) + " " + $3.cod;
+                                                      s1 += "mov " + to_string($3.dir) + " A\n";
+                                                      s1 += "jz L" + to_string(label2) + "\n";
+                                                      s1 += $5.cod;
+                                                      s1 += "jmp L" + to_string(label1) + "\n";
+                                                      s1 += "L" + to_string(label2) + "\n";
+                                                      $$.cod = s1;
+                                                }
+            | para pari id asig Esimple    {
+                                                Simbolo *simb = tsimbs->buscar($3.lexema);
+                                                if(simb == nullptr){
+                                                      errorSemantico(ERRNODECL, $3.lexema, $3.nlin, $3.ncol);
+                                                }
+                                                if(simb->tipo != ENTERO){
+                                                      errorSemantico(ERR_NOENTERO, $3.lexema, $3.nlin, $3.ncol);
+                                                }
+
+                                                if((ttipos->tipos)[$3.tipo].clase == ARRAY){
+                                                      errorSemantico(ERRFALTAN, $3.lexema, $3.nlin, $3.ncol);
+                                                }
+                                          }
+                pyc Expr pyc id     {
+                                          Simbolo *simb = tsimbs->buscar($10.lexema);
+                                          if(simb == nullptr){
+                                                errorSemantico(ERRNODECL, $10.lexema, $10.nlin, $10.ncol);
+                                          }
+                                          if(simb->tipo != ENTERO){
+                                                errorSemantico(ERR_NOENTERO, $10.lexema, $10.nlin, $10.ncol);
+                                          }
+
+                                          if((ttipos->tipos)[$3.tipo].clase == ARRAY){
+                                                errorSemantico(ERRFALTAN, $10.lexema, $10.nlin, $10.ncol);
+                                          }  
+                                    }
+                  incrdecr pard Instr         {                                                                       
+                                                      s1 = $5.cod;
+                                                                  
+                                                      // id = Esimple
+                                                      Simbolo *simb = tsimbs->buscar($3.lexema);
+                                                           
+                                                      if ($5.tipo == REAL) {
+                                                            s1 += "mov " + to_string($5.dir) + " A\n";
+                                                            s1 += "rtoi\n";
+                                                            s1 += "mov A " + to_string($5.dir) + "\n";
+                                                      }
+
+                                                      s1 += "mov #0 A\n";
+                                                      s1 += "addi #" + to_string(simb->dir) + "\n";
+                                                      s1 += "mov " + to_string($5.dir) + " @A\n";
+
+                                                      // Expr
+                                                      int label1 = incrementarEtiqueta();
+                                                      int label2 = incrementarEtiqueta(); 
+                                                      s1 += "L" + to_string(label1) + " " + $8.cod;
+                                                      s1 += "mov " + to_string($8.dir) + " A\n";
+                                                      s1 += "jz L" + to_string(label2) + "\n";
+                                                      s1 += $14.cod;
+                                                      
+                                                      // incrdecr
+                                                      Simbolo *simb2 = tsimbs->buscar($10.lexema);
+                                                      s1 += "mov " + to_string(simb2->dir) + " A\n";
+                                                      if( strcmp($12.lexema, "++") == 0){
+                                                            s1 += "addi #1\n";
+                                                      }
+                                                      else{
+                                                            s1 += "subi #1\n";
+                                                      }
+                                                
+                                                      s1 += "mov A " +  to_string(simb2->dir) + "\n";
+                                                      s1 += "jmp L" + to_string(label1) + "\n";
+
+                                                      // salir del for
+                                                      s1 += "L" + to_string(label2) + " ";
+                                                      $$.cod = s1;
+
+
+                                                }
+            ;
+
+Expr        : Expr oprel Esimple          {
+                                                s1 = $1.cod + $3.cod;
+                                                cont_pos_temps = nuevaTemporal($3.lexema, $3.nlin, $3.ncol);
+                                                $$.dir = cont_pos_temps;
+                                                $$.tipo = ENTERO;
+
+                                                if(strcmp($2.lexema, "==") == 0){
+                                                      s2 = "eql";
+                                                }
+                                                else if(strcmp($2.lexema, "!=") == 0){
+                                                      s2 = "neq";
+                                                }
+                                                else if(strcmp($2.lexema, ">") == 0){
+                                                      s2 = "gtr";
+                                                }
+                                                else if(strcmp($2.lexema, ">=") == 0){
+                                                      s2 = "geq";
+                                                }
+                                                else if(strcmp($2.lexema, "<") == 0){
+                                                      s2 = "lss";
+                                                }
+                                                else{
+                                                      s2 = "leq";
+                                                }
+                                                
+                                                if($1.tipo == $3.tipo){
+                                                      s1 += "mov " + to_string($1.dir) + " A\n";
+                                                      
+                                                      if($1.tipo == ENTERO){
+                                                            s1 += s2 + "i " + to_string($3.dir) + "\n";
+                                                      }
+                                                      else{
+                                                            s1 += s2 + "r " + to_string($3.dir) + "\n";
+                                                      }
+                                                }
+                                                else if($1.tipo == REAL && $3.tipo == ENTERO){
+                                                      s1 += "mov " + to_string($3.dir) + " A\n";
+                                                      s1 += "itor\n";
+                                                      s1 += "mov A " + to_string(cont_pos_temps) + "\n";
+                                                      s1 += "mov " + to_string($1.dir) + " A\n";
+                                                      s1 += s2 + "r " + to_string(cont_pos_temps) + "\n";
+                                                }
+                                                else{
+                                                      s1 += "mov " + to_string($1.dir) + " A\n";
+                                                      s1 += "itor\n";
+                                                      s1 += s2 + "r " + to_string($3.dir) + "\n";
+                                                }
+
+                                                s1 += "mov A " + to_string(cont_pos_temps) + "\n";
+                                                $$.cod = s1;
+
+                                          }
+            | Esimple         {
+                                    $$.cod = $1.cod;
+                                    $$.dir = $1.dir;
+                                    $$.tipo = $1.tipo;
+
                               }
-      ;
+            ;
+
+Esimple     : Esimple opas Term     {
+                                          s1 = $1.cod + $3.cod;
+                                          cont_pos_temps = nuevaTemporal($3.lexema, $3.nlin, $3.ncol);
+                                          $$.dir = cont_pos_temps;
+                                          
+                                          if(strcmp($2.lexema, "+") == 0){
+                                                s2 = "add";
+                                          }else{
+                                                s2 = "sub";
+                                          }
+                                          
+                                          if($1.tipo == $3.tipo){
+                                                $$.tipo = $1.tipo;
+
+                                                s1 += "mov " + to_string($1.dir) + " A\n";
+                                                
+                                                if($1.tipo == ENTERO){
+                                                      s1 += s2 + "i " + to_string($3.dir) + "\n";
+                                                }
+                                                else{
+                                                      s1 += s2 + "r " + to_string($3.dir) + "\n";
+                                                }
+                                          }
+                                          else if($1.tipo == REAL && $3.tipo == ENTERO){
+                                                $$.tipo =  REAL;
+                                                s1 += "mov " + to_string($3.dir) + " A\n";
+                                                s1 += "itor\n";
+                                                s1 += "mov A " + to_string(cont_pos_temps) + "\n";
+                                                s1 += "mov " + to_string($1.dir) + " A\n";
+                                                s1 += s2 + "r " + to_string(cont_pos_temps) + "\n";
+                                          }
+                                          else{    
+                                                $$.tipo = REAL;
+                                                s1 += "mov " + to_string($1.dir) + " A\n";
+                                                s1 += "itor\n";
+                                                s1 += s2 + "r " + to_string($3.dir) + "\n";
+                                          }
+
+                                          s1 += "mov A " + to_string(cont_pos_temps) + "\n";
+                                          $$.cod = s1;
+
+
+                                    }
+            | Term      {     
+                              $$.cod = $1.cod;
+                              $$.dir = $1.dir;
+                              $$.tipo = $1.tipo;
+                        }
+            ;
+
+Term        : Term opmd Factor      {     
+                                          s1 = $1.cod + $3.cod;
+                                          cont_pos_temps = nuevaTemporal($3.lexema, $3.nlin, $3.ncol);
+                                          $$.dir = cont_pos_temps;
+                                          
+                                          if(strcmp($2.lexema, "*") == 0){
+                                                s2 = "mul";
+                                          }else{
+                                                s2 = "div";
+                                          }
+                                          
+                                          if($1.tipo == $3.tipo){
+                                                $$.tipo = $1.tipo;
+
+                                                s1 += "mov " + to_string($1.dir) + " A\n";
+                                                
+                                                if($1.tipo == ENTERO){
+                                                      s1 += s2 + "i " + to_string($3.dir) + "\n";
+                                                }
+                                                else{
+                                                      s1 += s2 + "r " + to_string($3.dir) + "\n";
+                                                }
+                                          }
+                                          else if($1.tipo == REAL && $3.tipo == ENTERO){
+                                                $$.tipo =  REAL;
+                                                s1 += "mov " + to_string($3.dir) + " A\n";
+                                                s1 += "itor\n";
+                                                s1 += "mov A " + to_string(cont_pos_temps) + "\n";
+                                                s1 += "mov " + to_string($1.dir) + " A\n";
+                                                s1 += s2 + "r " + to_string(cont_pos_temps) + "\n";
+                                          }
+                                          else{    
+                                                $$.tipo = REAL;
+                                                s1 += "mov " + to_string($1.dir) + " A\n";
+                                                s1 += "itor\n";
+                                                s1 += s2 + "r " + to_string($3.dir) + "\n";
+                                          }
+
+                                          s1 += "mov A " + to_string(cont_pos_temps) + "\n";
+                                          $$.cod = s1;
+                                    }
+            | Factor          {     
+                                    $$.cod = $1.cod;
+                                    $$.dir = $1.dir;
+                                    $$.tipo = $1.tipo;
+                              }
+            ;
+
+Factor      : Ref       {     
+                              if((ttipos->tipos)[$1.tipo].clase == ARRAY){
+                                    errorSemantico(ERRFALTAN, $1.lexema, $1.nlin, $1.ncol);
+                              }
+
+                              s1 = $1.cod;
+                              cont_pos_temps = nuevaTemporal($1.lexema, $1.nlin, $1.ncol);
+                              $$.tipo = $1.tipo;
+                              $$.dir = cont_pos_temps;
+
+                              s1 += "mov " + to_string($1.dir) + " A\n";
+                              s1 += "addi #" + to_string($1.dbase) + "\n";
+                              s1 += "mov @A " + to_string(cont_pos_temps) + "\n";
+                              $$.cod = s1;
+                        }
+            | nentero         {     $$.tipo = ENTERO;
+                                    cont_pos_temps = nuevaTemporal($1.lexema, $1.nlin, $1.ncol);
+                                    $$.dir = cont_pos_temps;
+                                    s1 = "mov #" + string($1.lexema) + " " + to_string(cont_pos_temps) + "\n";
+                                    $$.cod = s1;
+                              }
+            | nreal           {     $$.tipo = REAL;
+                                    cont_pos_temps = nuevaTemporal($1.lexema, $1.nlin, $1.ncol);
+                                    $$.dir = cont_pos_temps;
+                                    $$.cod = "mov $" + string($1.lexema) + " " + to_string(cont_pos_temps) + "\n";
+                              }
+            | pari Expr pard        {     $$.cod = $2.cod;
+                                          $$.dir = $2.dir;
+                                          $$.tipo = $2.tipo;
+                                    }
+            ;
+
+Ref         : id        {     Simbolo *simb = tsimbs->buscar($1.lexema);
+                              if (simb == nullptr){
+                                    errorSemantico(ERRNODECL, $1.lexema, $1.nlin, $1.ncol);
+                              }
+
+                              cont_pos_temps = nuevaTemporal($1.lexema, $1.nlin, $1.ncol);
+                              $$.cod = "mov #0 " + to_string(cont_pos_temps) + "\n";
+                              $$.tipo = simb->tipo;
+                              $$.dbase = simb->dir;
+                              $$.dir = cont_pos_temps;
+
+                              $$.lexema = $1.lexema;
+                              $$.nlin = $1.nlin;
+                              $$.ncol = $1.ncol;
+                        }
+
+            | Ref cori  {     if (!esArray($1.tipo)) {
+                                    if(strcmp($1.lexema, "]") == 0) {
+                                       errorSemantico(ERRSOBRAN, $2.lexema, $2.nlin, $2.ncol); 
+                                    } else {
+                                       errorSemantico(ERRSOBRAN, $2.lexema, $1.nlin, $1.ncol);
+                                    }
+                                 }                   
+                        }
+              Esimple cord    {     if($4.tipo != ENTERO){
+                                          errorSemantico(ERR_NOENTERO, $5.lexema, $5.nlin, $5.ncol);
+                                    }
+
+                                    $$.tipo = (ttipos->tipos)[$1.tipo].tipoBase;
+                                    $$.dbase = $1.dbase;
+
+                                    cont_pos_temps = nuevaTemporal($1.lexema, $1.nlin, $1.ncol);
+                                    $$.dir = cont_pos_temps;
+
+                                    s1 = $1.cod + $4.cod;
+                                    s1 += "mov " + to_string($1.dir) + " A\n";
+                                    s1 += "muli #" + to_string((ttipos->tipos)[$1.tipo].tamanyo) + "\n";
+                                    s1 += "addi " + to_string($4.dir) + "\n";
+                                    s1 += "mov A " + to_string(cont_pos_temps) + "\n";
+
+                                    $$.cod = s1;
+
+                                    $$.lexema = $5.lexema;
+                                    $$.nlin = $5.nlin;
+                                    $$.ncol = $5.ncol;
+
+                              }
+            ;
+
+
+
 
 %%
 
 void msgError(int nerror,int nlin,int ncol,const char *s)
 {
-   switch (nerror) {
-      case ERRLEXICO: fprintf(stderr,"Error lexico (%d,%d): caracter '%s' incorrecto\n",nlin,ncol,s);
-         break;
-      case ERRSINT: fprintf(stderr,"Error sintactico (%d,%d): en '%s'\n",nlin,ncol,s);
-         break;
-      case ERREOF: fprintf(stderr,"Error sintactico: fin de fichero inesperado\n");
-         break;
+     switch (nerror) {
+         case ERRLEXICO: fprintf(stderr,"Error lexico (%d,%d): caracter '%s' incorrecto\n",nlin,ncol,s);
+            break;
+         case ERRSINT: fprintf(stderr,"Error sintactico (%d,%d): en '%s'\n",nlin,ncol,s);
+            break;
+         case ERREOF: fprintf(stderr,"Error sintactico: fin de fichero inesperado\n");
+            break;
+         case ERRLEXEOF: fprintf(stderr,"Error lexico: fin de fichero inesperado\n");
+            break;
      }
-
-   exit(1);
+        
+     exit(-1);
 }
 
-void errorSemantico(int nerror,int nlin,int ncol,const char *s)
+void errorSemantico(int nerror,char *lexema,int fila,int columna)
 {
-	fprintf(stderr,"Error semantico (%d,%d): ", nlin,ncol);
-   switch(nerror) {
-      case ERR_YADECL: fprintf(stderr,"variable '%s' ya declarada\n",s);
-         break;
-      case ERR_NODECL: fprintf(stderr,"variable '%s' no declarada\n",s);
-         break;
-      case ERR_DIM: fprintf(stderr,"la dimension debe ser mayor que cero\n");
-         break;
-      case ERR_FALTAN: fprintf(stderr,"faltan indices\n");
-         break;
-      case ERR_SOBRAN: fprintf(stderr,"sobran indices\n");
-         break;
-      case ERR_INDICE_ENTERO: fprintf(stderr,"la expresion entre corchetes debe ser de tipo entero\n");
-         break;
-      case ERR_EXP_LOG: fprintf(stderr,"la expresion debe ser de tipo logico\n");
-         break;
-      case ERR_EXDER_LOG: fprintf(stderr,"la expresion a la derecha de '%s' debe ser de tipo logico\n",s);
-         break;
-      case ERR_EXDER_ENT: fprintf(stderr,"la expresion a la derecha de '%s' debe ser de tipo entero\n",s);
-         break;
-      case ERR_EXDER_RE:fprintf(stderr,"la expresion a la derecha de '%s' debe ser de tipo real o entero\n",s);
-         break;        
-      case ERR_EXIZQ_LOG:fprintf(stderr,"la expresion a la izquierda de '%s' debe ser de tipo logico\n",s);
-         break;       
-      case ERR_EXIZQ_RE:fprintf(stderr,"la expresion a la izquierda de '%s' debe ser de tipo real o entero\n",s);
-         break;       
-      case ERR_NOCABE:fprintf(stderr,"la variable '%s' ya no cabe en memoria\n",s);
-         break;
-      case ERR_MAXTMP:fprintf(stderr,"no hay espacio para variables temporales\n");
-         break;
-   }
-   exit(-1);
+    fprintf(stderr,"Error semantico (%d,%d): en '%s', ",fila,columna,lexema);
+    switch (nerror) {
+             case ERRYADECL: fprintf(stderr,"simbolo ya declarado\n");
+               break;
+             case ERRNODECL: fprintf(stderr,"identificador no declarado\n");
+               break;
+             case ERRDIM: fprintf(stderr,"la dimension debe ser mayor que cero\n");
+               break;
+             case ERRFALTAN: fprintf(stderr,"faltan indices\n");
+               break;
+             case ERRSOBRAN: fprintf(stderr,"sobran indices\n");
+               break;
+             case ERR_NOENTERO: fprintf(stderr,"debe ser de tipo entero\n");
+               break;
+
+             case ERR_NOCABE:fprintf(stderr,"la variable ya no cabe en memoria\n");
+               break;
+             case ERR_MAXTMP:fprintf(stderr,"no hay espacio para variables temporales\n");
+               break;
+    }
+    exit(-1);
 }
 
 int yyerror(char *s)
@@ -899,26 +661,30 @@ int yyerror(char *s)
     exit(1);
 }
 
-unsigned int nuevaTemp(int nlin, int ncol) {
-   if (ctemp == MAX_DIR_TEMP) {
-      errorSemantico(ERR_MAXTMP, nlin, ncol, "");
-   }
-   return ++ctemp;
+int nuevaVariable(char *lexema, int linea, int columna){
+      if(FIN_DIR_VAR == cont_pos_vars){
+            errorSemantico(ERR_NOCABE, lexema, linea, columna);
+      }
+       return ++cont_pos_vars;
+
 }
 
-unsigned int nuevaVar(char *lexema, int nlin, int ncol) {
-   if (cvar == MAX_DIR_VAR) {
-      errorSemantico(ERR_NOCABE, nlin, ncol, lexema);
-   }
-   return ++cvar;
+int nuevaTemporal(char *lexema, int linea, int columna){
+      if(FIN_DIR_TMP == cont_pos_temps){
+            errorSemantico(ERR_MAXTMP, lexema, linea, columna);
+      }
+      return ++cont_pos_temps;
 }
 
-unsigned int nuevaEtiqueta(void) {
-   return ++cetiq;
+int incrementarEtiqueta(){
+      return ++cont_etiqueta;
 }
 
-bool esArray(int tipo) {
-   return (ttipos->tipos)[tipo].clase == ARRAY;
+bool esArray(int tipo){
+      if((ttipos->tipos)[tipo].clase == ARRAY){
+            return true;
+      }
+   return false;
 }
 
 int main(int argc,char *argv[])
@@ -940,3 +706,4 @@ int main(int argc,char *argv[])
     else
         fprintf(stderr,"Uso: ejemplo <nombre de fichero>\n");
 }
+

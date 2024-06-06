@@ -98,7 +98,7 @@ Bloque : llavei { tablaSimbolos = new TablaSimbolos(tablaSimbolos); }
          }
        ;
 
-BDecl  : BDecl DVar {$$.cod = "";}
+BDecl  : BDecl DVar {$$.cod = $1.cod + $2.cod;}
        | /* epsilon */   {$$.cod = "";}
        ;
 
@@ -194,8 +194,7 @@ Instr :   pyc {$$.cod = "";}
                                                                 $$.cod += "wri A\n";
                                                             } else {
                                                                 string dir5 = to_string($5.dir);
-                                                                $$.cod += "mov " + dir5 + " A" + "\n";
-                                                                $$.cod += "wri A\n";
+                                                                $$.cod += "wri "+ dir5 + "\n";
                                                             }
                                                         } else {
                                                             if($5.tipo == ENTERO){
@@ -205,11 +204,10 @@ Instr :   pyc {$$.cod = "";}
                                                                 $$.cod += "wrr A\n";
                                                             } else {
                                                                 string dir5 = to_string($5.dir);
-                                                                $$.cod += "mov " + dir5 + " A" + "\n";
-                                                                $$.cod += "wrr A\n";
+                                                                $$.cod += "wrr "+dir5+"\n";
                                                             }
                                                         }
-                                                        $$.cod += "wrl \n";
+                                                        $$.cod += "wrl\n";
                                                   }
 
          | tscanf pari formato coma referencia Ref pard pyc {
@@ -258,8 +256,8 @@ Instr :   pyc {$$.cod = "";}
 
                                                  $$.cod = $3.cod;
 
-                                                 string dir2 = to_string($3.dir);
-                                                 $$.cod += "mov " + dir2 + " A\n";
+                                                 string dir3 = to_string($3.dir);
+                                                 $$.cod += "mov " + dir3 + " A\n";
 
                                                  int etiqueta_1 = nEtiqueta();
                                                  string setiqueta_1 = to_string(etiqueta_1);
@@ -282,8 +280,8 @@ Instr :   pyc {$$.cod = "";}
 
                                            $$.cod = "L" + setiqueta_1 + " " + $3.cod;
 
-                                           string dir2 = to_string($2.dir);
-                                           $$.cod += "mov " + dir2 + " A" +"\n";
+                                           string dir3 = to_string($3.dir);
+                                           $$.cod += "mov " + dir3 + " A" +"\n";
 
                                            int etiqueta_2 = nEtiqueta();
                                            string setiqueta_2 = to_string(etiqueta_2);
@@ -311,14 +309,14 @@ Expr : Expr oprel Esimple {
                                         op = "gtr";
                                      } else if (strcmp($2.lexema,"<") == 0) {
                                         op = "lss";
-                                     } else if (strcmp($2.lexema,"<>") == 0) {
+                                     } else if (strcmp($2.lexema,"!=") == 0) {
                                         op = "neq";
-                                     } else if (strcmp($2.lexema,"=") == 0) {
+                                     } else if (strcmp($2.lexema,"==") == 0) {
                                         op = "eql";
-                                     } else if (strcmp($2.lexema,"<=") == 0) {
-                                        op = "leq";
-                                     } else {
+                                     } else if (strcmp($2.lexema,">=") == 0) {
                                         op = "geq";
+                                     } else {
+                                        op = "leq";
                                      }
 
                                     if ($1.tipo == $3.tipo && $1.tipo == ENTERO) {

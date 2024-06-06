@@ -187,9 +187,8 @@ mov #0 16001
 mov 16001 A
 addi #6
 mov @A 16002
-mov 16002 A
-wri A
-wrl 
+wri 16002
+wrl
 mov #0 16001
 mov #0 16002
 mov 16001 A
@@ -335,7 +334,6 @@ mov @A 16058
 mov 16044 A
 addi16058
 mov A 16059
-mov 16059 A
-wri A
-wrl 
+wri 16059
+wrl
 halt

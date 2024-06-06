@@ -19,7 +19,7 @@ mov @A 16004
 mov 16002 A
 lssi16004
 mov A 16005
-mov 0 A
+mov 16005 A
 jz L4
 mov #0 16006
 mov #0 16007
@@ -37,7 +37,7 @@ mov @A 16009
 mov 16007 A
 lssi16009
 mov A 16010
-mov 0 A
+mov 16010 A
 jz L2
 mov #0 16011
 mov #0 16012
@@ -102,7 +102,7 @@ mov @A 16004
 mov 16002 A
 lssi16004
 mov A 16005
-mov 0 A
+mov 16005 A
 jz L6
 mov #0 16006
 mov #0 16007
@@ -154,7 +154,7 @@ mov @A 16004
 mov 16002 A
 lssi16004
 mov A 16005
-mov 0 A
+mov 16005 A
 jz L8
 mov #0 16006
 mov #0 16007
@@ -203,7 +203,7 @@ mov @A 16004
 mov 16002 A
 lssi16004
 mov A 16005
-mov 0 A
+mov 16005 A
 jz L10
 mov #0 16006
 mov #0 16007
@@ -272,16 +272,14 @@ mov #0 16001
 mov 16001 A
 addi #1
 mov @A 16002
-mov 16002 A
-wri A
-wrl 
+wri 16002
+wrl
 mov #0 16001
 mov 16001 A
 addi #2
 mov @A 16002
-mov 16002 A
-wri A
-wrl 
+wri 16002
+wrl
 L22 mov #0 16001
 mov 16001 A
 addi #1
@@ -313,7 +311,7 @@ addi #31
 mov @A 16013
 mov #0 16014
 mov 16013 A
-geqi16014
+eqli16014
 mov A 16015
 mov 16011 A
 muli16015
@@ -324,12 +322,12 @@ addi #32
 mov @A 16018
 mov #0 16019
 mov 16018 A
-geqi16019
+eqli16019
 mov A 16020
 mov 16016 A
 muli16020
 mov A 16021
-mov 0 A
+mov 16021 A
 jz L23
 mov #0 16022
 mov #0 16023
@@ -470,7 +468,7 @@ addi #33
 mov @A 16031
 mov #0 16032
 mov 16031 A
-geqi16032
+eqli16032
 mov A 16033
 mov #0 16034
 mov 16034 A
@@ -553,7 +551,7 @@ addi #33
 mov @A 16031
 mov #0 16032
 mov 16031 A
-geqi16032
+eqli16032
 mov A 16033
 mov #0 16034
 mov 16034 A
@@ -636,7 +634,7 @@ addi #33
 mov @A 16031
 mov #1 16032
 mov 16031 A
-geqi16032
+eqli16032
 mov A 16033
 mov 16033 A
 jz L19
@@ -644,16 +642,14 @@ mov #0 16034
 mov 16034 A
 addi #1
 mov @A 16035
-mov 16035 A
-wri A
-wrl 
+wri 16035
+wrl
 mov #0 16034
 mov 16034 A
 addi #2
 mov @A 16035
-mov 16035 A
-wri A
-wrl 
+wri 16035
+wrl
 jmp L20
 L19 mov #0 16034
 mov 16034 A
@@ -721,9 +717,8 @@ L24 mov #0 16001
 mov 16001 A
 addi #30
 mov @A 16002
-mov 16002 A
-wri A
-wrl 
+wri 16002
+wrl
 mov #0 16001
 mov #1 16002
 mov 16001 A
@@ -768,16 +763,14 @@ mov #0 16001
 mov 16001 A
 addi #1
 mov @A 16002
-mov 16002 A
-wri A
-wrl 
+wri 16002
+wrl
 mov #0 16001
 mov 16001 A
 addi #2
 mov @A 16002
-mov 16002 A
-wri A
-wrl 
+wri 16002
+wrl
 L36 mov #0 16001
 mov 16001 A
 addi #1
@@ -809,7 +802,7 @@ addi #31
 mov @A 16013
 mov #0 16014
 mov 16013 A
-geqi16014
+eqli16014
 mov A 16015
 mov 16011 A
 muli16015
@@ -820,12 +813,12 @@ addi #32
 mov @A 16018
 mov #0 16019
 mov 16018 A
-geqi16019
+eqli16019
 mov A 16020
 mov 16016 A
 muli16020
 mov A 16021
-mov 0 A
+mov 16021 A
 jz L37
 mov #0 16022
 mov #0 16023
@@ -966,7 +959,7 @@ addi #34
 mov @A 16031
 mov #0 16032
 mov 16031 A
-geqi16032
+eqli16032
 mov A 16033
 mov #0 16034
 mov 16034 A
@@ -1049,7 +1042,7 @@ addi #34
 mov @A 16031
 mov #0 16032
 mov 16031 A
-geqi16032
+eqli16032
 mov A 16033
 mov #0 16034
 mov 16034 A
@@ -1132,7 +1125,7 @@ addi #34
 mov @A 16031
 mov #1 16032
 mov 16031 A
-geqi16032
+eqli16032
 mov A 16033
 mov 16033 A
 jz L33
@@ -1140,16 +1133,14 @@ mov #0 16034
 mov 16034 A
 addi #1
 mov @A 16035
-mov 16035 A
-wri A
-wrl 
+wri 16035
+wrl
 mov #0 16034
 mov 16034 A
 addi #2
 mov @A 16035
-mov 16035 A
-wri A
-wrl 
+wri 16035
+wrl
 jmp L34
 L33 mov #0 16034
 mov 16034 A
@@ -1217,7 +1208,6 @@ L38 mov #0 16001
 mov 16001 A
 addi #30
 mov @A 16002
-mov 16002 A
-wri A
-wrl 
+wri 16002
+wrl
 halt

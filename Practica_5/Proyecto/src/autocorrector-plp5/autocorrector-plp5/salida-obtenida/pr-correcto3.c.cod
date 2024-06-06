@@ -7,7 +7,7 @@ mov 16003 A
 addi #23
 mov @A 16004
 mov 16002 A
-geqi16004
+eqli16004
 mov A 16005
 mov 16005 A
 jz L5
@@ -35,7 +35,7 @@ mov #4 16008
 mov 16007 A
 lssi16008
 mov A 16009
-mov 0 A
+mov 16009 A
 jz L4
 mov #0 16010
 mov #0 16011
@@ -55,7 +55,7 @@ mov #4 16012
 mov 16011 A
 lssi16012
 mov A 16013
-mov 0 A
+mov 16013 A
 jz L2
 mov #0 16014
 mov #0 16015
@@ -108,7 +108,7 @@ mov @A 16011
 mov 16011 A
 itor
 wrr A
-wrl 
+wrl
 mov #0 16010
 mov #0 16011
 mov 16011 A
@@ -148,7 +148,6 @@ mov @A 16009
 mov 16007 A
 divi16009
 mov A 16010
-mov 16010 A
-wri A
-wrl 
+wri 16010
+wrl
 L5 halt
