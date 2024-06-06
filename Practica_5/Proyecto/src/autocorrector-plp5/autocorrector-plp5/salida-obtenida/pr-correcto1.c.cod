@@ -34,13 +34,13 @@ mov #3 16008
 mov #10 16009
 mov #9 16010
 mov 16009 A
-divi16010
+divi 16010
 mov A 16011
 mov 16008 A
-muli16011
+muli 16011
 mov A 16012
 mov 16007 A
-addi16012
+addi 16012
 mov A 16013
 mov 16005 A
 addi #6
@@ -52,11 +52,11 @@ addi #6
 mov @A 16007
 mov #2 16008
 mov 16007 A
-divi16008
+divi 16008
 mov A 16009
 mov #2 16010
 mov 16009 A
-divi16010
+divi 16010
 mov A 16011
 mov 16005 A
 addi #7

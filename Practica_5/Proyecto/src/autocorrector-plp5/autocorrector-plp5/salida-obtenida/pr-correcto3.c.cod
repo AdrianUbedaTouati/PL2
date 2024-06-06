@@ -83,7 +83,7 @@ mov 16023 A
 addi #4
 mov @A 16024
 mov 16016 A
-addi16024
+addi 16024
 mov A 16025
 mov 16014 A
 addi #24
@@ -95,7 +95,7 @@ addi #23
 mov @A 16016
 mov #1 16017
 mov 16016 A
-addi16017
+addi 16017
 mov A 16018
 mov 16014 A
 addi #23
@@ -116,7 +116,7 @@ addi #21
 mov @A 16012
 mov #1 16013
 mov 16012 A
-addi16013
+addi 16013
 mov A 16014
 mov 16010 A
 addi #21
@@ -131,7 +131,7 @@ mov 16013 A
 addi #24
 mov @A 16014
 mov 16012 A
-addi16014
+addi 16014
 mov A 16015
 mov 16010 A
 addi #25
@@ -146,7 +146,7 @@ mov 16008 A
 addi #26
 mov @A 16009
 mov 16007 A
-divi16009
+divi 16009
 mov A 16010
 wri 16010
 wrl
