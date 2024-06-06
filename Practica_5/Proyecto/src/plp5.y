@@ -293,9 +293,73 @@ Instr :   pyc {$$.cod = "";}
 
                                            $$.cod += "L" + setiqueta_2 + " ";
                                       }
-         | tfor pari id asig Esimple pyc Expr pyc id incrdecr pard Instr
-                                       {
+         | tfor pari id asig Esimple {
+                                         Simbolo *simbolo = tablaSimbolos->buscar($1.lexema);
+                                         if(simbolo == nullptr){
+                                                errorSemantico(ERRNODECL, $3.lexema, $3.nlin, $3.ncol);
+                                         }else if(simbolo->tipo != ENTERO){
+                                               errorSemantico(ERR_NOENTERO, $3.lexema, $3.nlin, $3.ncol);
+                                         }else if((tablaTipos->tipos)[$3.tipo].clase == ARRAY){
+                                               errorSemantico(ERRFALTAN, $3.lexema, $3.nlin, $3.ncol);
+                                         }
+                                     }
+         pyc Expr pyc id {
+                                 Simbolo *simbolo = tablaSimbolos->buscar($10.lexema);
+                                 if(simbolo == nullptr){
+                                       errorSemantico(ERRNODECL, $10.lexema, $10.nlin, $10.ncol);
+                                  }else if(simbolo->tipo != ENTERO){
+                                        errorSemantico(ERR_NOENTERO, $10.lexema, $10.nlin, $10.ncol);
+                                  }else if((tablaTipos->tipos)[$3.tipo].clase == ARRAY){
+                                        errorSemantico(ERRFALTAN, $10.lexema, $10.nlin, $10.ncol);
+                                  }
 
+                          }incrdecr pard Instr
+                                       {
+                                         cod = $5.cod;
+
+                                         Simbolo *simbolo = tablaSimbolos->buscar($3.lexema);
+
+                                         if ($5.tipo != ENTERO) {
+                                               string dir5 = to_string($5.dir);
+                                               cod += "mov " + dir5 + " A" + "\n";
+                                               cod += "rtoi\n";
+                                               cod += "mov A " + dir5 + "\n";
+                                         }
+
+                                         cod += "mov #0 A\n";
+                                         string sim_dir = to_string(simbolo->dir);
+                                         cod += "addi #" + sim_dir + "\n";
+
+                                         string dir5 = to_string($5.dir);
+                                         cod += "mov " + dir5 + " @A" + "\n";
+
+                                         // Expr
+                                         string setiqueta_1 = to_string(nEtiqueta());
+
+                                         cod += "L" + setiqueta_1 + " " + $8.cod;
+
+                                         string dir8 = to_string($8.dir);
+                                         cod += "mov " + dir8 + " A\n";
+
+                                         string setiqueta_2 = to_string(nEtiqueta());
+                                         cod += "jz L" + setiqueta_2 + "\n";
+                                         cod += $14.cod;
+
+                                         Simbolo *simbolo_2 = tablaSimbolos->buscar($10.lexema);
+                                         string sim_dir_2 = to_string(simbolo->dir);
+                                         cod += "mov " + sim_dir_2 + " A\n";
+                                         if( strcmp($12.lexema, "++") != 0){
+                                               cod += "subi #1\n";
+
+                                         }
+                                         else{
+                                               cod += "addi #1\n";
+                                         }
+
+                                         cod += "mov A " +  sim_dir_2 + "\n";
+                                         cod += "jmp L" + setiqueta_1 + "\n";
+
+                                         cod += "L" + setiqueta_2 + " ";
                                         }
          ;
 

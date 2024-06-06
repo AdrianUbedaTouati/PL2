@@ -1,5 +1,5 @@
-
-ERROR(m2r) al leer un valor de la posicion de memoria 21 sin haberlo
-inicializado, en la instrucción 4
-Línea 4: mov @A 16002
-
+   5.000
+   9.000
+  13.000
+  17.000
+ERROR(m2r) en línea 211: el primer operando de 'itor' debe ser entero.

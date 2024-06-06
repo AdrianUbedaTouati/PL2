@@ -195,12 +195,14 @@ enum yysymbol_kind_t
   YYSYMBOL_SeqInstr = 47,                  /* SeqInstr  */
   YYSYMBOL_48_8 = 48,                      /* @8  */
   YYSYMBOL_Instr = 49,                     /* Instr  */
-  YYSYMBOL_Expr = 50,                      /* Expr  */
-  YYSYMBOL_Esimple = 51,                   /* Esimple  */
-  YYSYMBOL_Term = 52,                      /* Term  */
-  YYSYMBOL_Factor = 53,                    /* Factor  */
-  YYSYMBOL_Ref = 54,                       /* Ref  */
-  YYSYMBOL_55_9 = 55                       /* $@9  */
+  YYSYMBOL_50_9 = 50,                      /* $@9  */
+  YYSYMBOL_51_10 = 51,                     /* $@10  */
+  YYSYMBOL_Expr = 52,                      /* Expr  */
+  YYSYMBOL_Esimple = 53,                   /* Esimple  */
+  YYSYMBOL_Term = 54,                      /* Term  */
+  YYSYMBOL_Factor = 55,                    /* Factor  */
+  YYSYMBOL_Ref = 56,                       /* Ref  */
+  YYSYMBOL_57_11 = 57                      /* $@11  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -528,16 +530,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  8
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   100
+#define YYLAST   94
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  30
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  26
+#define YYNNTS  28
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  47
+#define YYNRULES  49
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  104
+#define YYNSTATES  106
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   284
@@ -592,8 +594,8 @@ static const yytype_int16 yyrline[] =
        0,    75,    75,    84,    87,    90,    91,    94,    95,    94,
      101,   102,   105,   105,   108,   108,   109,   109,   112,   112,
      133,   134,   134,   146,   146,   148,   151,   152,   153,   187,
-     213,   240,   255,   277,   296,   302,   369,   374,   428,   433,
-     486,   493,   511,   520,   528,   535,   554,   554
+     213,   240,   255,   277,   296,   306,   296,   366,   433,   438,
+     492,   497,   550,   557,   575,   584,   592,   599,   618,   618
 };
 #endif
 
@@ -615,8 +617,8 @@ static const char *const yytname[] =
   "referencia", "cori", "cord", "llavei", "llaved", "formato", "incrdecr",
   "tscanf", "$accept", "S", "FVM", "Tipo", "Bloque", "$@1", "$@2", "BDecl",
   "DVar", "@3", "LIdent", "@4", "@5", "Variable", "@6", "V", "@7",
-  "SeqInstr", "@8", "Instr", "Expr", "Esimple", "Term", "Factor", "Ref",
-  "$@9", YY_NULLPTR
+  "SeqInstr", "@8", "Instr", "$@9", "$@10", "Expr", "Esimple", "Term",
+  "Factor", "Ref", "$@11", YY_NULLPTR
 };
 
 static const char *
@@ -640,17 +642,17 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      10,    28,   -70,    24,   -70,   -70,    10,    45,   -70,   -70,
-     -70,    18,    32,    29,    37,   -70,   -70,   -70,   -70,   -70,
-     -70,    29,    40,   -70,   -70,    48,   -70,    44,    20,   -70,
-     -70,    39,   -70,    43,     1,    40,   -70,    50,    51,    54,
-      55,   -70,   -70,    56,   -70,   -70,   -18,   -70,    46,    16,
-      16,    53,    47,    16,   -70,    61,   -70,   -70,    16,    33,
-      57,    58,   -70,    59,    35,    60,    63,    21,    16,    16,
-      38,     1,    16,    16,    16,     1,    16,    62,   -70,    -1,
-      41,   -70,    71,    57,    58,   -70,   -70,    19,    69,   -70,
-      68,     1,    16,     2,   -70,   -70,    27,    70,    75,   -70,
-      64,    72,     1,   -70
+      10,    21,   -70,    34,   -70,   -70,    10,    15,   -70,   -70,
+     -70,    23,    29,    27,    36,   -70,   -70,   -70,   -70,   -70,
+     -70,    27,    37,   -70,   -70,    46,   -70,    41,    39,   -70,
+     -70,    40,   -70,    42,     1,    37,   -70,    43,    48,    49,
+      51,   -70,   -70,    53,   -70,   -70,   -18,   -70,    44,    16,
+      16,    61,    47,    16,   -70,    59,   -70,   -70,    16,    31,
+      56,    57,   -70,    55,    33,    58,    62,    18,    16,    16,
+      35,     1,    16,    16,    16,     1,    16,    60,   -70,    -1,
+      38,   -70,    54,    56,    57,   -70,   -70,    56,    69,   -70,
+      66,     1,    68,     2,   -70,   -70,    16,    70,    24,   -70,
+      73,   -70,    63,    71,     1,   -70
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -662,21 +664,21 @@ static const yytype_int8 yydefact[] =
        3,     0,     0,     0,     0,    14,    13,    18,    17,     7,
        4,     0,    20,    11,    15,     0,    19,    25,     0,     5,
       10,    23,    21,     0,     0,    20,     9,     0,     0,     0,
-       0,    45,    26,     0,    27,    24,     0,    22,     0,     0,
-       0,     0,     0,     0,    46,     0,    42,    43,     0,     0,
-      36,    38,    40,    41,     0,     0,     0,     0,     0,     0,
+       0,    47,    26,     0,    27,    24,     0,    22,     0,     0,
+       0,     0,     0,     0,    48,     0,    44,    45,     0,     0,
+      38,    40,    42,    43,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,    28,     0,
-       0,    44,    31,    35,    37,    39,    33,     0,     0,    47,
+       0,    46,    31,    37,    39,    41,    33,    34,     0,    49,
        0,     0,     0,     0,    29,    32,     0,     0,     0,    30,
-       0,     0,     0,    34
+       0,    35,     0,     0,     0,    36
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -70,   -70,    81,   -70,    74,   -70,   -70,   -70,    66,   -70,
-     -70,   -70,   -70,    73,   -70,    65,   -70,   -70,   -70,   -69,
-     -49,   -55,    17,    22,   -34,   -70
+     -70,   -70,    80,   -70,    75,   -70,   -70,   -70,    65,   -70,
+     -70,   -70,   -70,    72,   -70,    52,   -70,   -70,   -70,   -69,
+     -70,   -70,   -49,   -55,    17,    20,   -34,   -70
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -684,7 +686,7 @@ static const yytype_int8 yydefgoto[] =
 {
        0,     3,     4,     5,    44,    23,    33,    27,     6,     9,
       12,    21,    13,    18,    22,    26,    35,    31,    34,    45,
-      59,    60,    61,    62,    63,    68
+      92,   102,    59,    60,    61,    62,    63,    68
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -694,30 +696,28 @@ static const yytype_int8 yytable[] =
 {
       46,    64,    82,    53,    67,    54,    86,    37,    38,    70,
       39,    40,    41,    79,     1,     2,    42,    83,    73,    97,
-      80,    87,    95,    89,     8,    54,    19,    41,    56,    57,
-      43,     7,    58,   103,    92,    14,    78,    46,    73,    72,
-      17,    46,    98,    96,    32,    72,    15,    16,    29,     2,
-      71,    72,    75,    72,    93,    81,    72,    46,    90,    72,
-      28,    11,    19,    25,    65,    -8,    48,    49,    46,    36,
-      50,    51,    52,    55,    66,    69,    73,    77,    74,    91,
-      41,    76,    54,    94,    88,    99,   100,    10,    20,   102,
-      84,     0,   101,    30,    24,     0,    85,     0,     0,     0,
-      47
+      80,    87,    95,    89,     7,    54,    19,    41,    56,    57,
+      43,    11,    58,    78,     8,   105,    72,    46,    17,   100,
+      14,    46,    72,    15,    16,    29,     2,    98,    71,    72,
+      75,    72,    81,    72,    93,    90,    72,    46,    28,    48,
+      25,    19,    91,    32,    49,    50,    -8,    51,    36,    52,
+      46,    55,    65,    69,    66,    73,    77,    74,    54,    76,
+      41,    94,    88,    96,   101,    99,    10,    47,   104,    20,
+      84,   103,    30,    24,    85
 };
 
 static const yytype_int8 yycheck[] =
 {
       34,    50,    71,    21,    53,    23,    75,     6,     7,    58,
        9,    10,    11,    68,     4,     5,    15,    72,    19,    17,
-      69,    76,    91,    24,     0,    23,    25,    11,    12,    13,
-      29,     3,    16,   102,    15,    17,    15,    71,    19,    18,
-      11,    75,    15,    92,    24,    18,    14,    15,     4,     5,
-      17,    18,    17,    18,    88,    17,    18,    91,    17,    18,
-      12,    16,    25,    23,    11,    26,    16,    16,   102,    26,
-      16,    16,    16,    27,    27,    14,    19,    14,    20,     8,
-      11,    21,    23,    15,    22,    15,    11,     6,    14,    17,
-      73,    -1,    28,    27,    21,    -1,    74,    -1,    -1,    -1,
-      35
+      69,    76,    91,    24,     3,    23,    25,    11,    12,    13,
+      29,    16,    16,    15,     0,   104,    18,    71,    11,    15,
+      17,    75,    18,    14,    15,     4,     5,    96,    17,    18,
+      17,    18,    17,    18,    88,    17,    18,    91,    12,    16,
+      23,    25,     8,    24,    16,    16,    26,    16,    26,    16,
+     104,    27,    11,    14,    27,    19,    14,    20,    23,    21,
+      11,    15,    22,    15,    11,    15,     6,    35,    17,    14,
+      73,    28,    27,    21,    74
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -728,13 +728,13 @@ static const yytype_int8 yystos[] =
       32,    16,    40,    42,    17,    14,    15,    11,    43,    25,
       34,    41,    44,    35,    43,    23,    45,    37,    12,     4,
       38,    47,    24,    36,    48,    46,    26,     6,     7,     9,
-      10,    11,    15,    29,    34,    49,    54,    45,    16,    16,
-      16,    16,    16,    21,    23,    27,    12,    13,    16,    50,
-      51,    52,    53,    54,    50,    11,    27,    50,    55,    14,
-      50,    17,    18,    19,    20,    17,    21,    14,    15,    51,
-      50,    17,    49,    51,    52,    53,    49,    51,    22,    24,
-      17,     8,    15,    54,    15,    49,    50,    17,    15,    15,
-      11,    28,    17,    49
+      10,    11,    15,    29,    34,    49,    56,    45,    16,    16,
+      16,    16,    16,    21,    23,    27,    12,    13,    16,    52,
+      53,    54,    55,    56,    52,    11,    27,    52,    57,    14,
+      52,    17,    18,    19,    20,    17,    21,    14,    15,    53,
+      52,    17,    49,    53,    54,    55,    49,    53,    22,    24,
+      17,     8,    50,    56,    15,    49,    15,    17,    52,    15,
+      15,    11,    51,    28,    17,    49
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
@@ -743,8 +743,8 @@ static const yytype_int8 yyr1[] =
        0,    30,    31,    32,    32,    33,    33,    35,    36,    34,
       37,    37,    39,    38,    41,    40,    42,    40,    44,    43,
       45,    46,    45,    48,    47,    47,    49,    49,    49,    49,
-      49,    49,    49,    49,    49,    50,    50,    51,    51,    52,
-      52,    53,    53,    53,    53,    54,    55,    54
+      49,    49,    49,    49,    50,    51,    49,    52,    52,    53,
+      53,    54,    54,    55,    55,    55,    55,    56,    57,    56
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -753,8 +753,8 @@ static const yytype_int8 yyr2[] =
        0,     2,     1,     2,     5,     1,     1,     0,     0,     6,
        2,     0,     0,     4,     0,     4,     0,     2,     0,     3,
        0,     0,     5,     0,     3,     0,     1,     1,     4,     7,
-       8,     5,     7,     5,    12,     3,     1,     3,     1,     3,
-       1,     1,     1,     1,     3,     1,     0,     5
+       8,     5,     7,     5,     0,     0,    14,     3,     1,     3,
+       1,     3,     1,     1,     1,     1,     3,     1,     0,     5
 };
 
 
@@ -1580,16 +1580,92 @@ yyreduce:
 #line 1581 "plp5.tab.c"
     break;
 
-  case 34: /* Instr: tfor pari id asig Esimple pyc Expr pyc id incrdecr pard Instr  */
-#line 297 "plp5.y"
-                                       {
-
-                                        }
-#line 1589 "plp5.tab.c"
+  case 34: /* $@9: %empty  */
+#line 296 "plp5.y"
+                                     {
+                                         Simbolo *simbolo = tablaSimbolos->buscar(yyvsp[-2].lexema);
+                                         if(simbolo == nullptr){
+                                                errorSemantico(ERRNODECL, yyvsp[-2].lexema, yyvsp[-2].nlin, yyvsp[-2].ncol);
+                                         }else if(simbolo->tipo != ENTERO){
+                                               errorSemantico(ERR_NOENTERO, yyvsp[-2].lexema, yyvsp[-2].nlin, yyvsp[-2].ncol);
+                                         }else if((tablaTipos->tipos)[yyvsp[-2].tipo].clase == ARRAY){
+                                               errorSemantico(ERRFALTAN, yyvsp[-2].lexema, yyvsp[-2].nlin, yyvsp[-2].ncol);
+                                         }
+                                     }
+#line 1596 "plp5.tab.c"
     break;
 
-  case 35: /* Expr: Expr oprel Esimple  */
-#line 302 "plp5.y"
+  case 35: /* $@10: %empty  */
+#line 306 "plp5.y"
+                         {
+                                 Simbolo *simbolo = tablaSimbolos->buscar(yyvsp[0].lexema);
+                                 if(simbolo == nullptr){
+                                       errorSemantico(ERRNODECL, yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
+                                  }else if(simbolo->tipo != ENTERO){
+                                        errorSemantico(ERR_NOENTERO, yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
+                                  }else if((tablaTipos->tipos)[yyvsp[-7].tipo].clase == ARRAY){
+                                        errorSemantico(ERRFALTAN, yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
+                                  }
+
+                          }
+#line 1612 "plp5.tab.c"
+    break;
+
+  case 36: /* Instr: tfor pari id asig Esimple $@9 pyc Expr pyc id $@10 incrdecr pard Instr  */
+#line 316 "plp5.y"
+                                              {
+
+                                             yyval.cod = yyvsp[-9].cod;
+
+                                             Simbolo *simbolo = tablaSimbolos->buscar(yyvsp[-11].lexema);
+
+                                             if (yyvsp[-9].tipo != ENTERO) {
+                                                   string dir5 = to_string(yyvsp[-9].dir);
+                                                   yyval.cod += "mov " + dir5 + " A" + "\n";
+                                                   yyval.cod += "rtoi\n";
+                                                   yyval.cod += "mov A " + dir5 + "\n";
+                                             }
+
+                                             yyval.cod += "mov #0 A\n";
+                                             string sim_dir = to_string(simbolo->dir);
+                                             yyval.cod += "addi #" + sim_dir + "\n";
+
+                                             string dir5 = to_string(yyvsp[-9].dir);
+                                             yyval.cod += "mov " + dir5 + " @A" + "\n";
+
+                                             // Expr
+                                             string setiqueta_1 = to_string(nEtiqueta());
+
+                                             yyval.cod += "L" + setiqueta_1 + " " + yyvsp[-6].cod;
+
+                                             string dir8 = to_string(yyvsp[-6].dir);
+                                             yyval.cod += "mov " + dir8 + " A\n";
+
+                                             string setiqueta_2 = to_string(nEtiqueta());
+                                             yyval.cod += "jz L" + setiqueta_2 + "\n";
+                                             yyval.cod += yyvsp[0].cod;
+
+                                             Simbolo *simbolo_2 = tablaSimbolos->buscar(yyvsp[-4].lexema);
+                                             string sim_dir_2 = to_string(simbolo->dir);
+                                             yyval.cod += "mov " + sim_dir_2 + " A\n";
+                                             if( strcmp(yyvsp[-2].lexema, "++") != 0){
+                                                   yyval.cod += "subi #1\n";
+
+                                             }
+                                             else{
+                                                   yyval.cod += "addi #1\n";
+                                             }
+
+                                             yyval.cod += "mov A " +  sim_dir_2 + "\n";
+                                             yyval.cod += "jmp L" + setiqueta_1 + "\n";
+
+                                             yyval.cod += "L" + setiqueta_2 + " ";
+                                        }
+#line 1665 "plp5.tab.c"
+    break;
+
+  case 37: /* Expr: Expr oprel Esimple  */
+#line 366 "plp5.y"
                           {
                                     yyval.dir = nTemp(yyvsp[0].nlin, yyvsp[0].ncol);
                                     yyval.cod = yyvsp[-2].cod + yyvsp[0].cod;
@@ -1656,19 +1732,19 @@ yyreduce:
 
                                     yyval.cod += "mov A " + stemp + "\n";
                                 }
-#line 1660 "plp5.tab.c"
+#line 1736 "plp5.tab.c"
     break;
 
-  case 36: /* Expr: Esimple  */
-#line 369 "plp5.y"
+  case 38: /* Expr: Esimple  */
+#line 433 "plp5.y"
                {yyval.dir = yyvsp[0].dir;
                 yyval.tipo = yyvsp[0].tipo;
                 yyval.cod = yyvsp[0].cod;}
-#line 1668 "plp5.tab.c"
+#line 1744 "plp5.tab.c"
     break;
 
-  case 37: /* Esimple: Esimple opas Term  */
-#line 374 "plp5.y"
+  case 39: /* Esimple: Esimple opas Term  */
+#line 438 "plp5.y"
                             {
                              numtemp = nTemp(yyvsp[0].nlin, yyvsp[0].ncol);
                              yyval.dir = numtemp;
@@ -1722,19 +1798,19 @@ yyreduce:
                              string snumtep = to_string(numtemp);
                              yyval.cod += "mov A " + snumtep + "\n";
                            }
-#line 1726 "plp5.tab.c"
+#line 1802 "plp5.tab.c"
     break;
 
-  case 38: /* Esimple: Term  */
-#line 428 "plp5.y"
+  case 40: /* Esimple: Term  */
+#line 492 "plp5.y"
             { yyval.dir = yyvsp[0].dir;
               yyval.tipo = yyvsp[0].tipo;
               yyval.cod = yyvsp[0].cod;}
-#line 1734 "plp5.tab.c"
+#line 1810 "plp5.tab.c"
     break;
 
-  case 39: /* Term: Term opmd Factor  */
-#line 433 "plp5.y"
+  case 41: /* Term: Term opmd Factor  */
+#line 497 "plp5.y"
                         {
                              numtemp = nTemp(yyvsp[0].nlin, yyvsp[0].ncol);
                              yyval.dir = numtemp;
@@ -1788,21 +1864,21 @@ yyreduce:
                              string snumtep = to_string(numtemp);
                              yyval.cod += "mov A " + snumtep + "\n";
                              }
-#line 1792 "plp5.tab.c"
+#line 1868 "plp5.tab.c"
     break;
 
-  case 40: /* Term: Factor  */
-#line 486 "plp5.y"
+  case 42: /* Term: Factor  */
+#line 550 "plp5.y"
               {
                 yyval.dir = yyvsp[0].dir;
                 yyval.tipo = yyvsp[0].tipo;
                 yyval.cod = yyvsp[0].cod;
               }
-#line 1802 "plp5.tab.c"
+#line 1878 "plp5.tab.c"
     break;
 
-  case 41: /* Factor: Ref  */
-#line 493 "plp5.y"
+  case 43: /* Factor: Ref  */
+#line 557 "plp5.y"
              {
                  if ((tablaTipos->tipos)[yyvsp[0].tipo].clase != ARRAY) {
                       yyval.cod = yyvsp[0].cod;
@@ -1821,11 +1897,11 @@ yyreduce:
                     errorSemantico(ERRFALTAN,yyvsp[0].lexema ,yyvsp[0].nlin, yyvsp[0].ncol);
                  }
              }
-#line 1825 "plp5.tab.c"
+#line 1901 "plp5.tab.c"
     break;
 
-  case 42: /* Factor: nentero  */
-#line 511 "plp5.y"
+  case 44: /* Factor: nentero  */
+#line 575 "plp5.y"
                {
 
                      yyval.dir = nTemp(yyvsp[0].nlin, yyvsp[0].ncol);
@@ -1835,11 +1911,11 @@ yyreduce:
 
                      yyval.tipo = ENTERO;
                }
-#line 1839 "plp5.tab.c"
+#line 1915 "plp5.tab.c"
     break;
 
-  case 43: /* Factor: nreal  */
-#line 520 "plp5.y"
+  case 45: /* Factor: nreal  */
+#line 584 "plp5.y"
              {
                      yyval.dir = nTemp(yyvsp[0].nlin, yyvsp[0].ncol);
 
@@ -1848,21 +1924,21 @@ yyreduce:
 
                      yyval.tipo = REAL;
              }
-#line 1852 "plp5.tab.c"
+#line 1928 "plp5.tab.c"
     break;
 
-  case 44: /* Factor: pari Expr pard  */
-#line 528 "plp5.y"
+  case 46: /* Factor: pari Expr pard  */
+#line 592 "plp5.y"
                       {
                           yyval.dir = yyvsp[-1].dir;
                           yyval.tipo = yyvsp[-1].tipo;
                           yyval.cod = yyvsp[-1].cod;
                       }
-#line 1862 "plp5.tab.c"
+#line 1938 "plp5.tab.c"
     break;
 
-  case 45: /* Ref: id  */
-#line 535 "plp5.y"
+  case 47: /* Ref: id  */
+#line 599 "plp5.y"
          {
             Simbolo *simb = tablaSimbolos->buscar(yyvsp[0].lexema);
             if (simb != nullptr) {
@@ -1882,11 +1958,11 @@ yyreduce:
                 errorSemantico(ERRNODECL,yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
              }
          }
-#line 1886 "plp5.tab.c"
+#line 1962 "plp5.tab.c"
     break;
 
-  case 46: /* $@9: %empty  */
-#line 554 "plp5.y"
+  case 48: /* $@11: %empty  */
+#line 618 "plp5.y"
                 {
                     if (!isArray(yyvsp[-1].tipo)) {
                         if(strcmp(yyvsp[-1].lexema, "]") != 0) {
@@ -1896,11 +1972,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1900 "plp5.tab.c"
+#line 1976 "plp5.tab.c"
     break;
 
-  case 47: /* Ref: Ref cori $@9 Esimple cord  */
-#line 563 "plp5.y"
+  case 49: /* Ref: Ref cori $@11 Esimple cord  */
+#line 627 "plp5.y"
                   {
                      if (yyvsp[-1].tipo == ENTERO) {
                          yyval.tipo = (tablaTipos->tipos)[yyvsp[-4].tipo].tipoBase;
@@ -1928,11 +2004,11 @@ yyreduce:
                          errorSemantico(ERR_NOENTERO,yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
                     }
                  }
-#line 1932 "plp5.tab.c"
+#line 2008 "plp5.tab.c"
     break;
 
 
-#line 1936 "plp5.tab.c"
+#line 2012 "plp5.tab.c"
 
       default: break;
     }
@@ -2125,7 +2201,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 592 "plp5.y"
+#line 656 "plp5.y"
 
 
 void msgError(int nerror,int nlin,int ncol,const char *s)

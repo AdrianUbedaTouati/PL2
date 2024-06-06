@@ -1,4 +1,62 @@
 mov #0 16001
+mov #0 A
+addi #21
+mov 16001 @A
+L3 mov #0 16002
+mov 16002 A
+addi #21
+mov @A 16003
+mov #4 16004
+mov 16003 A
+lssi16004
+mov A 16005
+mov 16005 A
+jz L4
+mov #0 16006
+mov #0 A
+addi #23
+mov 16006 @A
+L1 mov #0 16007
+mov 16007 A
+addi #23
+mov @A 16008
+mov #4 16009
+mov 16008 A
+lssi16009
+mov A 16010
+mov 16010 A
+jz L2
+mov #0 16011
+mov #0 16012
+mov 16012 A
+addi #21
+mov @A 16013
+mov 16011 A
+muli #4
+addi 16013
+mov A 16014
+mov #0 16015
+mov 16015 A
+addi #23
+mov @A 16016
+mov 16014 A
+muli #4
+addi 16016
+mov A 16017
+rdr A
+mov A16018
+mov 16017 A
+addi #4
+mov 16018 @A
+mov 23 A
+addi #1
+mov A 23
+jmp L1
+L2 mov 21 A
+addi #1
+mov A 21
+jmp L3
+L4 mov #0 16001
 mov 16001 A
 addi #21
 mov @A 16002
@@ -10,7 +68,7 @@ mov 16002 A
 eqli16004
 mov A 16005
 mov 16005 A
-jz L5
+jz L9
 mov #0 16006
 rdi A
 mov A16007
@@ -30,7 +88,7 @@ mov A 16007
 mov 16006 A
 addi #25
 mov 16007 @A
-L3 mov #0 16006
+L7 mov #0 16006
 mov 16006 A
 addi #21
 mov @A 16007
@@ -39,7 +97,7 @@ mov 16007 A
 lssi16008
 mov A 16009
 mov 16009 A
-jz L4
+jz L8
 mov #0 16010
 mov #0 16011
 mov 16010 A
@@ -53,7 +111,7 @@ mov A 16011
 mov 16010 A
 addi #24
 mov 16011 @A
-L1 mov #0 16010
+L5 mov #0 16010
 mov 16010 A
 addi #23
 mov @A 16011
@@ -62,7 +120,7 @@ mov 16011 A
 lssi16012
 mov A 16013
 mov 16013 A
-jz L2
+jz L6
 mov #0 16014
 mov #0 16015
 mov 16015 A
@@ -106,8 +164,8 @@ mov A 16018
 mov 16014 A
 addi #23
 mov 16018 @A
-jmp L1
-L2 mov #0 16010
+jmp L5
+L6 mov #0 16010
 mov 16010 A
 addi #24
 mov @A 16011
@@ -140,8 +198,8 @@ mov A 16015
 mov 16010 A
 addi #25
 mov 16015 @A
-jmp L3
-L4 mov #0 16006
+jmp L7
+L8 mov #0 16006
 mov 16006 A
 addi #25
 mov @A 16007
@@ -157,4 +215,4 @@ mov 16010 A
 rtoi
 wri A
 wrl
-L5 halt
+L9 halt
