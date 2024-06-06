@@ -518,7 +518,7 @@ Term : Term opmd Factor {
 
                                 string dir3 = to_string($3.dir);
                                 $$.cod += op + "r " + dir3 + "\n";
-                             } else if ($1.tipo == REAL && $1.tipo == ENTERO) {
+                             } else if ($1.tipo == REAL && $3.tipo == ENTERO) {
                                $$.tipo = REAL;
                                string dir3 = to_string($3.dir);
                                $$.cod += "mov " + dir3 + " A\n";

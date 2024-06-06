@@ -499,55 +499,68 @@ Esimple : Esimple opas Term {
               $$.cod = $1.cod;}
      ;
 
-Term        : Term opmd Factor      {     
-                                          s1 = $1.cod + $3.cod;
-                                          cont_pos_temps = nuevaTemporal($3.lexema, $3.nlin, $3.ncol);
-                                          $$.dir = cont_pos_temps;
-                                          
-                                          if(strcmp($2.lexema, "*") == 0){
-                                                s2 = "mul";
-                                          }else{
-                                                s2 = "div";
-                                          }
-                                          
-                                          if($1.tipo == $3.tipo){
-                                                $$.tipo = $1.tipo;
+Term : Term opmd Factor {
+                             cont_pos_temps = nuevaTemporal($3.lexema,$3.nlin, $3.ncol);
+                             $$.dir = cont_pos_temps;
+                             $$.cod = $1.cod + $3.cod;
 
-                                                s1 += "mov " + to_string($1.dir) + " A\n";
-                                                
-                                                if($1.tipo == ENTERO){
-                                                      s1 += s2 + "i " + to_string($3.dir) + "\n";
-                                                }
-                                                else{
-                                                      s1 += s2 + "r " + to_string($3.dir) + "\n";
-                                                }
-                                          }
-                                          else if($1.tipo == REAL && $3.tipo == ENTERO){
-                                                $$.tipo =  REAL;
-                                                s1 += "mov " + to_string($3.dir) + " A\n";
-                                                s1 += "itor\n";
-                                                s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                                s1 += "mov " + to_string($1.dir) + " A\n";
-                                                s1 += s2 + "r " + to_string(cont_pos_temps) + "\n";
-                                          }
-                                          else{    
-                                                $$.tipo = REAL;
-                                                s1 += "mov " + to_string($1.dir) + " A\n";
-                                                s1 += "itor\n";
-                                                s1 += s2 + "r " + to_string($3.dir) + "\n";
-                                          }
-
-                                          s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                          $$.cod = s1;
-                                    }
-            | Factor          {     
-                                    $$.cod = $1.cod;
-                                    $$.dir = $1.dir;
-                                    $$.tipo = $1.tipo;
+                              string op;
+                              if (strcmp("*", $2.lexema) != 0) {
+                                 op = "div";
+                              } else {
+                                 op = "mul";
                               }
-            ;
 
-Factor      : Ref       {     
+                             if ($1.tipo == ENTERO && $3.tipo == ENTERO){
+                                 $$.tipo = ENTERO;
+                                 string dir1 = to_string($1.dir);
+                                 $$.cod += "mov " + dir1 + " A\n";
+
+                                 string dir3 = to_string($3.dir);
+                                 $$.cod += op + "i " + dir3 + "\n";
+                              } else if($1.tipo == REAL && $3.tipo == REAL) {
+                                 $$.tipo = REAL;
+                                 string dir1 = to_string($1.dir);
+                                 $$.cod += "mov " + dir1 + " A\n";
+
+                                 string dir3 = to_string($3.dir);
+                                 $$.cod += op + "r " + dir3 + "\n";
+                              } else if ($1.tipo == REAL && $3.tipo == ENTERO) {
+                                $$.tipo = REAL;
+                                string dir3 = to_string($3.dir);
+                                $$.cod += "mov " + dir3 + " A\n";
+
+                                $$.cod += "itor\n";
+
+                                string snumtep = to_string(cont_pos_temps);
+                                $$.cod += "mov A " + snumtep + "\n";
+
+                                string dir1= to_string($1.dir);
+                                $$.cod += "mov " + dir1 + " A\n";
+
+                                $$.cod += op + "r " + snumtep + "\n";
+
+                             }else {
+                               $$.tipo = REAL;
+                               string dir1 = to_string($1.dir);
+                               $$.cod += "mov " + dir1 + " A\n";
+
+                               $$.cod += "itor\n";
+
+                               string dir3= to_string($3.dir);
+                               $$.cod += op + "r " + dir3 + "\n";
+                             }
+                             string snumtep = to_string(cont_pos_temps);
+                             $$.cod += "mov A " + snumtep + "\n";
+                             }
+     | Factor {
+                $$.dir = $1.dir;
+                $$.tipo = $1.tipo;
+                $$.cod = $1.cod;
+              }
+     ;
+
+Factor      : Ref       {
                               if((ttipos->tipos)[$1.tipo].clase == ARRAY){
                                     errorSemantico(ERRFALTAN, $1.lexema, $1.nlin, $1.ncol);
                               }
