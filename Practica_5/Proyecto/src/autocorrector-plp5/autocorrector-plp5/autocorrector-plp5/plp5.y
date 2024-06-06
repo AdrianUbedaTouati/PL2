@@ -155,201 +155,218 @@ SeqInstr : SeqInstr {$$.nlin = cont_pos_temps;} Instr {$$.cod = $1.cod + $3.cod;
                                                 cont_pos_temps = $2.nlin;}
          | /* epsilon */   {$$.cod = "";}
          ;
-Instr       : pyc       {
-                              $$.cod = "";
-                        }
-            | Bloque    {
-                              $$.cod = $1.cod;
-                        }
-            | Ref asig Expr pyc     {
-                                          if((ttipos->tipos)[$1.tipo].clase == ARRAY){
-                                                errorSemantico(ERRFALTAN, $1.lexema, $1.nlin, $1.ncol);
-                                          }
-                                          
-                                          s1 = $1.cod + $3.cod;
+Instr :   pyc {$$.cod = "";}
+         | Bloque {$$.cod = $1.cod;}
+         | Ref asig Expr pyc {
+                                 if ((ttipos->tipos)[$1.tipo].clase == ARRAY) {
+                                    errorSemantico(ERRFALTAN,$1.lexema, $1.nlin, $1.ncol);
+                                 }else{
+                                    $$.cod = $1.cod + $3.cod;
+                                 }
 
-                                          if ($1.tipo == REAL && $3.tipo == ENTERO) {
-                                                s1 += "mov " + to_string($3.dir) + " A\n";
-                                                s1 += "itor\n";
-                                                s1 += "mov A " + to_string($3.dir) + "\n";
-                                          }
-                                          if ($1.tipo == ENTERO && $3.tipo == REAL) {
-                                                s1 += "mov " + to_string($3.dir) + " A\n";
-                                                s1 += "rtoi\n";
-                                                s1 += "mov A " + to_string($3.dir) + "\n";
-                                          }
+                                 if ($3.tipo == ENTERO && $1.tipo == REAL) {
+                                    string dir3 = to_string($3.dir);
+                                    $$.cod += "mov " + dir3 + " A" + "\n";
+                                    $$.cod += "itor\n";
 
-                                          s1 += "mov " + to_string($1.dir) + " A\n";
-                                          s1 += "addi #" + to_string($1.dbase) + "\n";
+                                    string dir3_2 = to_string($3.dir);
+                                    $$.cod += "mov A " + dir3_2 + "\n";
+                                 }
 
-                                          s1 += "mov " + to_string($3.dir) + " @A\n";
-                                          $$.cod = s1;
-                                    }
-            | tprintf pari formato coma Expr pard pyc        {
-                                                                  s1 = $5.cod;
-                                                                  if(strcmp($3.lexema, "\"%d\"") ==0){
-                                                                        if($5.tipo == REAL){
-                                                                              s1 += "mov " + to_string($5.dir) + " A\n";
-                                                                              s1 += "rtoi\n";
-                                                                              s1 += "wri A\n";    
-                                                                        }
-                                                                        else{
-                                                                              s1 += "wri " + to_string($5.dir) + "\n";
-                                                                        }
-                                                                  }
-                                                                  else{
-                                                                        if($5.tipo == ENTERO){
-                                                                              s1 += "mov " + to_string($5.dir) + " A\n";
-                                                                              s1 += "itor\n";
-                                                                              s1 += "wrr A\n";    
-                                                                        }
-                                                                        else{
-                                                                              s1 += "wrr " + to_string($5.dir) + "\n";
-                                                                        }
-                                                                  }
-                                                                  s1 += "wrl\n";
-                                                                  $$.cod = s1;
+                                 if ($3.tipo == REAL && $1.tipo == ENTERO) {
+                                     string dir3 = to_string($3.dir);
+                                     $$.cod += "mov " + dir3 + " A" + "\n";
+                                     $$.cod += "rtoi\n";
+
+                                     string dir3_2 = to_string($3.dir);
+                                     $$.cod += "mov A " + dir3_2 + "\n";
+                                 }
+
+                                     string dir1 = to_string($1.dir);
+                                     $$.cod += "mov " + dir1 + " A" + "\n";
+
+                                     string dbase_1 =  to_string($1.dbase);
+                                     $$.cod += "addi #" + dbase_1 + "\n";
+
+                                     string dir3_3 = to_string($3.dir);
+                                     $$.cod += "mov " + dir3_3 + " @A\n";
+                                }
+         | tprintf pari formato coma Expr pard pyc {
+                                                        $$.cod = $5.cod;
+                                                        if(strcmp($3.lexema, "\"%d\"") == 0){
+                                                            if($5.tipo != ENTERO){
+                                                                string dir5 = to_string($5.dir);
+                                                                $$.cod += "mov " + dir5 + " A" + "\n";
+                                                                $$.cod += "rtoi\n";
+                                                                $$.cod += "wri A\n";
+                                                            } else {
+                                                                string dir5 = to_string($5.dir);
+                                                                $$.cod += "wri "+ dir5 + "\n";
                                                             }
-            | tscanf pari formato coma referencia Ref pard pyc     {
-                                                                        if ((ttipos->tipos)[$6.tipo].clase == ARRAY) {
-                                                                              errorSemantico(ERRFALTAN, $6.lexema, $6.nlin, $6.ncol);
-                                                                        }
-                                                                              
-                                                                        s1 = $6.cod;
+                                                        } else {
+                                                            if($5.tipo == ENTERO){
+                                                                string dir5 = to_string($5.dir);
+                                                                $$.cod += "mov " + dir5 + " A" + "\n";
+                                                                $$.cod += "itor\n";
+                                                                $$.cod += "wrr A\n";
+                                                            } else {
+                                                                string dir5 = to_string($5.dir);
+                                                                $$.cod += "wrr "+dir5+"\n";
+                                                            }
+                                                        }
+                                                        $$.cod += "wrl\n";
+                                                  }
 
-                                                                        if($6.tipo == ENTERO){
-                                                                              s1 += "rdi A\n";
-                                                                              if(strcmp($3.lexema, "\"%g\"") ==0){
-                                                                                    s1 += "itor\n";
-                                                                              }
-                                                                              
-                                                                              cont_pos_temps = nuevaTemporal($6.lexema, $6.nlin, $6.ncol);
-                                                                              s1 += "mov A " + to_string(cont_pos_temps) + "\n";
+         | tscanf pari formato coma referencia Ref pard pyc {
+                                                             if ((ttipos->tipos)[$6.tipo].clase == ARRAY) {
+                                                                errorSemantico(ERRFALTAN, $6.lexema, $6.nlin, $6.ncol);
+                                                             } else {
+                                                                $$.cod = $6.cod;
 
-                                                                              s1 += "mov " + to_string($6.dir) + " A\n";
-                                                                              s1 += "addi #" + to_string($6.dbase) + "\n";
+                                                                if($6.tipo ==  ENTERO) {
+                                                                    $$.cod += "rdi A\n";
+                                                                    if(strcmp($3.lexema, "\"%g\"") == 0){
+                                                                        $$.cod += "itor\n";
+                                                                    }
+                                                                }else {
+                                                                    $$.cod += "rdr A\n";
+                                                                    if(strcmp($3.lexema,"\"%d\"") == 0){
+                                                                        $$.cod += "rtoi\n";
+                                                                    }
+                                                                }
+                                                                string stemp = to_string(nuevaTemporal($6.lexema,$6.nlin,$6.ncol));
+                                                                $$.cod += "mov A" + stemp + "\n";
+                                                                string dir6 = to_string($6.dir);
 
-                                                                              s1 += "mov " + to_string(cont_pos_temps) + " @A\n";
-                                                                        }
-                                                                        else{
-                                                                              s1 += "rdr A\n";
-                                                                              if(strcmp($3.lexema, "\"%d\"") ==0){
-                                                                                    s1 += "rtoi\n";
-                                                                              }
-                                                                              
-                                                                              cont_pos_temps = nuevaTemporal($6.lexema, $6.nlin, $6.ncol);
-                                                                              s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-
-                                                                              s1 += "mov " + to_string($6.dir) + " A\n";
-                                                                              s1 += "addi #" + to_string($6.dbase) + "\n";
-
-                                                                              s1 += "mov " + to_string(cont_pos_temps) + " @A\n";
-                                                                        }
-                                                                        $$.cod = s1;
-                                                                  }
-            | tif pari Expr pard Instr     {
-                                                s1 = $3.cod;
-                                                int label = incrementarEtiqueta();
-
-                                                s1 += "mov " + to_string($3.dir) + " A\n";
-                                                s1 += "jz L" + to_string(label) +"\n";
-                                                s1 += $5.cod;
-                                                s1 += "L" + to_string(label) + " ";
-                                                $$.cod = s1;
-                                          }
-            | tif pari Expr pard Instr telse Instr      {
-                                                            s1 = $3.cod;
-                                                            int label1 = incrementarEtiqueta();
-                                                            int label2 = incrementarEtiqueta();
-
-                                                            s1 += "mov " + to_string($3.dir) + " A\n";
-                                                            s1 += "jz L" + to_string(label1) +"\n";
-                                                            s1 += $5.cod;
-                                                            s1 += "jmp L" + to_string(label2) + "\n";
-                                                            s1 += "L" + to_string(label1) + " " + $7.cod;
-                                                            s1 += "L" + to_string(label2) + " ";
-                                                            $$.cod = s1;
-
-                                                      }
-            | twhile pari Expr pard Instr        {
-                                                      int label1 = incrementarEtiqueta();
-                                                      int label2 = incrementarEtiqueta();
-                                                
-                                                      s1 = "L" + to_string(label1) + " " + $3.cod;
-                                                      s1 += "mov " + to_string($3.dir) + " A\n";
-                                                      s1 += "jz L" + to_string(label2) + "\n";
-                                                      s1 += $5.cod;
-                                                      s1 += "jmp L" + to_string(label1) + "\n";
-                                                      s1 += "L" + to_string(label2) + "\n";
-                                                      $$.cod = s1;
-                                                }
-            | tfor pari id asig Esimple {
-                                                       Simbolo *simbolo = tsimbs->buscar($3.lexema);
-                                                       if(simbolo == nullptr){
-                                                              errorSemantico(ERRNODECL, $3.lexema, $3.nlin, $3.ncol);
-                                                       }else if(simbolo->tipo != ENTERO){
-                                                             errorSemantico(ERR_NOENTERO, $3.lexema, $3.nlin, $3.ncol);
-                                                       }else if((ttipos->tipos)[$3.tipo].clase == ARRAY){
-                                                             errorSemantico(ERRFALTAN, $3.lexema, $3.nlin, $3.ncol);
-                                                       }
-                                                   }
-                       pyc Expr pyc id {
-                                               Simbolo *simbolo = tsimbs->buscar($10.lexema);
-                                               if(simbolo == nullptr){
-                                                     errorSemantico(ERRNODECL, $10.lexema, $10.nlin, $10.ncol);
-                                                }else if(simbolo->tipo != ENTERO){
-                                                      errorSemantico(ERR_NOENTERO, $10.lexema, $10.nlin, $10.ncol);
-                                                }else if((ttipos->tipos)[$3.tipo].clase == ARRAY){
-                                                      errorSemantico(ERRFALTAN, $10.lexema, $10.nlin, $10.ncol);
-                                                }
-
-                                        }incrdecr pard Instr{
-                                                           Simbolo *simbolo = tsimbs->buscar($3.lexema);
-                                                           $$.cod = $5.cod;
-                                                           if ($5.tipo != ENTERO) {
-                                                                 string dir5 = to_string($5.dir);
-                                                                 $$.cod += "mov " + dir5 + " A" + "\n";
-                                                                 $$.cod += "rtoi\n";
-                                                                 $$.cod += "mov A " + dir5 + "\n";
+                                                                $$.cod += "mov " + dir6 + " A" + "\n";
+                                                                string dbase = to_string($6.dbase);
+                                                                $$.cod += "addi #" + dbase +"\n";
+                                                                $$.cod += "mov " + stemp +" @A\n";
+                                                             }
                                                            }
+         | tif pari Expr pard Instr {
+                                         $$.cod = $3.cod;
 
-                                                           $$.cod += "mov #0 A\n";
+                                         string dir3 = to_string($3.dir);
+                                         $$.cod += "mov " + dir3 + " A" + "\n";
 
-                                                           string sim_dir = to_string(simbolo->dir);
-                                                           $$.cod += "addi #" + sim_dir + "\n";
+                                         int etiqueta = incrementarEtiqueta();
+                                         string setiqueta = to_string(etiqueta);
 
-                                                           string dir5 = to_string($5.dir);
-                                                           $$.cod += "mov " + dir5 + " @A" + "\n";
+                                         $$.cod += "jz L" + setiqueta +"\n";
 
-                                                           // Expr
-                                                           string setiqueta_1 = to_string(incrementarEtiqueta());
+                                         $$.cod += $5.cod;
 
-                                                           $$.cod += "L" + setiqueta_1 + " " + $8.cod;
+                                         $$.cod += "L" + setiqueta + " ";
+                                    }
+         | tif pari Expr pard Instr telse Instr {
 
-                                                           string dir8 = to_string($8.dir);
-                                                           $$.cod += "mov " + dir8 + " A\n";
+                                                 $$.cod = $3.cod;
 
-                                                           string setiqueta_2 = to_string(incrementarEtiqueta());
-                                                           $$.cod += "jz L" + setiqueta_2 + "\n";
-                                                           $$.cod += $14.cod;
+                                                 string dir3 = to_string($3.dir);
+                                                 $$.cod += "mov " + dir3 + " A\n";
 
-                                                           Simbolo *simbolo_2 = tsimbs->buscar($10.lexema);
-                                                           string sim_dir_2 = to_string(simbolo->dir);
-                                                           $$.cod += "mov " + sim_dir_2 + " A\n";
-                                                           if( strcmp($12.lexema, "++") != 0){
-                                                                 $$.cod += "subi #1\n";
+                                                 int etiqueta_1 = incrementarEtiqueta();
+                                                 string setiqueta_1 = to_string(etiqueta_1);
 
-                                                           }
-                                                           else{
-                                                                 $$.cod += "addi #1\n";
-                                                           }
+                                                 $$.cod += "jz L" + setiqueta_1 + "\n";
 
-                                                           $$.cod += "mov A " +  sim_dir_2 + "\n";
-                                                           $$.cod += "jmp L" + setiqueta_1 + "\n";
+                                                 $$.cod += $5.cod;
 
-                                                           $$.cod += "L" + setiqueta_2 + " ";
-                                                      }
-            ;
+                                                 int etiqueta_2 = incrementarEtiqueta();
+                                                 string setiqueta_2 = to_string(etiqueta_2);
+
+                                                 $$.cod += "jmp L" + setiqueta_2 + "\n";
+
+                                                 $$.cod += "L" + setiqueta_1 + " " + $7.cod;
+                                                 $$.cod += "L" + setiqueta_2 + " ";
+                                              }
+         | twhile pari Expr pard Instr {
+                                           int etiqueta_1 = incrementarEtiqueta();
+                                           string setiqueta_1 = to_string(etiqueta_1);
+
+                                           $$.cod = "L" + setiqueta_1 + " " + $3.cod;
+
+                                           string dir3 = to_string($3.dir);
+                                           $$.cod += "mov " + dir3 + " A" +"\n";
+
+                                           int etiqueta_2 = incrementarEtiqueta();
+                                           string setiqueta_2 = to_string(etiqueta_2);
+                                           $$.cod += "jz L" + setiqueta_2 + "\n";
+
+                                           $$.cod += $5.cod;
+
+                                           $$.cod += "jmp L" + setiqueta_1 + "\n";
+
+                                           $$.cod += "L" + setiqueta_2 + " ";
+                                      }
+         | tfor pari id asig Esimple {
+                                         Simbolo *simbolo = tsimbs->buscar($3.lexema);
+                                         if(simbolo == nullptr){
+                                                errorSemantico(ERRNODECL, $3.lexema, $3.nlin, $3.ncol);
+                                         }else if(simbolo->tipo != ENTERO){
+                                               errorSemantico(ERR_NOENTERO, $3.lexema, $3.nlin, $3.ncol);
+                                         }else if((ttipos->tipos)[$3.tipo].clase == ARRAY){
+                                               errorSemantico(ERRFALTAN, $3.lexema, $3.nlin, $3.ncol);
+                                         }
+                                     }
+         pyc Expr pyc id {
+                                 Simbolo *simbolo = tsimbs->buscar($10.lexema);
+                                 if(simbolo == nullptr){
+                                       errorSemantico(ERRNODECL, $10.lexema, $10.nlin, $10.ncol);
+                                  }else if(simbolo->tipo != ENTERO){
+                                        errorSemantico(ERR_NOENTERO, $10.lexema, $10.nlin, $10.ncol);
+                                  }else if((ttipos->tipos)[$3.tipo].clase == ARRAY){
+                                        errorSemantico(ERRFALTAN, $10.lexema, $10.nlin, $10.ncol);
+                                  }
+
+                          }incrdecr pard Instr{
+                                             Simbolo *simbolo = tsimbs->buscar($3.lexema);
+                                             $$.cod = $5.cod;
+                                             if ($5.tipo != ENTERO) {
+                                                   string dir5 = to_string($5.dir);
+                                                   $$.cod += "mov " + dir5 + " A" + "\n";
+                                                   $$.cod += "rtoi\n";
+                                                   $$.cod += "mov A " + dir5 + "\n";
+                                             }
+
+                                             $$.cod += "mov #0 A\n";
+
+                                             string sim_dir = to_string(simbolo->dir);
+                                             $$.cod += "addi #" + sim_dir + "\n";
+
+                                             string dir5 = to_string($5.dir);
+                                             $$.cod += "mov " + dir5 + " @A" + "\n";
+
+                                             // Expr
+                                             string setiqueta_1 = to_string(incrementarEtiqueta());
+
+                                             $$.cod += "L" + setiqueta_1 + " " + $8.cod;
+
+                                             string dir8 = to_string($8.dir);
+                                             $$.cod += "mov " + dir8 + " A\n";
+
+                                             string setiqueta_2 = to_string(incrementarEtiqueta());
+                                             $$.cod += "jz L" + setiqueta_2 + "\n";
+                                             $$.cod += $14.cod;
+
+                                             Simbolo *simbolo_2 = tsimbs->buscar($10.lexema);
+                                             string sim_dir_2 = to_string(simbolo->dir);
+                                             $$.cod += "mov " + sim_dir_2 + " A\n";
+                                             if( strcmp($12.lexema, "++") != 0){
+                                                   $$.cod += "subi #1\n";
+
+                                             }
+                                             else{
+                                                   $$.cod += "addi #1\n";
+                                             }
+
+                                             $$.cod += "mov A " +  sim_dir_2 + "\n";
+                                             $$.cod += "jmp L" + setiqueta_1 + "\n";
+
+                                             $$.cod += "L" + setiqueta_2 + " ";
+                                        }
+         ;
 
 Expr        : Expr oprel Esimple          {
                                                 s1 = $1.cod + $3.cod;

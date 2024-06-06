@@ -44,7 +44,7 @@ muli #4
 addi 16016
 mov A 16017
 rdr A
-mov A 16018
+mov A16018
 mov 16017 A
 addi #3
 mov 16018 @A
@@ -71,7 +71,7 @@ mov 16005 A
 jz L9
 mov #0 16006
 rdi A
-mov A 16007
+mov A16007
 mov 16006 A
 addi #25
 mov 16007 @A
@@ -165,8 +165,7 @@ mov 16014 A
 addi #22
 mov 16018 @A
 jmp L5
-L6
-mov #0 16010
+L6 mov #0 16010
 mov 16010 A
 addi #23
 mov @A 16011
@@ -200,8 +199,7 @@ mov 16010 A
 addi #24
 mov 16015 @A
 jmp L7
-L8
-mov #0 16006
+L8 mov #0 16006
 mov 16006 A
 addi #24
 mov @A 16007
