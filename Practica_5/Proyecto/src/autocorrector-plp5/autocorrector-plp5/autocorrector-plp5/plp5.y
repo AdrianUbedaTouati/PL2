@@ -117,46 +117,44 @@ LIdent      :  LIdent coma {$$.tipo = $0.tipo;} Variable   {$$.cod = ""; }
             |  {$$.tipo = $0.tipo;} Variable   {$$.cod = ""; }
             ;
 
-Variable    : id  {     
-                        if (tsimbs->buscarAmbito($1.lexema) != nullptr) {
-                              errorSemantico(ERRYADECL, $1.lexema, $1.nlin, $1.ncol);
-                        }
-                        $$.tipo = $0.tipo;
-                  }  
-                  V     {
-                              Simbolo *simb = new Simbolo();
-                              simb->nombre = $1.lexema;
-                              simb->dir = nuevaVariable($1.lexema, $1.nlin, $1.ncol);
-                              simb->tam = $3.tamanyo;
-                              simb->tipo = $3.tipo;
+Variable : id {
+                   if (tsimbs->buscarAmbito($1.lexema)!=nullptr) {
+                     errorSemantico(ERRYADECL, $1.lexema,$1.nlin, $1.ncol);
+                   }
+                   $$.tipo = $0.tipo;
+               }
+           V {
+                Simbolo *simbolo = new Simbolo();
+                simbolo->dir = nuevaVariable($1.lexema, $1.nlin, $1.ncol);
+                simbolo->nombre = $1.lexema;
+                simbolo->tam = $3.tamanyo;
+                simbolo->tipo = $3.tipo;
 
-                              if(cont_pos_vars + simb->tam >= FIN_DIR_VAR) {
-                                    errorSemantico(ERR_NOCABE, $1.lexema, $1.nlin, $1.ncol);
-                              }
-                              cont_pos_vars += simb->tam;  
-                              tsimbs->nuevoSimbolo(*simb);
-                        }
-            ;
+                if (cont_pos_vars + simbolo->tam >= FIN_DIR_VAR) {
+                    errorSemantico(ERR_NOCABE,$1.lexema, $1.nlin, $1.ncol);
+                }
+                cont_pos_vars += simbolo->tam;
+                tsimbs->nuevoSimbolo(*simbolo);
+             }
+         ;
 
-V           : cori nentero cord {$$.tipo = $0.tipo; $$.tamanyo = 1;}
-                                    V   {      
-                                          if (stoi($2.lexema) <= 0) {
-                                                errorSemantico(ERRDIM, $2.lexema, $2.nlin, $2.ncol); 
-                                          }
-                                          $$.tipo = ttipos->nuevoTipoArray(stoi($2.lexema), $5.tipo);
-                                          $$.tamanyo = $5.tamanyo * stoi($2.lexema);
-                                    }
-            | /* epsilon */   { $$.tipo = $0.tipo; $$.tamanyo = $0.tamanyo;}
-            ;
+V :  {$$.tipo = $0.tipo; $$.tamanyo = $0.tamanyo;}
+  | cori nentero cord {$$.tamanyo = 1; $$.tipo = $0.tipo;}
+  V {
+      if(stoi($2.lexema) > 0){
+        $$.tipo = ttipos->nuevoTipoArray(stoi($2.lexema),$5.tipo);
+        $$.tamanyo = $5.tamanyo * stoi($2.lexema);
+      } else {
+        errorSemantico(ERRDIM,$2.lexema, $2.nlin, $2.ncol);
+      }
+  }
+  ;
 
-SeqInstr    : SeqInstr {  $$.nlin = cont_pos_temps;  } 
-                  Instr       {
-                                    $$.cod = $1.cod + $3.cod;
-                                    cont_pos_temps = $2.nlin;
-                              }
-            | /* epsilon */   { $$.cod = "";}
-            ;
 
+SeqInstr : SeqInstr {$$.nlin = cont_pos_temps;} Instr {$$.cod = $1.cod + $3.cod;
+                                                cont_pos_temps = $2.nlin;}
+         | /* epsilon */   {$$.cod = "";}
+         ;
 Instr       : pyc       {
                               $$.cod = "";
                         }
