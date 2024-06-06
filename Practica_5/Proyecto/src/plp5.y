@@ -87,8 +87,8 @@ FVM   : DVar FVM  {
      | tint tmain pari pard Bloque  {$$.cod = $5.cod;}
      ;
 
-Tipo   : tint   {$$.cod = ENTERO;}
-       | tfloat {$$.cod = REAL;}
+Tipo   : tint   {$$.tipo = ENTERO;}
+       | tfloat {$$.tipo = REAL;}
        ;
 
 Bloque : llavei { tablaSimbolos = new TablaSimbolos(tablaSimbolos); }
@@ -102,7 +102,7 @@ BDecl  : BDecl DVar {$$.cod = $1.cod + $2.cod;}
        | /* epsilon */   {$$.cod = "";}
        ;
 
-DVar  : Tipo {$$.tipo = $0.tipo;} LIdent pyc {$$.cod = "";}
+DVar  : Tipo {$$.tipo = $1.tipo;} LIdent pyc {$$.cod = "";}
       ;
 
 LIdent : LIdent coma {$$.tipo = $0.tipo;} Variable {$$.cod = "";}

@@ -1,22 +1,22 @@
 mov #0 16001
 mov $7.5 16002
 mov 16001 A
-addi #3
+addi #4
 mov 16002 @A
 mov #0 16001
 mov #0 16002
 mov 16002 A
-addi #3
+addi #4
 mov @A 16003
 mov 16003 A
 rtoi
 mov A 16003
 mov 16001 A
-addi #2
+addi #3
 mov 16003 @A
 mov #0 16001
 mov 16001 A
-addi #2
+addi #3
 mov @A 16002
 mov $7.1 16003
 mov 16002 A
@@ -28,7 +28,7 @@ jz L1
 mov #0 16005
 mov #0 16006
 mov 16006 A
-addi #2
+addi #3
 mov @A 16007
 mov #3 16008
 mov #10 16009
@@ -43,12 +43,12 @@ mov 16007 A
 addi 16012
 mov A 16013
 mov 16005 A
-addi #5
+addi #6
 mov 16013 @A
 mov #0 16005
 mov #0 16006
 mov 16006 A
-addi #5
+addi #6
 mov @A 16007
 mov #2 16008
 mov 16007 A
@@ -59,23 +59,23 @@ mov 16009 A
 divi 16010
 mov A 16011
 mov 16005 A
-addi #6
+addi #7
 mov 16011 @A
 mov #0 16005
 mov 16005 A
-addi #6
+addi #7
 mov @A 16006
 wri 16006
 wrl
 L1 mov #0 16001
 mov 16001 A
-addi #3
+addi #4
 mov @A 16002
 wrr 16002
 wrl
 mov #0 16001
 mov 16001 A
-addi #2
+addi #3
 mov @A 16002
 wri 16002
 wrl

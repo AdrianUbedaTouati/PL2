@@ -9,7 +9,7 @@ typedef struct {
    int dir;
    int dbase;
    string cod;
-   int tamanyo;
+   int tam;
 } MITIPO;
 
 #define YYSTYPE MITIPO
