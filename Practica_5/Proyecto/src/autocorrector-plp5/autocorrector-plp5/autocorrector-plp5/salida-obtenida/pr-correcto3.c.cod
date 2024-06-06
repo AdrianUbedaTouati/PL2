@@ -8,7 +8,7 @@ addi #20
 mov @A 16003
 mov #4 16004
 mov 16003 A
-lssi 16004
+lssi16004
 mov A 16005
 mov 16005 A
 jz L4
@@ -22,7 +22,7 @@ addi #22
 mov @A 16008
 mov #4 16009
 mov 16008 A
-lssi 16009
+lssi16009
 mov A 16010
 mov 16010 A
 jz L2
@@ -65,7 +65,7 @@ mov 16003 A
 addi #22
 mov @A 16004
 mov 16002 A
-eqli 16004
+eqli16004
 mov A 16005
 mov 16005 A
 jz L9
@@ -94,7 +94,7 @@ addi #20
 mov @A 16007
 mov #4 16008
 mov 16007 A
-lssi 16008
+lssi16008
 mov A 16009
 mov 16009 A
 jz L8
@@ -117,7 +117,7 @@ addi #22
 mov @A 16011
 mov #4 16012
 mov 16011 A
-lssi 16012
+lssi16012
 mov A 16013
 mov 16013 A
 jz L6

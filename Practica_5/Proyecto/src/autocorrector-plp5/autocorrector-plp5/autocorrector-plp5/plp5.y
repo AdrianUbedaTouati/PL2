@@ -368,115 +368,136 @@ Instr :   pyc {$$.cod = "";}
                                         }
          ;
 
-Expr        : Expr oprel Esimple          {
-                                                s1 = $1.cod + $3.cod;
-                                                cont_pos_temps = nuevaTemporal($3.lexema, $3.nlin, $3.ncol);
-                                                $$.dir = cont_pos_temps;
-                                                $$.tipo = ENTERO;
+Expr : Expr oprel Esimple {
+                                    $$.dir = nuevaTemporal($3.lexema,$3.nlin, $3.ncol);
+                                    $$.cod = $1.cod + $3.cod;
+                                    $$.tipo = ENTERO;
 
-                                                if(strcmp($2.lexema, "==") == 0){
-                                                      s2 = "eql";
-                                                }
-                                                else if(strcmp($2.lexema, "!=") == 0){
-                                                      s2 = "neq";
-                                                }
-                                                else if(strcmp($2.lexema, ">") == 0){
-                                                      s2 = "gtr";
-                                                }
-                                                else if(strcmp($2.lexema, ">=") == 0){
-                                                      s2 = "geq";
-                                                }
-                                                else if(strcmp($2.lexema, "<") == 0){
-                                                      s2 = "lss";
-                                                }
-                                                else{
-                                                      s2 = "leq";
-                                                }
-                                                
-                                                if($1.tipo == $3.tipo){
-                                                      s1 += "mov " + to_string($1.dir) + " A\n";
-                                                      
-                                                      if($1.tipo == ENTERO){
-                                                            s1 += s2 + "i " + to_string($3.dir) + "\n";
-                                                      }
-                                                      else{
-                                                            s1 += s2 + "r " + to_string($3.dir) + "\n";
-                                                      }
-                                                }
-                                                else if($1.tipo == REAL && $3.tipo == ENTERO){
-                                                      s1 += "mov " + to_string($3.dir) + " A\n";
-                                                      s1 += "itor\n";
-                                                      s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                                      s1 += "mov " + to_string($1.dir) + " A\n";
-                                                      s1 += s2 + "r " + to_string(cont_pos_temps) + "\n";
-                                                }
-                                                else{
-                                                      s1 += "mov " + to_string($1.dir) + " A\n";
-                                                      s1 += "itor\n";
-                                                      s1 += s2 + "r " + to_string($3.dir) + "\n";
-                                                }
+                                     string op = "";
+                                     if (strcmp($2.lexema,">") == 0) {
+                                        op = "gtr";
+                                     } else if (strcmp($2.lexema,"<") == 0) {
+                                        op = "lss";
+                                     } else if (strcmp($2.lexema,"!=") == 0) {
+                                        op = "neq";
+                                     } else if (strcmp($2.lexema,"==") == 0) {
+                                        op = "eql";
+                                     } else if (strcmp($2.lexema,">=") == 0) {
+                                        op = "geq";
+                                     } else {
+                                        op = "leq";
+                                     }
 
-                                                s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                                $$.cod = s1;
+                                    if ($1.tipo == $3.tipo && $1.tipo == ENTERO) {
+                                       string dir1 = to_string($1.dir);
+                                       string dir3 = to_string($3.dir);
 
-                                          }
-            | Esimple         {
-                                    $$.cod = $1.cod;
-                                    $$.dir = $1.dir;
-                                    $$.tipo = $1.tipo;
+                                       $$.cod += "mov " + dir1 + " A" + "\n";
+                                       $$.cod += op + "i" + dir3 + "\n";
+                                    } else if ($1.tipo == $3.tipo && $1.tipo == REAL) {
+                                          string dir1 = to_string($1.dir);
+                                          string dir3 = to_string($3.dir);
 
-                              }
-            ;
+                                          $$.cod += "mov " + dir1 + " A" + "\n";
+                                          $$.cod += op + "r" + dir3 + "\n";
+                                    }else if ($1.tipo == REAL && $3.tipo == ENTERO) {
+                                       string dir3 = to_string($3.dir);
+                                       $$.cod += "mov " + dir3 + " A" + "\n";
 
-Esimple     : Esimple opas Term     {
-                                          s1 = $1.cod + $3.cod;
-                                          cont_pos_temps = nuevaTemporal($3.lexema, $3.nlin, $3.ncol);
-                                          $$.dir = cont_pos_temps;
-                                          
-                                          if(strcmp($2.lexema, "+") == 0){
-                                                s2 = "add";
-                                          }else{
-                                                s2 = "sub";
-                                          }
-                                          
-                                          if($1.tipo == $3.tipo){
-                                                $$.tipo = $1.tipo;
-
-                                                s1 += "mov " + to_string($1.dir) + " A\n";
-                                                
-                                                if($1.tipo == ENTERO){
-                                                      s1 += s2 + "i " + to_string($3.dir) + "\n";
-                                                }
-                                                else{
-                                                      s1 += s2 + "r " + to_string($3.dir) + "\n";
-                                                }
-                                          }
-                                          else if($1.tipo == REAL && $3.tipo == ENTERO){
-                                                $$.tipo =  REAL;
-                                                s1 += "mov " + to_string($3.dir) + " A\n";
-                                                s1 += "itor\n";
-                                                s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                                s1 += "mov " + to_string($1.dir) + " A\n";
-                                                s1 += s2 + "r " + to_string(cont_pos_temps) + "\n";
-                                          }
-                                          else{    
-                                                $$.tipo = REAL;
-                                                s1 += "mov " + to_string($1.dir) + " A\n";
-                                                s1 += "itor\n";
-                                                s1 += s2 + "r " + to_string($3.dir) + "\n";
-                                          }
-
-                                          s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                          $$.cod = s1;
+                                       $$.cod += "itor\n";
 
 
+                                       string stemp = to_string(cont_pos_temps);
+
+                                       $$.cod += "mov A " + stemp + "\n";
+
+                                       string dir1 = to_string($1.dir);
+
+                                       $$.cod += "mov " + dir1 + " A" + "\n";
+
+                                       string stemp_2 = to_string(cont_pos_temps);
+
+                                       $$.cod += op + "r " + stemp_2 + "\n";
+
+                                    } else if ($1.tipo == ENTERO && $3.tipo == REAL) {
+                                       string dir1 = to_string($1.dir);
+
+                                       $$.cod += "mov " + dir1 + " A" + "\n";
+
+                                       $$.cod += "itor\n";
+
+                                       string dir3 = to_string($3.dir);
+
+                                       $$.cod += op + "r " + dir3 + "\n";
                                     }
-            | Term      {     
-                              $$.cod = $1.cod;
-                              $$.dir = $1.dir;
-                              $$.tipo = $1.tipo;
-                        }
-            ;
+                                    string stemp = to_string(cont_pos_temps);
+
+                                    $$.cod += "mov A " + stemp + "\n";
+                                }
+
+     | Esimple {$$.dir = $1.dir;
+                $$.tipo = $1.tipo;
+                $$.cod = $1.cod;}
+     ;
+
+Esimple : Esimple opas Term {
+                             cont_pos_temps = nuevaTemporal($3.lexema,$3.nlin, $3.ncol);
+                             $$.dir = cont_pos_temps;
+                             $$.cod = $1.cod + $3.cod;
+
+                              string op;
+                              if (strcmp("+", $2.lexema) != 0) {
+                                 op = "sub";
+                              } else {
+                                 op = "add";
+                              }
+
+                             if ($1.tipo == ENTERO && $3.tipo == ENTERO){
+                                $$.tipo = ENTERO;
+                                string dir1 = to_string($1.dir);
+                                $$.cod += "mov " + dir1 + " A\n";
+
+                                string dir3 = to_string($3.dir);
+                                $$.cod += op + "i " + dir3 + "\n";
+                             } else if($1.tipo == REAL && $3.tipo == REAL) {
+                                $$.tipo = REAL;
+                                string dir1 = to_string($1.dir);
+                                $$.cod += "mov " + dir1 + " A\n";
+
+                                string dir3 = to_string($3.dir);
+                                $$.cod += op + "r " + dir3 + "\n";
+                             } else if ($1.tipo == REAL && $1.tipo == ENTERO) {
+                               $$.tipo = REAL;
+                               string dir3 = to_string($3.dir);
+                               $$.cod += "mov " + dir3 + " A\n";
+
+                               $$.cod += "itor\n";
+
+                               string snumtep = to_string(cont_pos_temps);
+                               $$.cod += "mov A " + snumtep + "\n";
+
+                               string dir1= to_string($1.dir);
+                               $$.cod += "mov " + dir1 + " A\n";
+
+                               $$.cod += op + "r " + snumtep + "\n";
+                             }else {
+                               $$.tipo = REAL;
+                               string dir1 = to_string($1.dir);
+                               $$.cod += "mov " + dir1 + " A\n";
+
+                               $$.cod += "itor\n";
+
+                               string dir3= to_string($3.dir);
+                               $$.cod += op + "r " + dir3 + "\n";
+                             }
+                             string snumtep = to_string(cont_pos_temps);
+                             $$.cod += "mov A " + snumtep + "\n";
+                           }
+
+     | Term { $$.dir = $1.dir;
+              $$.tipo = $1.tipo;
+              $$.cod = $1.cod;}
+     ;
 
 Term        : Term opmd Factor      {     
                                           s1 = $1.cod + $3.cod;

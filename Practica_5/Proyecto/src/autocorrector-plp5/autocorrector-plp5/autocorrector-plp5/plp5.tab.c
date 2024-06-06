@@ -601,8 +601,8 @@ static const yytype_int16 yyrline[] =
        0,    81,    81,    90,    93,    96,    97,   100,   101,   100,
      106,   107,   110,   110,   116,   116,   117,   117,   120,   120,
      141,   142,   142,   154,   154,   156,   158,   159,   160,   194,
-     220,   247,   262,   284,   303,   313,   303,   371,   423,   431,
-     474,   481,   522,   529,   544,   550,   555,   561,   577,   577
+     220,   247,   262,   284,   303,   313,   303,   371,   438,   443,
+     497,   502,   543,   550,   565,   571,   576,   582,   598,   598
 };
 #endif
 
@@ -1673,132 +1673,151 @@ yyreduce:
 
   case 37: /* Expr: Expr oprel Esimple  */
 #line 371 "plp5.y"
-                                          {
-                                                s1 = yyvsp[-2].cod + yyvsp[0].cod;
-                                                cont_pos_temps = nuevaTemporal(yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
-                                                yyval.dir = cont_pos_temps;
-                                                yyval.tipo = ENTERO;
+                          {
+                                    yyval.dir = nuevaTemporal(yyvsp[0].lexema,yyvsp[0].nlin, yyvsp[0].ncol);
+                                    yyval.cod = yyvsp[-2].cod + yyvsp[0].cod;
+                                    yyval.tipo = ENTERO;
 
-                                                if(strcmp(yyvsp[-1].lexema, "==") == 0){
-                                                      s2 = "eql";
-                                                }
-                                                else if(strcmp(yyvsp[-1].lexema, "!=") == 0){
-                                                      s2 = "neq";
-                                                }
-                                                else if(strcmp(yyvsp[-1].lexema, ">") == 0){
-                                                      s2 = "gtr";
-                                                }
-                                                else if(strcmp(yyvsp[-1].lexema, ">=") == 0){
-                                                      s2 = "geq";
-                                                }
-                                                else if(strcmp(yyvsp[-1].lexema, "<") == 0){
-                                                      s2 = "lss";
-                                                }
-                                                else{
-                                                      s2 = "leq";
-                                                }
-                                                
-                                                if(yyvsp[-2].tipo == yyvsp[0].tipo){
-                                                      s1 += "mov " + to_string(yyvsp[-2].dir) + " A\n";
-                                                      
-                                                      if(yyvsp[-2].tipo == ENTERO){
-                                                            s1 += s2 + "i " + to_string(yyvsp[0].dir) + "\n";
-                                                      }
-                                                      else{
-                                                            s1 += s2 + "r " + to_string(yyvsp[0].dir) + "\n";
-                                                      }
-                                                }
-                                                else if(yyvsp[-2].tipo == REAL && yyvsp[0].tipo == ENTERO){
-                                                      s1 += "mov " + to_string(yyvsp[0].dir) + " A\n";
-                                                      s1 += "itor\n";
-                                                      s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                                      s1 += "mov " + to_string(yyvsp[-2].dir) + " A\n";
-                                                      s1 += s2 + "r " + to_string(cont_pos_temps) + "\n";
-                                                }
-                                                else{
-                                                      s1 += "mov " + to_string(yyvsp[-2].dir) + " A\n";
-                                                      s1 += "itor\n";
-                                                      s1 += s2 + "r " + to_string(yyvsp[0].dir) + "\n";
-                                                }
+                                     string op = "";
+                                     if (strcmp(yyvsp[-1].lexema,">") == 0) {
+                                        op = "gtr";
+                                     } else if (strcmp(yyvsp[-1].lexema,"<") == 0) {
+                                        op = "lss";
+                                     } else if (strcmp(yyvsp[-1].lexema,"!=") == 0) {
+                                        op = "neq";
+                                     } else if (strcmp(yyvsp[-1].lexema,"==") == 0) {
+                                        op = "eql";
+                                     } else if (strcmp(yyvsp[-1].lexema,">=") == 0) {
+                                        op = "geq";
+                                     } else {
+                                        op = "leq";
+                                     }
 
-                                                s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                                yyval.cod = s1;
+                                    if (yyvsp[-2].tipo == yyvsp[0].tipo && yyvsp[-2].tipo == ENTERO) {
+                                       string dir1 = to_string(yyvsp[-2].dir);
+                                       string dir3 = to_string(yyvsp[0].dir);
 
-                                          }
-#line 1729 "plp5.tab.c"
+                                       yyval.cod += "mov " + dir1 + " A" + "\n";
+                                       yyval.cod += op + "i" + dir3 + "\n";
+                                    } else if (yyvsp[-2].tipo == yyvsp[0].tipo && yyvsp[-2].tipo == REAL) {
+                                          string dir1 = to_string(yyvsp[-2].dir);
+                                          string dir3 = to_string(yyvsp[0].dir);
+
+                                          yyval.cod += "mov " + dir1 + " A" + "\n";
+                                          yyval.cod += op + "r" + dir3 + "\n";
+                                    }else if (yyvsp[-2].tipo == REAL && yyvsp[0].tipo == ENTERO) {
+                                       string dir3 = to_string(yyvsp[0].dir);
+                                       yyval.cod += "mov " + dir3 + " A" + "\n";
+
+                                       yyval.cod += "itor\n";
+
+
+                                       string stemp = to_string(cont_pos_temps);
+
+                                       yyval.cod += "mov A " + stemp + "\n";
+
+                                       string dir1 = to_string(yyvsp[-2].dir);
+
+                                       yyval.cod += "mov " + dir1 + " A" + "\n";
+
+                                       string stemp_2 = to_string(cont_pos_temps);
+
+                                       yyval.cod += op + "r " + stemp_2 + "\n";
+
+                                    } else if (yyvsp[-2].tipo == ENTERO && yyvsp[0].tipo == REAL) {
+                                       string dir1 = to_string(yyvsp[-2].dir);
+
+                                       yyval.cod += "mov " + dir1 + " A" + "\n";
+
+                                       yyval.cod += "itor\n";
+
+                                       string dir3 = to_string(yyvsp[0].dir);
+
+                                       yyval.cod += op + "r " + dir3 + "\n";
+                                    }
+                                    string stemp = to_string(cont_pos_temps);
+
+                                    yyval.cod += "mov A " + stemp + "\n";
+                                }
+#line 1743 "plp5.tab.c"
     break;
 
   case 38: /* Expr: Esimple  */
-#line 423 "plp5.y"
-                              {
-                                    yyval.cod = yyvsp[0].cod;
-                                    yyval.dir = yyvsp[0].dir;
-                                    yyval.tipo = yyvsp[0].tipo;
-
-                              }
-#line 1740 "plp5.tab.c"
+#line 438 "plp5.y"
+               {yyval.dir = yyvsp[0].dir;
+                yyval.tipo = yyvsp[0].tipo;
+                yyval.cod = yyvsp[0].cod;}
+#line 1751 "plp5.tab.c"
     break;
 
   case 39: /* Esimple: Esimple opas Term  */
-#line 431 "plp5.y"
-                                    {
-                                          s1 = yyvsp[-2].cod + yyvsp[0].cod;
-                                          cont_pos_temps = nuevaTemporal(yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
-                                          yyval.dir = cont_pos_temps;
-                                          
-                                          if(strcmp(yyvsp[-1].lexema, "+") == 0){
-                                                s2 = "add";
-                                          }else{
-                                                s2 = "sub";
-                                          }
-                                          
-                                          if(yyvsp[-2].tipo == yyvsp[0].tipo){
-                                                yyval.tipo = yyvsp[-2].tipo;
+#line 443 "plp5.y"
+                            {
+                             cont_pos_temps = nuevaTemporal(yyvsp[0].lexema,yyvsp[0].nlin, yyvsp[0].ncol);
+                             yyval.dir = cont_pos_temps;
+                             yyval.cod = yyvsp[-2].cod + yyvsp[0].cod;
 
-                                                s1 += "mov " + to_string(yyvsp[-2].dir) + " A\n";
-                                                
-                                                if(yyvsp[-2].tipo == ENTERO){
-                                                      s1 += s2 + "i " + to_string(yyvsp[0].dir) + "\n";
-                                                }
-                                                else{
-                                                      s1 += s2 + "r " + to_string(yyvsp[0].dir) + "\n";
-                                                }
-                                          }
-                                          else if(yyvsp[-2].tipo == REAL && yyvsp[0].tipo == ENTERO){
-                                                yyval.tipo =  REAL;
-                                                s1 += "mov " + to_string(yyvsp[0].dir) + " A\n";
-                                                s1 += "itor\n";
-                                                s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                                s1 += "mov " + to_string(yyvsp[-2].dir) + " A\n";
-                                                s1 += s2 + "r " + to_string(cont_pos_temps) + "\n";
-                                          }
-                                          else{    
-                                                yyval.tipo = REAL;
-                                                s1 += "mov " + to_string(yyvsp[-2].dir) + " A\n";
-                                                s1 += "itor\n";
-                                                s1 += s2 + "r " + to_string(yyvsp[0].dir) + "\n";
-                                          }
+                              string op;
+                              if (strcmp("+", yyvsp[-1].lexema) != 0) {
+                                 op = "sub";
+                              } else {
+                                 op = "add";
+                              }
 
-                                          s1 += "mov A " + to_string(cont_pos_temps) + "\n";
-                                          yyval.cod = s1;
+                             if (yyvsp[-2].tipo == ENTERO && yyvsp[0].tipo == ENTERO){
+                                yyval.tipo = ENTERO;
+                                string dir1 = to_string(yyvsp[-2].dir);
+                                yyval.cod += "mov " + dir1 + " A\n";
 
+                                string dir3 = to_string(yyvsp[0].dir);
+                                yyval.cod += op + "i " + dir3 + "\n";
+                             } else if(yyvsp[-2].tipo == REAL && yyvsp[0].tipo == REAL) {
+                                yyval.tipo = REAL;
+                                string dir1 = to_string(yyvsp[-2].dir);
+                                yyval.cod += "mov " + dir1 + " A\n";
 
-                                    }
-#line 1788 "plp5.tab.c"
+                                string dir3 = to_string(yyvsp[0].dir);
+                                yyval.cod += op + "r " + dir3 + "\n";
+                             } else if (yyvsp[-2].tipo == REAL && yyvsp[-2].tipo == ENTERO) {
+                               yyval.tipo = REAL;
+                               string dir3 = to_string(yyvsp[0].dir);
+                               yyval.cod += "mov " + dir3 + " A\n";
+
+                               yyval.cod += "itor\n";
+
+                               string snumtep = to_string(cont_pos_temps);
+                               yyval.cod += "mov A " + snumtep + "\n";
+
+                               string dir1= to_string(yyvsp[-2].dir);
+                               yyval.cod += "mov " + dir1 + " A\n";
+
+                               yyval.cod += op + "r " + snumtep + "\n";
+                             }else {
+                               yyval.tipo = REAL;
+                               string dir1 = to_string(yyvsp[-2].dir);
+                               yyval.cod += "mov " + dir1 + " A\n";
+
+                               yyval.cod += "itor\n";
+
+                               string dir3= to_string(yyvsp[0].dir);
+                               yyval.cod += op + "r " + dir3 + "\n";
+                             }
+                             string snumtep = to_string(cont_pos_temps);
+                             yyval.cod += "mov A " + snumtep + "\n";
+                           }
+#line 1809 "plp5.tab.c"
     break;
 
   case 40: /* Esimple: Term  */
-#line 474 "plp5.y"
-                        {     
-                              yyval.cod = yyvsp[0].cod;
-                              yyval.dir = yyvsp[0].dir;
-                              yyval.tipo = yyvsp[0].tipo;
-                        }
-#line 1798 "plp5.tab.c"
+#line 497 "plp5.y"
+            { yyval.dir = yyvsp[0].dir;
+              yyval.tipo = yyvsp[0].tipo;
+              yyval.cod = yyvsp[0].cod;}
+#line 1817 "plp5.tab.c"
     break;
 
   case 41: /* Term: Term opmd Factor  */
-#line 481 "plp5.y"
+#line 502 "plp5.y"
                                     {     
                                           s1 = yyvsp[-2].cod + yyvsp[0].cod;
                                           cont_pos_temps = nuevaTemporal(yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
@@ -1840,21 +1859,21 @@ yyreduce:
                                           s1 += "mov A " + to_string(cont_pos_temps) + "\n";
                                           yyval.cod = s1;
                                     }
-#line 1844 "plp5.tab.c"
+#line 1863 "plp5.tab.c"
     break;
 
   case 42: /* Term: Factor  */
-#line 522 "plp5.y"
+#line 543 "plp5.y"
                               {     
                                     yyval.cod = yyvsp[0].cod;
                                     yyval.dir = yyvsp[0].dir;
                                     yyval.tipo = yyvsp[0].tipo;
                               }
-#line 1854 "plp5.tab.c"
+#line 1873 "plp5.tab.c"
     break;
 
   case 43: /* Factor: Ref  */
-#line 529 "plp5.y"
+#line 550 "plp5.y"
                         {     
                               if((ttipos->tipos)[yyvsp[0].tipo].clase == ARRAY){
                                     errorSemantico(ERRFALTAN, yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
@@ -1870,41 +1889,41 @@ yyreduce:
                               s1 += "mov @A " + to_string(cont_pos_temps) + "\n";
                               yyval.cod = s1;
                         }
-#line 1874 "plp5.tab.c"
+#line 1893 "plp5.tab.c"
     break;
 
   case 44: /* Factor: nentero  */
-#line 544 "plp5.y"
+#line 565 "plp5.y"
                               {     yyval.tipo = ENTERO;
                                     cont_pos_temps = nuevaTemporal(yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
                                     yyval.dir = cont_pos_temps;
                                     s1 = "mov #" + string(yyvsp[0].lexema) + " " + to_string(cont_pos_temps) + "\n";
                                     yyval.cod = s1;
                               }
-#line 1885 "plp5.tab.c"
+#line 1904 "plp5.tab.c"
     break;
 
   case 45: /* Factor: nreal  */
-#line 550 "plp5.y"
+#line 571 "plp5.y"
                               {     yyval.tipo = REAL;
                                     cont_pos_temps = nuevaTemporal(yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
                                     yyval.dir = cont_pos_temps;
                                     yyval.cod = "mov $" + string(yyvsp[0].lexema) + " " + to_string(cont_pos_temps) + "\n";
                               }
-#line 1895 "plp5.tab.c"
+#line 1914 "plp5.tab.c"
     break;
 
   case 46: /* Factor: pari Expr pard  */
-#line 555 "plp5.y"
+#line 576 "plp5.y"
                                     {     yyval.cod = yyvsp[-1].cod;
                                           yyval.dir = yyvsp[-1].dir;
                                           yyval.tipo = yyvsp[-1].tipo;
                                     }
-#line 1904 "plp5.tab.c"
+#line 1923 "plp5.tab.c"
     break;
 
   case 47: /* Ref: id  */
-#line 561 "plp5.y"
+#line 582 "plp5.y"
                         {     Simbolo *simb = tsimbs->buscar(yyvsp[0].lexema);
                               if (simb == nullptr){
                                     errorSemantico(ERRNODECL, yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
@@ -1920,11 +1939,11 @@ yyreduce:
                               yyval.nlin = yyvsp[0].nlin;
                               yyval.ncol = yyvsp[0].ncol;
                         }
-#line 1924 "plp5.tab.c"
+#line 1943 "plp5.tab.c"
     break;
 
   case 48: /* $@11: %empty  */
-#line 577 "plp5.y"
+#line 598 "plp5.y"
                         {     if (!esArray(yyvsp[-1].tipo)) {
                                     if(strcmp(yyvsp[-1].lexema, "]") == 0) {
                                        errorSemantico(ERRSOBRAN, yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol); 
@@ -1933,11 +1952,11 @@ yyreduce:
                                     }
                                  }                   
                         }
-#line 1937 "plp5.tab.c"
+#line 1956 "plp5.tab.c"
     break;
 
   case 49: /* Ref: Ref cori $@11 Esimple cord  */
-#line 585 "plp5.y"
+#line 606 "plp5.y"
                               {     if(yyvsp[-1].tipo != ENTERO){
                                           errorSemantico(ERR_NOENTERO, yyvsp[0].lexema, yyvsp[0].nlin, yyvsp[0].ncol);
                                     }
@@ -1961,11 +1980,11 @@ yyreduce:
                                     yyval.ncol = yyvsp[0].ncol;
 
                               }
-#line 1965 "plp5.tab.c"
+#line 1984 "plp5.tab.c"
     break;
 
 
-#line 1969 "plp5.tab.c"
+#line 1988 "plp5.tab.c"
 
       default: break;
     }
@@ -2158,7 +2177,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 613 "plp5.y"
+#line 634 "plp5.y"
 
 
 void msgError(int nerror,int nlin,int ncol,const char *s)

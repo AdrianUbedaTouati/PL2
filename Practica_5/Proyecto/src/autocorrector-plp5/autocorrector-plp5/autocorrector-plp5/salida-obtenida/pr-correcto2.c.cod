@@ -17,7 +17,7 @@ mov 16003 A
 addi #2
 mov @A 16004
 mov 16002 A
-lssi 16004
+lssi16004
 mov A 16005
 mov 16005 A
 jz L4
@@ -35,7 +35,7 @@ mov 16008 A
 addi #2
 mov @A 16009
 mov 16007 A
-lssi 16009
+lssi16009
 mov A 16010
 mov 16010 A
 jz L2
@@ -100,7 +100,7 @@ mov 16003 A
 addi #2
 mov @A 16004
 mov 16002 A
-lssi 16004
+lssi16004
 mov A 16005
 mov 16005 A
 jz L6
@@ -152,7 +152,7 @@ mov 16003 A
 addi #2
 mov @A 16004
 mov 16002 A
-lssi 16004
+lssi16004
 mov A 16005
 mov 16005 A
 jz L8
@@ -201,7 +201,7 @@ mov 16003 A
 addi #2
 mov @A 16004
 mov 16002 A
-lssi 16004
+lssi16004
 mov A 16005
 mov 16005 A
 jz L10
@@ -289,7 +289,7 @@ mov 16003 A
 addi #2
 mov @A 16004
 mov 16002 A
-lssi 16004
+lssi16004
 mov A 16005
 mov #0 16006
 mov 16006 A
@@ -300,7 +300,7 @@ mov 16008 A
 addi #2
 mov @A 16009
 mov 16007 A
-lssi 16009
+lssi16009
 mov A 16010
 mov 16005 A
 muli 16010
@@ -311,7 +311,7 @@ addi #30
 mov @A 16013
 mov #0 16014
 mov 16013 A
-eqli 16014
+eqli16014
 mov A 16015
 mov 16011 A
 muli 16015
@@ -322,7 +322,7 @@ addi #31
 mov @A 16018
 mov #0 16019
 mov 16018 A
-eqli 16019
+eqli16019
 mov A 16020
 mov 16016 A
 muli 16020
@@ -369,7 +369,7 @@ mov 16033 A
 subi 16034
 mov A 16035
 mov 16031 A
-lssi 16035
+lssi16035
 mov A 16036
 mov #0 16037
 mov 16037 A
@@ -384,7 +384,7 @@ mov 16040 A
 subi 16041
 mov A 16042
 mov 16038 A
-lssi 16042
+lssi16042
 mov A 16043
 mov 16036 A
 muli 16043
@@ -468,7 +468,7 @@ addi #32
 mov @A 16031
 mov #0 16032
 mov 16031 A
-eqli 16032
+eqli16032
 mov A 16033
 mov #0 16034
 mov 16034 A
@@ -483,7 +483,7 @@ mov 16037 A
 subi 16038
 mov A 16039
 mov 16035 A
-lssi 16039
+lssi16039
 mov A 16040
 mov 16033 A
 muli 16040
@@ -551,7 +551,7 @@ addi #32
 mov @A 16031
 mov #0 16032
 mov 16031 A
-eqli 16032
+eqli16032
 mov A 16033
 mov #0 16034
 mov 16034 A
@@ -566,7 +566,7 @@ mov 16037 A
 subi 16038
 mov A 16039
 mov 16035 A
-lssi 16039
+lssi16039
 mov A 16040
 mov 16033 A
 muli 16040
@@ -634,7 +634,7 @@ addi #32
 mov @A 16031
 mov #1 16032
 mov 16031 A
-eqli 16032
+eqli16032
 mov A 16033
 mov 16033 A
 jz L19
@@ -664,7 +664,7 @@ mov 16037 A
 subi 16038
 mov A 16039
 mov 16035 A
-lssi 16039
+lssi16039
 mov A 16040
 mov #0 16041
 mov 16041 A
@@ -679,7 +679,7 @@ mov 16044 A
 subi 16045
 mov A 16046
 mov 16042 A
-lssi 16046
+lssi16046
 mov A 16047
 mov 16040 A
 addi 16047
@@ -780,7 +780,7 @@ mov 16003 A
 addi #2
 mov @A 16004
 mov 16002 A
-lssi 16004
+lssi16004
 mov A 16005
 mov #0 16006
 mov 16006 A
@@ -791,7 +791,7 @@ mov 16008 A
 addi #2
 mov @A 16009
 mov 16007 A
-lssi 16009
+lssi16009
 mov A 16010
 mov 16005 A
 muli 16010
@@ -802,7 +802,7 @@ addi #30
 mov @A 16013
 mov #0 16014
 mov 16013 A
-eqli 16014
+eqli16014
 mov A 16015
 mov 16011 A
 muli 16015
@@ -813,7 +813,7 @@ addi #31
 mov @A 16018
 mov #0 16019
 mov 16018 A
-eqli 16019
+eqli16019
 mov A 16020
 mov 16016 A
 muli 16020
@@ -860,7 +860,7 @@ mov 16033 A
 subi 16034
 mov A 16035
 mov 16031 A
-lssi 16035
+lssi16035
 mov A 16036
 mov #0 16037
 mov 16037 A
@@ -875,7 +875,7 @@ mov 16040 A
 subi 16041
 mov A 16042
 mov 16038 A
-lssi 16042
+lssi16042
 mov A 16043
 mov 16036 A
 muli 16043
@@ -959,7 +959,7 @@ addi #33
 mov @A 16031
 mov #0 16032
 mov 16031 A
-eqli 16032
+eqli16032
 mov A 16033
 mov #0 16034
 mov 16034 A
@@ -974,7 +974,7 @@ mov 16037 A
 subi 16038
 mov A 16039
 mov 16035 A
-lssi 16039
+lssi16039
 mov A 16040
 mov 16033 A
 muli 16040
@@ -1042,7 +1042,7 @@ addi #33
 mov @A 16031
 mov #0 16032
 mov 16031 A
-eqli 16032
+eqli16032
 mov A 16033
 mov #0 16034
 mov 16034 A
@@ -1057,7 +1057,7 @@ mov 16037 A
 subi 16038
 mov A 16039
 mov 16035 A
-lssi 16039
+lssi16039
 mov A 16040
 mov 16033 A
 muli 16040
@@ -1125,7 +1125,7 @@ addi #33
 mov @A 16031
 mov #1 16032
 mov 16031 A
-eqli 16032
+eqli16032
 mov A 16033
 mov 16033 A
 jz L33
@@ -1155,7 +1155,7 @@ mov 16037 A
 subi 16038
 mov A 16039
 mov 16035 A
-lssi 16039
+lssi16039
 mov A 16040
 mov #0 16041
 mov 16041 A
@@ -1170,7 +1170,7 @@ mov 16044 A
 subi 16045
 mov A 16046
 mov 16042 A
-lssi 16046
+lssi16046
 mov A 16047
 mov 16040 A
 addi 16047
